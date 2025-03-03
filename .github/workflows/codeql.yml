@@ -1,0 +1,58 @@
+name: "CodeQL Analysis"
+
+on:
+  push:
+    branches: [ "main", "develop" ] # Includes both 'main' and 'develop'
+  pull_request:
+    branches: [ "main", "develop" ] # PRs to both branches
+  schedule:
+    - cron: '23 2 * * 1' # Weekly scan (Monday at 2:23 AM UTC)
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest  # Consistent runner
+    permissions:
+      security-events: write  # Essential for reporting
+      actions: read        # Needed for private repos & actions
+      contents: read       # Needed to checkout code
+
+    strategy:
+      fail-fast: false # Continue other matrix jobs even if one fails
+      matrix:
+        language: [ 'go', 'javascript' ] # Correctly defines the language matrix!
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Go environment  # Correctly placed *before* CodeQL init
+      if: matrix.language == 'go' # Only setup Go when analyzing Go!
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.4'  # Specify a Go version (or use go.mod)
+        cache: true         # Enable caching of Go modules
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        # build-mode: ${{ matrix.build-mode }}  <-- REMOVE THIS.  We handle build explicitly.
+        # queries: security-extended,security-and-quality # Optional: Customize queries
+
+    - name: Build Go code
+      if: matrix.language == 'go' # Conditional Go build step
+      run: |
+        go get -d -v ./... # Get dependencies
+        go build ./...    # Build the application
+
+    - name: Build JavaScript code (if applicable)
+      if: matrix.language == 'javascript' # Conditional JavaScript build step
+      run: |
+        npm install      # Install JavaScript dependencies (adjust for yarn/pnpm)
+        npm run build  # Run build script IF YOU HAVE ONE.  Otherwise, remove this line.
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"  # Categorize results
