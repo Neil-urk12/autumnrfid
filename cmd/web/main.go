@@ -14,15 +14,11 @@ func main() {
 		Views: viewsEngine,
 	})
 
-	// app.Static("/ui/static", "./static")
+	// Fix: Change the static file path to match your directory structure
+	app.Static("/ui/static", "./ui/static")
+
 	appHandler := handlers.NewHandler()
-
 	app.Get("/", appHandler.HandleGetIndex)
-
-	app.Get("/toma", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, toma")
-	})
-
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.SendString("Fiber Web Server is running")
 	})
