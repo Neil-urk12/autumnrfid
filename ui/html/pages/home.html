@@ -1,289 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
+    <title>RFID</title>
     <style>
+        :root {
+            --darkest-blue: #1e5470;
+            --dark-blue: #34729b;
+            --medium-blue: #6db0db;
+            --light-blue: #d1ecff;
+            --aqua: #6fc0d3;
+            --light-aqua: #c9eaef;
+            --white: #ffffff;
+        }
+
         body {
-            font-family: sans-serif;
-            background-color: #f0f8ff;
-            /* Light blue background */
+            font-family: 'Arial', sans-serif;
+            background-color: var(--light-aqua);
             margin: 0;
             padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            background: linear-gradient(to bottom, var(--dark-blue), var(--darkest-blue));
+            border-bottom: 8px solid var(--medium-blue);
+        }
+
+        .navbar div {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 1.1em;
+            line-height: 70px;
+            height: 70px;
+        }
+
+        .navbar div:hover {
+            background: var(--medium-blue);
         }
 
         .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 20px auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            /* Important for rounded corners on inner elements */
-        }
-
-        .header {
-            background-color: #1c4e80;
-            /* Darker blue */
-            color: white;
-            padding: 10px;
-            text-align: center;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-        }
-
-        .header>div {
-            font-weight: bold;
-        }
-
-        .section {
-            padding: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .section:last-child {
-            border-bottom: none;
-        }
-
-        .section-title {
-            background-color: #2a6f97;
-            /* Slightly lighter blue */
-            color: white;
-            padding: 10px;
-            margin: -20px -20px 20px -20px;
-            /* Extend to edges */
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            font-size: 1.1em;
-        }
-
-        .student-info {
             display: grid;
             grid-template-columns: 1fr 2fr;
-            /* Image, then details */
             gap: 20px;
-            align-items: center;
+            padding: 20px;
+            width: calc(100% - 40px);
+            margin: 0 auto;
+            height: calc(100vh - 120px);
         }
 
-        .student-image {
+        .profile {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--white);
+            padding: 0;
+            border: 1px solid var(--medium-blue);
+            height: 100%;
+        }
+
+        .profile-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile img {
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            overflow: hidden;
-            /* Clip image to circle */
-            margin: 0 auto;
+            background: var(--light-aqua);
+            border: 4px solid var(--aqua);
+            margin-bottom: 15px;
         }
 
-        .student-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Ensure image fills the circle */
+        .profile-info {
+            flex: 1;
+            text-align: center;
         }
 
-        .student-details p {
-            margin: 5px 0;
+        .profile-info h3 {
+            margin: 0;
+            color: var(--dark-blue);
+            font-size: 1.5em;
         }
 
-        .student-details table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .student-details td {
-            padding: 5px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .student-details td:first-child {
-            font-weight: bold;
-            width: 30%;
-        }
-
-
-        .grades-table {
+        .profile-info table {
             width: 100%;
             border-collapse: collapse;
+            margin: 15px auto 0;
         }
 
-        .grades-table th,
-        .grades-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        .profile-info table, th, td {
+            border: 1px solid var(--medium-blue);
+        }
+
+        th, td {
+            padding: 10px;
             text-align: left;
         }
 
-        .grades-table th {
-            background-color: #f2f2f2;
+        th {
+            background-color: var(--medium-blue);
+            color: white;
         }
 
-        .progress-bars {
+        .content {
             display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 15px;
-
-        }
-
-        .progress-bar {
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            height: 20px;
-            margin-bottom: 5px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 23px;
             height: 100%;
-            background-color: #2a6f97;
-            border-radius: 5px;
-            transition: width 0.5s ease;
-            /* Smooth transition */
         }
 
-        .progress-label {
-            margin-bottom: 5px;
+        .summary-grades {
+            min-height: 0;
+            flex-shrink: 1;
+            height: 300px;
         }
 
-        .progress-container {
+        .summary-bills {
+            flex-shrink: 0;
+            height: 250px;
+        }
+
+        .summary {
             display: flex;
             flex-direction: column;
+            background-color: var(--white);
+            border: 1px solid var(--medium-blue);
+            border-radius: 4px;
+            height: 100%;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .container {
-                width: 95%;
-            }
-
-            .header {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .student-info {
-                grid-template-columns: 1fr;
-                /* Stack image and details */
-            }
-
-            .student-image {
-                margin-left: 0;
-            }
-
-            .progress-bars {
-                grid-template-columns: repeat(1, 1fr);
-            }
+        .summary-header {
+            background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+            color: var(--white);
+            padding: 10px 15px;
+            font-weight: bold;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
         }
 
-        @media (max-width: 480px) {
-            .header {
-                grid-template-columns: repeat(1, 1fr);
-            }
+        .summary-content {
+            padding: 15px;
+            flex: 1;
+            overflow: auto;
+            min-height: 0;
+            height: calc(100% - 45px);  
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+        }
+
+        table, th, td {
+            border: 1px solid var(--medium-blue);
+        }
+
+        th {
+            background: var(--light-blue);
+            color: var(--dark-blue);
+            padding: 8px;
+            text-align: left;
+            width: 40%;
+        }
+
+        td {
+            padding: 8px;
+            background: var(--white);
+        }
+
+        .summary table th {
+            background: var(--light-blue);
+            color: var(--dark-blue);
+        }
+
+        .summary.full-width {
+            grid-column: span 2;
+        }
+
+        .bill-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bill-total {
+            border-bottom: 2px solid var(--medium-blue);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .bill-amount {
+            font-size: 1.8em;
+            color: var(--dark-blue);
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .bill-label {
+            color: var(--darkest-blue);
+            font-size: 0.9em;
+        }
+
+        .bill-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--light-blue);
+            border-radius: 4px;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-amount {
+            font-size: 1.2em;
+            color: var(--darkest-blue);
+            margin-top: 4px;
+        }
+
+        .payment-schedule {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .payment-item {
+            background: var(--light-aqua);
+            padding: 10px 6px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .payment-title {
+            font-weight: bold;
+            color: var(--darkest-blue);
+            margin-bottom: 4px;
+        }
+
+        .payment-amount {
+            font-size: 1.1em;
+            color: var(--dark-blue);
+            margin: 4px 0;
+        }
+
+        .payment-date {
+            color: var(--darkest-blue);
+            font-size: 0.8em;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid var(--medium-blue);
         }
     </style>
 </head>
-
 <body>
-
-    <div class="container">
-        <div class="header">
-            <div>RFID</div>
-            <div>Grades</div>
-            <div>Bills</div>
-            <div>LMS</div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Student Information</div>
-            <div class="student-info">
-                <div class="student-image">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.X5IFK5FnctErlsC4kU0RLQHaHX%26pid%3DApi&f=1&ipt=e05637e8411f1745fbc9af8e445d3210d517db3237f87c5896548a909a792de9&ipo=images"
-                        alt="Student Photo">
-                </div>
-                <div class="student-details">
-                    <p><strong>Toma Toma</strong></p>
-                    <p>1st Year - BSCS</p>
-                    <table>
-                        <tr>
-                            <td>School Number</td>
-                            <td>CN-23-3422553</td>
-                        </tr>
-                        <tr>
-                            <td>Birthday</td>
-                            <td>01-01-2025</td>
-                        </tr>
-                        <tr>
-                            <td>Last Access</td>
-                            <td>2024-03-19 14:30:45</td>
-                        </tr>
-                        <tr>
-                            <td>First Access</td>
-                            <td>2024-01-15 08:15:22</td>
-                        </tr>
-                    </table>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Summary of Grades</div>
-            <table class="grades-table">
-                <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Grade</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Math</td>
-                        <td>95</td>
-                    </tr>
-                    <tr>
-                        <td>Science</td>
-                        <td>92</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Summary of LMS Progress</div>
-            <div class="progress-bars">
-                <div class="progress-container">
-                    <div class="progress-label">Web Development</div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: 80%;"></div>
-                    </div>
-                    <div style="text-align: right;">80%</div>
-                </div>
-
-                <div class="progress-container">
-                    <div class="progress-label">Database Systems</div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: 90%;"></div>
-                    </div>
-                    <div style="text-align: right;">90%</div>
-                </div>
-
-                <div class="progress-container">
-                    <div class="progress-label">Programming Fundamentals</div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: 75%;"></div>
-                    </div>
-                    <div style="text-align: right;">75%</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Summary of Bills</div>
-            <div></div>
-        </div>
+    <div class="navbar">
+        <div class="rfid">RFID</div>
+        <div class="grades">Grades</div>
+        <div class="bills">Bills</div>
     </div>
 
-</body>
+    <div class="container">
+        <div class="profile">
+            <div class="summary-header">Student Information</div>
+            <div class="summary-content">
+                <div class="profile-header">
+                    <img src="image/doll.jfif" alt="Profile Picture">
+                    <div class="profile-info">
+                        <h3>Toma Toma</h3>
+                        <h5>1st Year - BSCS</h5>
+                    </div>
+                </div>
+                <table>
+                    <tr>
+                        <th>School Number</th>
+                        <td>CN-23-3422553</td>
+                    </tr>
+                    <tr>
+                        <th>Birthday</th>
+                        <td>01-01-2025</td>
+                    </tr>
+                </table>
+                <table style="margin-top: 15px;">
+                    <tr>
+                        <th>Last Access</th>
+                        <td>2024-03-19 14:30:45</td>
+                    </tr>
+                    <tr>
+                        <th>First Access</th>
+                        <td>2024-01-15 08:15:22</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
+        <div class="content">
+            <div class="summary full-width summary-grades">
+                <div class="summary-header">Summary of Grades</div>
+                <div class="summary-content">
+                    <table>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Grade</th>
+                        </tr>
+                        <tr>
+                            <td>Math</td>
+                            <td>95</td>
+                        </tr>
+                        <tr>
+                            <td>Science</td>
+                            <td>92</td>
+                        </tr>
+                        <tr>
+                            <td>Science</td>
+                            <td>92</td>
+                        </tr>
+                        <tr>
+                            <td>Science</td>
+                            <td>92</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="summary full-width summary-bills">
+                <div class="summary-header">Summary of Bills</div>
+                <div class="summary-content">
+                    <div class="bill-summary">
+                        <div class="bill-total">
+                            <div class="bill-label">Total Tuition & Misc. Fees</div>
+                            <div class="bill-amount">P14621.83</div>
+                        </div>
+                        
+                        <div class="bill-status">
+                            <div class="status-item">
+                                <div class="bill-label">Initial Payment</div>
+                                <div class="status-amount">P2750.00 (Paid)</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="bill-label">Remaining Balance</div>
+                                <div class="status-amount">P11871.83</div>
+                            </div>
+                        </div>
+
+                        <div class="bill-label">Payment Per Exam</div>
+                        <div class="payment-schedule">
+                            <div class="payment-item">
+                                <div class="payment-title">Prelim</div>
+                                <div class="payment-amount">P2967.96</div>
+                                <div class="payment-date">Exam: February 17</div>
+                            </div>
+                            <div class="payment-item">
+                                <div class="payment-title">Midterm</div>
+                                <div class="payment-amount">P2967.96</div>
+                                <div class="payment-date">Exam: March 17</div>
+                            </div>
+                            <div class="payment-item">
+                                <div class="payment-title">Pre-Finals</div>
+                                <div class="payment-amount">P2967.96</div>
+                                <div class="payment-date">Exam: April 17</div>
+                            </div>
+                            <div class="payment-item">
+                                <div class="payment-title">Finals</div>
+                                <div class="payment-amount">P2967.96</div>
+                                <div class="payment-date">Exam: May 17</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
