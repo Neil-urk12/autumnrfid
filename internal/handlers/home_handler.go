@@ -2,13 +2,13 @@ package handlers
 
 import "github.com/gofiber/fiber/v2"
 
-type AppHandler struct{}
+type HomeHandler struct{}
 
-func NewHandler() *AppHandler {
-	return &AppHandler{}
+func NewHandler() *HomeHandler {
+	return &HomeHandler{}
 }
 
-func (app *AppHandler) HandleGetIndex(ctx *fiber.Ctx) error {
+func (app *HomeHandler) HandleGetIndex(ctx *fiber.Ctx) error {
 	context := fiber.Map{}
 	return ctx.Render("home", context)
 }
