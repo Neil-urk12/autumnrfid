@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"rfidsystem/internal/repositories"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,11 +15,12 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 
 	fmt.Println("RFID:", rfid)
 
-	student, err := h.db.GetStudentByRFID(rfid)
-	// student, err := h.db.GetStudentByRFID("ACLC-2023-001")
+	// Create a new RFIDRepository instance
+	rfidRepo := repositories.NewRFIDRepository(h.db)
+
+	student, err := rfidRepo.GetStudentByRFID(rfid)
 	if err != nil {
 		fmt.Println(err)
-		// fmt.Println("Student", student)
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Database error")
 	}
 

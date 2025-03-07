@@ -35,57 +35,47 @@ func (c *DatabaseClient) Close() error {
 	return c.DB.Close()
 }
 
-type Test struct {
-	StudentId    string
-	DepartmentID int
-	FirstName    string
-	LastName     string
-	MiddleName   string
-	YearLevel    int
-	Program      string
-}
+// type Test struct {
+// 	StudentId    string
+// 	DepartmentID int
+// 	FirstName    string
+// 	LastName     string
+// 	MiddleName   string
+// 	YearLevel    int
+// 	Program      string
+// }
 
-func (c *DatabaseClient) GetStudentByRFID(studentId string) (*Test, error) {
-	query := `
-		SELECT *
-		FROM Students 
-		WHERE student_ID = ?
-	`
+// func (c *DatabaseClient) GetStudentByRFID(studentId string) (*Test, error) {
+// 	query := `
+// 		SELECT *
+// 		FROM Students
+// 		WHERE student_ID = ?
+// 	`
 
-	student := &Test{}
-	err := c.DB.QueryRow(query, studentId).Scan(
-		&student.StudentId,
-		&student.DepartmentID,
-		&student.FirstName,
-		&student.LastName,
-		&student.MiddleName,
-		&student.YearLevel,
-		&student.Program,
-	)
+// 	student := &Test{}
+// 	err := c.DB.QueryRow(query, studentId).Scan(
+// 		&student.StudentId,
+// 		&student.DepartmentID,
+// 		&student.FirstName,
+// 		&student.LastName,
+// 		&student.MiddleName,
+// 		&student.YearLevel,
+// 		&student.Program,
+// 	)
 
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error querying student: %v", err)
-	}
+// 	if err == sql.ErrNoRows {
+// 		return nil, nil
+// 	}
+// 	if err != nil {
+// 		return nil, fmt.Errorf("error querying student: %v", err)
+// 	}
 
-	return student, nil
-}
-
-type Student struct {
-	ID           int
-	RFIDNumber   string
-	SchoolNumber string
-	FirstName    string
-	LastName     string
-	Course       string
-	YearLevel    int
-}
+// 	return student, nil
+// }
 
 // func (c *DatabaseClient) GetStudentGrades(studentID int) ([]Grade, error) {
 // 	query := `
-// 		SELECT 
+// 		SELECT
 // 		FROM Enrollments
 // 		WHERE student_id = ?
 // 	`
