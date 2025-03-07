@@ -35,6 +35,9 @@ func main() {
 	// Pass the database client to the handler
 	appHandler := handlers.NewHandler(db)
 	app.Get("/", appHandler.HandleGetIndex)
+
+	app.Post("/card-scan", appHandler.HandleCardScan)
+
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.SendString("Fiber Web Server is running")
 	})
