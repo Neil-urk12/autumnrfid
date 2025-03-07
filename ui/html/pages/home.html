@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
     <title>RFID</title>
     <link rel="stylesheet" href="/ui/static/styles.css">
 </head>
@@ -16,16 +17,16 @@
         <div class="bills">Bills</div>
     </div>
 
-    <div class="container">
+    <div class="container" hx-ext="sse" sse-connect="/stream" sse-swap="message" hx-target=".container">
         <div class="profile">
             <div class="summary-header">Student Information</div>
             <div class="summary-content">
                 <div class="profile-header">
                     <img src="image/doll.jfif" alt="Profile Picture">
                     <div class="profile-info">
-                        <h3>Toma Toma</h3>
-                        <h5>Second Year</h5>
-                        <h5>BS Computer Science</h5>
+                        <h3>{{.Student.FirstName}} {{.Student.LastName}}</h3>
+                        <h5>{{.Student.YearLevel}}th Year</h5>
+                        <h5>{{.Student.Program}}</h5>
                     </div>
                 </div>
                 <div class="student-details">
@@ -35,7 +36,7 @@
                         </tr>
                         <tr>
                             <th>Student Number</th>
-                            <td>CN-23-3422553</td>
+                            <td>{{.Student.StudentID}}</td>
                         </tr>
                         <tr>
                             <th>Birthday</th>
@@ -57,11 +58,11 @@
                         </tr>
                         <tr>
                             <th>Program</th>
-                            <td>BS Computer Science</td>
+                            <td>{{.Student.Program}}</td>
                         </tr>
                         <tr>
                             <th>Year Level</th>
-                            <td>Second Year</td>
+                            <td>{{.Student.YearLevel}}th Year</td>
                         </tr>
                         <tr>
                             <th>Block</th>
@@ -108,17 +109,17 @@
                                 <td class="year-header">Second Year</td>
                                 <td>1.40</td>
                                 <td>-</td>
-                        </tr>
-                        <tr>
+                            </tr>
+                            <tr>
                                 <td class="year-header">Third Year</td>
                                 <td>-</td>
                                 <td>-</td>
-                        </tr>
-                        <tr>
+                            </tr>
+                            <tr>
                                 <td class="year-header">Fourth Year</td>
                                 <td>-</td>
                                 <td>-</td>
-                        </tr>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -131,7 +132,7 @@
                             <div class="bill-label">Total Tuition & Misc. Fees</div>
                             <div class="bill-amount">P14621.83</div>
                         </div>
-                        
+
                         <div class="bill-status">
                             <div class="status-item">
                                 <div class="bill-label">Initial Payment</div>
@@ -172,4 +173,5 @@
         </div>
     </div>
 </body>
+
 </html>
