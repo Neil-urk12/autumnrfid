@@ -1,14 +1,19 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"rfidsystem/internal/repositories"
 
-type HomeHandler struct{}
+	"github.com/gofiber/fiber/v2"
+)
 
-func NewHandler() *HomeHandler {
-	return &HomeHandler{}
+type AppHandler struct {
+	db *repositories.DatabaseClient
 }
 
-func (app *HomeHandler) HandleGetIndex(ctx *fiber.Ctx) error {
-	context := fiber.Map{}
-	return ctx.Render("home", context)
+func NewHandler(db *repositories.DatabaseClient) *AppHandler {
+	return &AppHandler{db: db}
+}
+
+func (h *AppHandler) HandleGetIndex(ctx *fiber.Ctx) error {
+	return ctx.Render("home", fiber.Map{})
 }
