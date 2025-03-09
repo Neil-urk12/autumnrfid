@@ -25,10 +25,12 @@ func NewRFIDRepository(dbClient *DatabaseClient) *RFIDRepository {
 
 func (r *RFIDRepository) GetStudentByRFID(studentId string) (*Student, error) {
 	query := `
-		SELECT student_ID, DepartmentID, FirstName, LastName, MiddleName, YearLevel, Program
+		SELECT student_ID, department_ID, first_Name, last_Name, middle_Name, year_Level, program
 		FROM Students 
 		WHERE student_ID = ?
 	`
+
+	fmt.Printf("Executing query with student ID: %s\n", studentId)
 
 	student := &Student{}
 	err := r.dbClient.DB.QueryRow(query, studentId).Scan(
@@ -42,9 +44,11 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*Student, error) {
 	)
 
 	if err == sql.ErrNoRows {
+		fmt.Printf("No student found with ID: %s\n", studentId)
 		return nil, nil
 	}
 	if err != nil {
+		fmt.Printf("Error querying student: %v\n", err)
 		return nil, fmt.Errorf("error querying student: %v", err)
 	}
 

@@ -1,13 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     <title>RFID</title>
-    <link rel="stylesheet" href="/ui/static/styles.css">
+    <link rel="stylesheet" href="/ui/static/styles.css" />
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 3rem;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            color: #d32f2f;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .error-details {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,154 +51,374 @@
         <div class="bills">Bills</div>
     </div>
 
-    <div class="container" hx-ext="sse" sse-connect="/stream" sse-swap="message" hx-target=".container">
-        <div class="profile">
-            <div class="summary-header">Student Information</div>
-            <div class="summary-content">
-                <div class="profile-header">
-                    <img src="image/doll.jfif" alt="Profile Picture">
-                    <div class="profile-info">
-                        <h3>{{.Student.FirstName}} {{.Student.LastName}}</h3>
-                        <h5>{{.Student.YearLevel}}th Year</h5>
-                        <h5>{{.Student.Program}}</h5>
-                    </div>
-                </div>
-                <div class="student-details">
-                    <table class="info-table">
-                        <tr>
-                            <th colspan="2">Personal Information</th>
-                        </tr>
-                        <tr>
-                            <th>Student Number</th>
-                            <td>{{.Student.StudentID}}</td>
-                        </tr>
-                        <tr>
-                            <th>Birthday</th>
-                            <td>01-01-2025</td>
-                        </tr>
-                        <tr>
-                            <th>Contact Number</th>
-                            <td>09913445768</td>
-                        </tr>
-                        <tr>
-                            <th>Email</th>
-                            <td>tomatoma@gmail.com</td>
-                        </tr>
-                    </table>
+    <div id="main-container" class="container">
+        <!-- Debug button for direct testing -->
+        <!-- <div style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+            <button id="test-update-btn" onclick="testStudentUpdate()" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                Test Update UI
+            </button>
+            <button id="test-404-btn" onclick="testNotFound()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; margin-left: 5px; cursor: pointer;">
+                Test 404
+            </button>
+        </div> -->
 
-                    <table class="info-table" style="margin-top: 15px;">
-                        <tr>
-                            <th colspan="2">Academic Information</th>
-                        </tr>
-                        <tr>
-                            <th>Program</th>
-                            <td>{{.Student.Program}}</td>
-                        </tr>
-                        <tr>
-                            <th>Year Level</th>
-                            <td>{{.Student.YearLevel}}th Year</td>
-                        </tr>
-                        <tr>
-                            <th>Block</th>
-                            <td>CS-22A</td>
-                        </tr>
-                    </table>
+        <!-- SSE event handlers - direct manual approach -->
+        <div>
+            <script type="text/javascript">
+                // Create and manage our own EventSource for maximum control
+                let eventSource = null;
 
-                    <table class="info-table" style="margin-top: 15px;">
-                        <tr>
-                            <th colspan="2">System Access</th>
-                        </tr>
-                        <tr>
-                            <th>Last Access</th>
-                            <td>2024-03-19 14:30:45</td>
-                        </tr>
-                        <tr>
-                            <th>First Access</th>
-                            <td>2024-01-15 08:15:22</td>
-                        </tr>
-                    </table>
-                </div>
+                // Setup EventSource connection
+                function setupSSE() {
+                    console.log("Setting up SSE connection");
+                    // if (eventSource) {
+                    //     console.log('Closing existing EventSource');
+                    //     eventSource.close();
+                    // }
+
+                    // Create new EventSource
+                    eventSource = new EventSource("/stream");
+
+                    // Handle connection error and auto-reconnect
+                    eventSource.onerror = function () {
+                        setTimeout(setupSSE, 5000);
+                    };
+
+                    // Listen for specific events
+                    eventSource.addEventListener(
+                        "student-data",
+                        function (e) {
+                            console.log(
+                                "STUDENT DATA EVENT RECEIVED - Full event object:",
+                                e,
+                            );
+                            console.log(
+                                "STUDENT DATA - Raw data string:",
+                                e.data,
+                            );
+                            try {
+                                const studentData = JSON.parse(e.data);
+                                console.log(
+                                    "Student data successfully parsed:",
+                                    studentData,
+                                );
+
+                                // Update student data fields
+                                updateStudentData(studentData);
+                                // Show student info and grades/bills sections, hide error page
+                                document
+                                    .getElementById("student-info")
+                                    .classList.remove("hidden");
+                                document
+                                    .getElementById("grades-section")
+                                    .classList.remove("hidden");
+                                document
+                                    .getElementById("bills-section")
+                                    .classList.remove("hidden");
+                                document
+                                    .getElementById("error-page")
+                                    .classList.add("hidden");
+
+                                console.log(
+                                    "UI updated to show student data",
+                                );
+
+                                // Alert for confirmation
+                                // alert('Student data received: ' + studentData.firstName + ' ' + studentData.lastName);
+                            } catch (err) {
+                                console.error(
+                                    "Error parsing student data:",
+                                    err,
+                                );
+                            }
+                        },
+                    );
+
+                    eventSource.addEventListener("not-found", function (e) {
+                        // Hide student info and grades/bills sections, show error page
+                        document
+                            .getElementById("student-info")
+                            .classList.add("hidden");
+                        document
+                            .getElementById("grades-section")
+                            .classList.add("hidden");
+                        document
+                            .getElementById("bills-section")
+                            .classList.add("hidden");
+                        document
+                            .getElementById("error-page")
+                            .classList.remove("hidden");
+                    });
+                }
+
+                // Test function for student data update
+                // function testStudentUpdate() {
+                //     const testData = {
+                //         studentID: "ACLC-2023-001",
+                //         firstName: "Juan",
+                //         lastName: "Dela Cruz",
+                //         middleName: "Reyes",
+                //         yearLevel: 1,
+                //         yearLevelStr: "First",
+                //         program: "BSCS"
+                //     };
+
+                //     updateStudentData(testData);
+                //     document.getElementById('student-info').classList.remove('hidden');
+                //     document.getElementById('error-page').classList.add('hidden');
+                // }
+
+                // // Test function for not found
+                // function testNotFound() {
+                //     document.getElementById('student-info').classList.add('hidden');
+                //     document.getElementById('error-page').classList.remove('hidden');
+
+                // }
+
+                // Initialize on page load
+                document.addEventListener("DOMContentLoaded", function () {
+                    setupSSE();
+                });
+
+                function updateStudentData(data) {
+                    try {
+                        // Update student name
+                        document.getElementById(
+                            "student-name",
+                        ).textContent =
+                            data.firstName + " " + data.lastName;
+                        document.getElementById(
+                            "student-year",
+                        ).textContent = data.yearLevelStr + " Year";
+                        document.getElementById(
+                            "student-program",
+                        ).textContent = data.program;
+
+                        // Update student details
+                        document.getElementById("student-id").textContent =
+                            data.studentID;
+                        document.getElementById(
+                            "student-program-details",
+                        ).textContent = data.program;
+                        document.getElementById(
+                            "student-year-details",
+                        ).textContent = data.yearLevelStr + " Year";
+                    } catch (err) {
+                        console.error("Error updating DOM:", err);
+                    }
+                }
+            </script>
+        </div>
+        <!-- Error page for 404 not found -->
+        <div id="error-page" class="error-container {{if .Student}}hidden{{end}}">
+            <div class="error-code">404</div>
+            <div class="error-message">Student Not Found</div>
+            <div class="error-details">
+                The student ID you're looking for doesn't exist in our
+                database.
             </div>
         </div>
 
-        <div class="content">
-            <div class="summary full-width summary-grades">
-                <div class="summary-header">Summary of Grades</div>
+        <!-- Student information section -->
+        <div id="student-info" class="{{if not .Student}}hidden{{end}}">
+            <div class="profile">
+                <div class="summary-header">Student Information</div>
                 <div class="summary-content">
-                    <table class="grades-table">
-                        <thead>
+                    <div class="profile-header">
+                        <img src="/ui/static/images/profile-placeholder.png" alt="Profile Picture" />
+                        <div class="profile-info">
+                            <h3 id="student-name">
+                                {{if .Student}}{{.Student.FirstName}}
+                                {{.Student.LastName}}{{end}}
+                            </h3>
+                            <h5 id="student-year">
+                                {{if .Student}}{{.YearLevel}} Year{{end}}
+                            </h5>
+                            <h5 id="student-program">
+                                {{if .Student}}{{.Student.Program}}{{end}}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="student-details">
+                        <table class="info-table">
                             <tr>
-                                <th style="width: 40%;">Academic Year</th>
-                                <th style="width: 30%;">First Semester</th>
-                                <th style="width: 30%;">Second Semester</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="year-header">First Year</td>
-                                <td>1.50</td>
-                                <td>1.23</td>
-                            </tr>
-                            <tr>
-                                <td class="year-header">Second Year</td>
-                                <td>1.40</td>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <td class="year-header">Third Year</td>
-                                <td>-</td>
-                                <td>-</td>
+                                <th colspan="2">Personal Information</th>
                             </tr>
                             <tr>
-                                <td class="year-header">Fourth Year</td>
-                                <td>-</td>
-                                <td>-</td>
+                                <th>Student Number</th>
+                                <td id="student-id">
+                                    {{if
+                                    .Student}}{{.Student.StudentID}}{{end}}
+                                </td>
                             </tr>
-                        </tbody>
-                    </table>
+                            <tr>
+                                <th>Birthday</th>
+                                <td>01-01-2025</td>
+                            </tr>
+                            <tr>
+                                <th>Contact Number</th>
+                                <td>09913445768</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>tomatoma@gmail.com</td>
+                            </tr>
+                        </table>
+
+                        <table class="info-table" style="margin-top: 15px">
+                            <tr>
+                                <th colspan="2">Academic Information</th>
+                            </tr>
+                            <tr>
+                                <th>Program</th>
+                                <td id="student-program-details">
+                                    {{if
+                                    .Student}}{{.Student.Program}}{{end}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Year Level</th>
+                                <td id="student-year-details">
+                                    {{if .Student}}{{.YearLevel}}
+                                    Year{{end}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Block</th>
+                                <td>CS-22A</td>
+                            </tr>
+                        </table>
+
+                        <table class="info-table" style="margin-top: 15px">
+                            <tr>
+                                <th colspan="2">System Access</th>
+                            </tr>
+                            <tr>
+                                <th>Last Access</th>
+                                <td>2024-03-19 14:30:45</td>
+                            </tr>
+                            <tr>
+                                <th>First Access</th>
+                                <td>2024-01-15 08:15:22</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="summary full-width summary-bills">
-                <div class="summary-header">Summary of Bills</div>
-                <div class="summary-content">
-                    <div class="bill-summary">
-                        <div class="bill-total">
-                            <div class="bill-label">Total Tuition & Misc. Fees</div>
-                            <div class="bill-amount">P14621.83</div>
-                        </div>
 
-                        <div class="bill-status">
-                            <div class="status-item">
-                                <div class="bill-label">Initial Payment</div>
-                                <div class="status-amount">P2750.00 (Paid)</div>
+            <div class="content">
+                <div id="grades-section" class="summary full-width summary-grades">
+                    <div class="summary-header">Summary of Grades</div>
+                    <div class="summary-content">
+                        <table class="grades-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">
+                                        Academic Year
+                                    </th>
+                                    <th style="width: 30%">
+                                        First Semester
+                                    </th>
+                                    <th style="width: 30%">
+                                        Second Semester
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="year-header">First Year</td>
+                                    <td>1.50</td>
+                                    <td>1.23</td>
+                                </tr>
+                                <tr>
+                                    <td class="year-header">Second Year</td>
+                                    <td>1.40</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td class="year-header">Third Year</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td class="year-header">Fourth Year</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="bills-section" class="summary full-width summary-bills">
+                    <div class="summary-header">Summary of Bills</div>
+                    <div class="summary-content">
+                        <div class="bill-summary">
+                            <div class="bill-total">
+                                <div class="bill-label">
+                                    Total Tuition & Misc. Fees
+                                </div>
+                                <div class="bill-amount">P14621.83</div>
                             </div>
-                            <div class="status-item">
-                                <div class="bill-label">Remaining Balance</div>
-                                <div class="status-amount">P11871.83</div>
-                            </div>
-                        </div>
 
-                        <div class="bill-label">Payment Per Exam</div>
-                        <div class="payment-schedule">
-                            <div class="payment-item">
-                                <div class="payment-title">Prelim</div>
-                                <div class="payment-amount">P2967.96</div>
-                                <div class="payment-date">Exam: February 17</div>
+                            <div class="bill-status">
+                                <div class="status-item">
+                                    <div class="bill-label">
+                                        Initial Payment
+                                    </div>
+                                    <div class="status-amount">
+                                        P2750.00 (Paid)
+                                    </div>
+                                </div>
+                                <div class="status-item">
+                                    <div class="bill-label">
+                                        Remaining Balance
+                                    </div>
+                                    <div class="status-amount">
+                                        P11871.83
+                                    </div>
+                                </div>
                             </div>
-                            <div class="payment-item">
-                                <div class="payment-title">Midterm</div>
-                                <div class="payment-amount">P2967.96</div>
-                                <div class="payment-date">Exam: March 17</div>
-                            </div>
-                            <div class="payment-item">
-                                <div class="payment-title">Pre-Finals</div>
-                                <div class="payment-amount">P2967.96</div>
-                                <div class="payment-date">Exam: April 17</div>
-                            </div>
-                            <div class="payment-item">
-                                <div class="payment-title">Finals</div>
-                                <div class="payment-amount">P2967.96</div>
-                                <div class="payment-date">Exam: May 17</div>
+
+                            <div class="bill-label">Payment Per Exam</div>
+                            <div class="payment-schedule">
+                                <div class="payment-item">
+                                    <div class="payment-title">Prelim</div>
+                                    <div class="payment-amount">
+                                        P2967.96
+                                    </div>
+                                    <div class="payment-date">
+                                        Exam: February 17
+                                    </div>
+                                </div>
+                                <div class="payment-item">
+                                    <div class="payment-title">Midterm</div>
+                                    <div class="payment-amount">
+                                        P2967.96
+                                    </div>
+                                    <div class="payment-date">
+                                        Exam: March 17
+                                    </div>
+                                </div>
+                                <div class="payment-item">
+                                    <div class="payment-title">
+                                        Pre-Finals
+                                    </div>
+                                    <div class="payment-amount">
+                                        P2967.96
+                                    </div>
+                                    <div class="payment-date">
+                                        Exam: April 17
+                                    </div>
+                                </div>
+                                <div class="payment-item">
+                                    <div class="payment-title">Finals</div>
+                                    <div class="payment-amount">
+                                        P2967.96
+                                    </div>
+                                    <div class="payment-date">
+                                        Exam: May 17
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

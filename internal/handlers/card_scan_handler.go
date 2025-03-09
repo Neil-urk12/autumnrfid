@@ -1,11 +1,54 @@
 package handlers
 
 import (
+	"bufio"
 	"fmt"
 	"rfidsystem/internal/repositories"
+	"sync"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+// SSE broadcaster for sending messages to connected clients
+type Broadcaster struct {
+	events chan string
+	mu     sync.Mutex
+}
+
+// Global broadcaster instance
+var (
+	broadcaster *Broadcaster
+	once        sync.Once
+)
+
+// GetBroadcaster returns the singleton broadcaster instance
+func GetBroadcaster() *Broadcaster {
+	once.Do(func() {
+		broadcaster = &Broadcaster{
+			events: make(chan string, 100),
+		}
+	})
+	return broadcaster
+}
+
+// Broadcast sends a message with the specified event type to all SSE clients
+func (b *Broadcaster) Broadcast(event string, data string) {
+	// Make sure to follow SSE format EXACTLY: "event: name\ndata: data\n\n"
+	// The double newline at the end is CRITICAL
+	message := fmt.Sprintf("event: %s\ndata: %s\n\n", event, data)
+
+	// Debug what we're actually sending
+	fmt.Printf("[SSE DEBUG] Raw message being sent:\n%s\n", message)
+
+	// Immediately write to channel if there's room, otherwise drop the message
+	select {
+	case b.events <- message:
+		// Message sent successfully
+	default:
+		fmt.Println("Warning: SSE message buffer full, dropping message")
+	}
+}
 
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	rfid := ctx.FormValue("rfid")
@@ -16,26 +59,54 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	rfidRepo := repositories.NewRFIDRepository(h.db)
 	student, err := rfidRepo.GetStudentByRFID(rfid)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).SendString("Database error")
+		// Log the actual error
+		fmt.Printf("Database error: %v\n", err)
+		GetBroadcaster().Broadcast("error", fmt.Sprintf(`{"message": "Database error: %v"}`, err))
+		return ctx.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("Database error: %v", err))
 	}
 
+	// Handle not found case
 	if student == nil {
+		// Send a not-found event to all SSE clients
+		GetBroadcaster().Broadcast("not-found", fmt.Sprintf(`{"rfid": "%s"}`, rfid))
 		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 	}
 
-	fmt.Println("Student : ", student)
-	// Get student's grades
-	// grades, err := h.db.GetStudentGrades(student.ID)
-	// if err != nil {
-	// 	return ctx.Status(fiber.StatusInternalServerError).SendString("Error fetching grades")
-	// }
+	// Format student data as clean JSON for SSE - using compact format to avoid whitespace issues
+	studentData := fmt.Sprintf(`{"studentID":"%s","firstName":"%s","lastName":"%s","middleName":"%s","yearLevel":%d,"yearLevelStr":"%s","program":"%s"}`,
+		student.StudentID,
+		student.FirstName,
+		student.LastName,
+		student.MiddleName,
+		student.YearLevel,
+		getYearLevelString(student.YearLevel),
+		student.Program)
+	
 
-	// Pass data to the template
-	return ctx.Render("home", fiber.Map{
-		"Student":   student,
-		"Title":     "Student Information",
-		"YearLevel": getYearLevelString(student.YearLevel),
-	})
+
+	// Send student data to all connected SSE clients
+	GetBroadcaster().Broadcast("student-data", studentData)
+	
+	// Log that we've broadcast the event (for debugging)
+	fmt.Printf("Broadcast sent with event: 'student-data' and data: %s\n", studentData)
+
+	// Handle response based on content type
+	if ctx.Accepts("application/json") == "application/json" {
+		// For API clients, return JSON response
+		fmt.Println("Returning JSON response")
+		return ctx.JSON(fiber.Map{
+			"status": "success",
+			"data":   student,
+		})
+	} else {
+		// For direct requests, render the template
+		fmt.Println("Rendering template")
+		return ctx.Render("home", fiber.Map{
+			"Student":   student,
+			"Title":     "Student Information",
+			"YearLevel": getYearLevelString(student.YearLevel),
+		})
+	}
 }
 
 func getYearLevelString(year int) string {
@@ -52,17 +123,81 @@ func getYearLevelString(year int) string {
 		return fmt.Sprintf("%dth", year)
 	}
 }
+
+// HandleSSE establishes a server-sent events connection
 func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 	c.Set("Content-Type", "text/event-stream")
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
 	c.Set("Transfer-Encoding", "chunked")
 
-	return c.SendString("data: connected\n\n")
-}
+	// Log SSE connection
+	fmt.Printf("SSE connection established from %s\n", c.IP())
 
-// func (h *AppHandler) HandleSSEEvent(c *fiber.Ctx) error {
-// 	rfid := c.FormValue("rfid")
-// 	if rfid == "" {
-// 		return c.Status(fiber.StatusBadRequest).SendString("RFID is required")
-// 	}
+	// Send initial connection message
+	initMessage := "event: connected\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\", \"status\": \"connected\"}\n\n"
+
+	// Get broadcaster instance
+	broadcaster := GetBroadcaster()
+
+	// Create channel for client-specific cleanup
+	done := make(chan bool)
+
+	// Setup cleanup when connection is closed
+	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		ticker := time.NewTicker(15 * time.Second)
+		defer ticker.Stop()
+
+		// Send initial message first
+		if fw, err := w.Write([]byte(initMessage)); err != nil || fw == 0 {
+			fmt.Printf("Error sending initial SSE message: %v\n", err)
+			return
+		}
+		if err := w.Flush(); err != nil {
+			fmt.Printf("Error flushing initial SSE message: %v\n", err)
+			return
+		}
+
+		fmt.Println("Initial SSE message sent successfully")
+		eventsChannel := broadcaster.events
+
+		for {
+			select {
+			case <-done:
+				fmt.Println("SSE connection closing (done channel triggered)")
+				return
+			case <-ticker.C:
+				// Send heartbeat
+				pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
+				fw, err := w.Write([]byte(pingMsg))
+				if err != nil || fw == 0 {
+					fmt.Printf("Error sending SSE ping: %v\n", err)
+					close(done)
+					return
+				}
+				if err = w.Flush(); err != nil {
+					fmt.Printf("Error flushing SSE ping: %v\n", err)
+					close(done)
+					return
+				}
+			case msg := <-eventsChannel:
+				// Send message from broadcaster
+				fmt.Printf("Broadcasting message: %s\n", msg)
+				fw, err := w.Write([]byte(msg))
+				if err != nil || fw == 0 {
+					fmt.Printf("Error sending SSE message: %v\n", err)
+					close(done)
+					return
+				}
+				if err = w.Flush(); err != nil {
+					fmt.Printf("Error flushing SSE message: %v\n", err)
+					close(done)
+					return
+				}
+				fmt.Println("SSE message sent successfully")
+			}
+		}
+	})
+
+	return nil
+}
