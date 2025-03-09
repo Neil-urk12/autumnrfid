@@ -313,3 +313,112 @@ th {
     color: var(--darkest-blue);
     font-weight: bold;
 }
+
+@media (max-width: 1440px) {
+    .profile-info h3 {
+        font-size: 1.4rem;
+    }
+
+    .profile-info h5 {
+        font-size: 0.9rem;
+
+    }
+
+    .grades-table th,
+    .grades-table td {
+        padding: 7px 8px;
+        font-size: 15px;
+    }
+
+    .info-table th,
+    .info-table td {
+        padding: 7px 6px;
+        font-size: 15px;
+    }
+
+    .bill-amount {
+        font-size: 1.6em;
+    }
+
+    .status-amount {
+        font-size: 1.1rem;
+    }
+
+    .bill-total {
+        margin: 0;
+        padding-bottom: 5px;
+    }
+
+    .payment-title {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr 1.4fr;
+        gap: 20px;
+    }
+
+    .summary-content {
+        padding: 15px;
+    }
+
+    .profile img {
+        width: 65px;
+        height: 65px;
+    }
+
+    .grades-table th,
+    .grades-table td {
+        padding: 7px 8px;
+        font-size: 13.2px;
+    }
+
+    .info-table th,
+    .info-table td {
+        padding: 7px 6px;
+        font-size: 13.2px;
+    }
+
+    .profile-header {
+        padding: 10px;
+    }
+
+    .profile-info h3 {
+        font-size: 1.3rem;
+    }
+
+    .profile-info h5 {
+        font-size: 0.8rem;
+
+    }
+
+    .bill-summary {
+        gap: 10px;
+    }
+
+    .bill-total {
+        padding-bottom: 5px;
+    }
+
+    .bill-label {
+        font-size: 0.8rem;
+    }
+
+    .bill-amount {
+        font-size: 1.4rem;
+    }
+
+    .payment-title {
+        font-size: 0.7rem;
+    }
+
+    .payment-amount {
+        font-size: 0.9rem;
+    }
+
+    .status-amount {
+        font-size: 1rem;
+    }
+}
