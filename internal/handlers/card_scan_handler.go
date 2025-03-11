@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"rfidsystem/internal/repositories"
+	"strings"
 	"sync"
 	"time"
 
@@ -73,7 +74,29 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 
 	// Format student data as clean JSON for SSE - using compact format to avoid whitespace issues
-	studentData := fmt.Sprintf(`{"studentID":"%s","firstName":"%s","lastName":"%s","middleName":"%s","yearLevel":%d,"yearLevelStr":"%s","program":"%s"}`,
+	// Include dummy grades and bills data
+	studentData := fmt.Sprintf(`{
+		"studentID":"%s",
+		"firstName":"%s",
+		"lastName":"%s",
+		"middleName":"%s",
+		"yearLevel":%d,
+		"yearLevelStr":"%s",
+		"program":"%s",
+		"grades":[
+			{"subject":"Mathematics", "code":"MATH101", "units":3, "grade":"1.00", "remarks":"Passed"},
+			{"subject":"English", "code":"ENG101", "units":3, "grade":"1.25", "remarks":"Passed"},
+			{"subject":"Science", "code":"SCI101", "units":4, "grade":"1.50", "remarks":"Passed"},
+			{"subject":"History", "code":"HIST101", "units":3, "grade":"1.75", "remarks":"Passed"},
+			{"subject":"Physical Education", "code":"PE101", "units":2, "grade":"1.00", "remarks":"Passed"}
+		],
+		"bills":[
+			{"description":"Tuition Fee", "amount":15000.00, "status":"Paid", "dueDate":"2024-01-15"},
+			{"description":"Library Fee", "amount":1500.00, "status":"Paid", "dueDate":"2024-01-15"},
+			{"description":"Laboratory Fee", "amount":2500.00, "status":"Unpaid", "dueDate":"2024-02-15"},
+			{"description":"Miscellaneous Fee", "amount":1000.00, "status":"Unpaid", "dueDate":"2024-02-15"}
+		]
+	}`,
 		student.StudentID,
 		student.FirstName,
 		student.LastName,
@@ -81,12 +104,13 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		student.YearLevel,
 		getYearLevelString(student.YearLevel),
 		student.Program)
-	
 
+	// Remove all whitespace to ensure proper JSON formatting for SSE
+	studentData = removeWhitespace(studentData)
 
 	// Send student data to all connected SSE clients
 	GetBroadcaster().Broadcast("student-data", studentData)
-	
+
 	// Log that we've broadcast the event (for debugging)
 	fmt.Printf("Broadcast sent with event: 'student-data' and data: %s\n", studentData)
 
@@ -124,6 +148,28 @@ func getYearLevelString(year int) string {
 	}
 }
 
+// Helper function to remove all whitespace from a string for compact JSON
+func removeWhitespace(s string) string {
+	// First remove all newlines and tabs
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\t", "")
+	
+	// Handle spaces more carefully - don't remove spaces in quoted strings
+	var result strings.Builder
+	inQuotes := false
+	
+	for _, r := range s {
+		if r == '"' {
+			inQuotes = !inQuotes
+			result.WriteRune(r)
+		} else if inQuotes || r != ' ' {
+			result.WriteRune(r)
+		}
+	}
+	
+	return result.String()
+}
+
 // HandleSSE establishes a server-sent events connection
 func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 	c.Set("Content-Type", "text/event-stream")
@@ -145,7 +191,7 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 
 	// Setup cleanup when connection is closed
 	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
-		ticker := time.NewTicker(15 * time.Second)
+		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 
 		// Send initial message first
