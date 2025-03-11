@@ -153,11 +153,11 @@ func removeWhitespace(s string) string {
 	// First remove all newlines and tabs
 	s = strings.ReplaceAll(s, "\n", "")
 	s = strings.ReplaceAll(s, "\t", "")
-	
+
 	// Handle spaces more carefully - don't remove spaces in quoted strings
 	var result strings.Builder
 	inQuotes := false
-	
+
 	for _, r := range s {
 		if r == '"' {
 			inQuotes = !inQuotes
@@ -166,7 +166,7 @@ func removeWhitespace(s string) string {
 			result.WriteRune(r)
 		}
 	}
-	
+
 	return result.String()
 }
 
@@ -212,20 +212,20 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 			case <-done:
 				fmt.Println("SSE connection closing (done channel triggered)")
 				return
-			case <-ticker.C:
-				// Send heartbeat
-				pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
-				fw, err := w.Write([]byte(pingMsg))
-				if err != nil || fw == 0 {
-					fmt.Printf("Error sending SSE ping: %v\n", err)
-					close(done)
-					return
-				}
-				if err = w.Flush(); err != nil {
-					fmt.Printf("Error flushing SSE ping: %v\n", err)
-					close(done)
-					return
-				}
+			// case <-ticker.C:
+			// 	// Send heartbeat
+			// 	pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
+			// 	fw, err := w.Write([]byte(pingMsg))
+			// 	if err != nil || fw == 0 {
+			// 		fmt.Printf("Error sending SSE ping: %v\n", err)
+			// 		close(done)
+			// 		return
+			// 	}
+			// 	if err = w.Flush(); err != nil {
+			// 		fmt.Printf("Error flushing SSE ping: %v\n", err)
+			// 		close(done)
+			// 		return
+			// 	}
 			case msg := <-eventsChannel:
 				// Send message from broadcaster
 				fmt.Printf("Broadcasting message: %s\n", msg)
