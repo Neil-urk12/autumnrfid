@@ -1,137 +1,128 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-        <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
-        <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
-        <title>RFID</title>
-        <link rel="stylesheet" href="/ui/static/styles.css" />
-        <style>
-            .error-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                padding: 3rem;
-            }
 
-            .error-code {
-                font-size: 8rem;
-                font-weight: bold;
-                color: #d32f2f;
-                margin-bottom: 1rem;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>RFID</title>
+    <link rel="stylesheet" href="/ui/static/styles.css" />
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 3rem;
+        }
 
-            .error-message {
-                font-size: 1.5rem;
-                text-align: center;
-                margin-bottom: 2rem;
-            }
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            color: #d32f2f;
+            margin-bottom: 1rem;
+        }
 
-            .error-details {
-                font-size: 1rem;
-                color: #666;
-                text-align: center;
-            }
+        .error-message {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-            .hidden {
-                display: none;
-            }
+        .error-details {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+        }
 
-            #student-data-container {
-                display: grid;
-                grid-template-columns: 1fr 2fr;
-                width: 100%;
-            }
+        .hidden {
+            display: none;
+        }
 
-            #student-data-container.hidden {
-                display: none;
-            }
+        #student-data-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            width: 100%;
+        }
 
-            #student-info {
-                grid-column: 1;
-            }
+        #student-data-container.hidden {
+            display: none;
+        }
 
-            #grades-bills-container {
-                grid-column: 2;
-                display: grid;
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                gap: 20px;
-            }
+        #student-info {
+            grid-column: 1;
+        }
 
-            /* Welcome section styling */
-            #welcome-section {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                height: calc(100vh - 130px);
-                background-color: var(--white);
-                border-radius: 8px;
-                padding: 2rem;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                margin: 20px auto;
-            }
+        #grades-bills-container {
+            grid-column: 2;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto;
+            gap: 20px;
+        }
 
-            #welcome-section h1 {
-                color: var(--dark-blue);
-                margin-bottom: 1rem;
-                font-size: 2.5rem;
-            }
+        /* Welcome section styling */
+        #welcome-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: calc(100vh - 130px);
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+        }
 
-            #welcome-section p {
-                color: #666;
-                font-size: 1.2rem;
-                max-width: 800px;
-                margin-bottom: 2rem;
-                line-height: 1.6;
-            }
+        #welcome-section h1 {
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
 
-            .scan-icon {
-                font-size: 5rem;
-                color: var(--aqua);
-                margin-bottom: 2rem;
-            }
-        </style>
-    </head>
+        #welcome-section p {
+            color: #666;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
 
-    <body>
-        <div class="navbar">
-            <div class="rfid">RFID</div>
-            <div class="grades">Grades</div>
-            <div class="bills">Bills</div>
-        </div>
+        .scan-icon {
+            font-size: 5rem;
+            color: var(--aqua);
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
 
-        <div id="main-container" class="container">
-            <!-- Debug button for direct testing -->
-            <div style="position: fixed; top: 10px; right: 10px; z-index: 9999">
-                <button
-                    id="test-update-btn"
-                    onclick="testStudentUpdate()"
-                    style="
+<body>
+    <div class="navbar">
+        <div class="rfid">RFID</div>
+        <div class="grades">Grades</div>
+        <div class="bills">Bills</div>
+    </div>
+
+    <div id="main-container" class="container">
+        <!-- Debug button for direct testing -->
+        <div style="position: fixed; top: 10px; right: 10px; z-index: 9999">
+            <button id="test-update-btn" onclick="testStudentUpdate()" style="
                         background: #007bff;
                         color: white;
                         border: none;
                         padding: 8px 15px;
                         border-radius: 4px;
                         cursor: pointer;
-                    "
-                >
-                    Test Update UI
-                </button>
-                <button
-                    id="test-404-btn"
-                    onclick="testNotFound()"
-                    style="
+                    ">
+                Test Update UI
+            </button>
+            <button id="test-404-btn" onclick="testNotFound()" style="
                         background: #dc3545;
                         color: white;
                         border: none;
@@ -139,580 +130,563 @@
                         border-radius: 4px;
                         margin-left: 5px;
                         cursor: pointer;
-                    "
-                >
-                    Test 404
-                </button>
-            </div>
+                    ">
+                Test 404
+            </button>
+        </div>
 
-            <!-- SSE event handlers - direct manual approach -->
-            <div>
-                <script type="text/javascript">
-                    // Create and manage our own EventSource for maximum control
-                    let eventSource = null;
+        <!-- SSE event handlers - direct manual approach -->
+        <div>
+            <script type="text/javascript">
+                // Create and manage our own EventSource for maximum control
+                let eventSource = null;
 
-                    // Setup EventSource connection
-                    function setupSSE() {
-                        console.log("Setting up SSE connection");
-                        // if (eventSource) {
-                        //     console.log('Closing existing EventSource');
-                        //     eventSource.close();
-                        // }
+                // Setup EventSource connection
+                function setupSSE() {
+                    console.log("Setting up SSE connection");
+                    // if (eventSource) {
+                    //     console.log('Closing existing EventSource');
+                    //     eventSource.close();
+                    // }
 
-                        // Create new EventSource
-                        eventSource = new EventSource("/stream");
+                    // Create new EventSource
+                    eventSource = new EventSource("/stream");
 
-                        // Handle connection error and auto-reconnect
-                        eventSource.onerror = function () {
-                            setTimeout(setupSSE, 5000);
-                        };
-
-                        // Listen for specific events
-                        eventSource.addEventListener(
-                            "student-data",
-                            function (e) {
-                                console.log(
-                                    "STUDENT DATA EVENT RECEIVED - Full event object:",
-                                    e,
-                                );
-                                console.log(
-                                    "STUDENT DATA - Raw data string:",
-                                    e.data,
-                                );
-                                try {
-                                    const studentData = JSON.parse(e.data);
-                                    console.log(
-                                        "Student data successfully parsed:",
-                                        studentData,
-                                    );
-
-                                    // Update student data fields
-                                    updateStudentData(studentData);
-
-                                    console.log("BEFORE VISIBILITY CHANGE:");
-                                    console.log(
-                                        "welcome-section hidden?",
-                                        document
-                                            .getElementById("welcome-section")
-                                            .classList.contains("hidden"),
-                                    );
-                                    console.log(
-                                        "student-data-container hidden?",
-                                        document
-                                            .getElementById(
-                                                "student-data-container",
-                                            )
-                                            .classList.contains("hidden"),
-                                    );
-                                    console.log(
-                                        "error-page hidden?",
-                                        document
-                                            .getElementById("error-page")
-                                            .classList.contains("hidden"),
-                                    );
-
-                                    // Force hide welcome section with both approaches
-                                    const welcomeSection =
-                                        document.getElementById(
-                                            "welcome-section",
-                                        );
-                                    welcomeSection.classList.add("hidden");
-                                    welcomeSection.style.display = "none";
-
-                                    // Force show student data container with both approaches
-                                    const studentDataContainer =
-                                        document.getElementById(
-                                            "student-data-container",
-                                        );
-                                    studentDataContainer.classList.remove(
-                                        "hidden",
-                                    );
-                                    studentDataContainer.style.display = "grid";
-
-                                    // Force hide error page
-                                    document
-                                        .getElementById("error-page")
-                                        .classList.add("hidden");
-
-                                    console.log("AFTER VISIBILITY CHANGE:");
-                                    console.log(
-                                        "welcome-section hidden?",
-                                        document
-                                            .getElementById("welcome-section")
-                                            .classList.contains("hidden"),
-                                    );
-                                    console.log(
-                                        "welcome-section display:",
-                                        getComputedStyle(
-                                            document.getElementById(
-                                                "welcome-section",
-                                            ),
-                                        ).display,
-                                    );
-                                    console.log(
-                                        "student-data-container hidden?",
-                                        document
-                                            .getElementById(
-                                                "student-data-container",
-                                            )
-                                            .classList.contains("hidden"),
-                                    );
-                                    console.log(
-                                        "student-data-container display:",
-                                        getComputedStyle(
-                                            document.getElementById(
-                                                "student-data-container",
-                                            ),
-                                        ).display,
-                                    );
-
-                                    console.log(
-                                        "UI updated to show student data",
-                                    );
-                                } catch (err) {
-                                    console.error(
-                                        "Error parsing student data:",
-                                        err,
-                                    );
-                                }
-                            },
-                        );
-
-                        eventSource.addEventListener("not-found", function (e) {
-                            console.log("NOT FOUND EVENT RECEIVED");
-
-                            // Force hide welcome section and student data with both approaches
-                            const welcomeSection =
-                                document.getElementById("welcome-section");
-                            welcomeSection.classList.add("hidden");
-                            welcomeSection.style.display = "none";
-
-                            const studentDataContainer =
-                                document.getElementById(
-                                    "student-data-container",
-                                );
-                            studentDataContainer.classList.add("hidden");
-                            studentDataContainer.style.display = "none";
-
-                            // Force show error page with both approaches
-                            const errorPage =
-                                document.getElementById("error-page");
-                            errorPage.classList.remove("hidden");
-                            errorPage.style.display = "flex";
-
-                            console.log("UI updated to show error page");
-                        });
-
-                        eventSource.addEventListener("ping", function (e) {
-                            console.log(
-                                "PING EVENT RECEIVED - Full event object:",
-                                e,
-                            );
-                            console.log("PING - Raw data string:", e.data);
-                            try {
-                                const pingData = JSON.parse(e.data);
-                                console.log("PING - Parsed data:", pingData);
-                            } catch (err) {
-                                console.error("Error parsing ping data:", err);
-                            }
-                        });
-                    }
-
-                    // Initialize the application with welcome screen visible
-                    window.onload = function () {
-                        // Ensure welcome section is visible and others are hidden on load
-                        document.getElementById(
-                            "welcome-section",
-                        ).style.display = "flex";
-                        document.getElementById(
-                            "student-data-container",
-                        ).style.display = "none";
-                        document.getElementById("error-page").style.display =
-                            "none";
-
-                        setupSSE();
+                    // Handle connection error and auto-reconnect
+                    eventSource.onerror = function () {
+                        setTimeout(setupSSE, 5000);
                     };
 
-                    function updateStudentData(data) {
-                        try {
-                            // Update profile information
-                            document.getElementById(
-                                "student-name",
-                            ).textContent =
-                                data.firstName + " " + data.lastName;
-                            document.getElementById(
-                                "student-year",
-                            ).textContent = data.yearLevelStr + " Year";
-                            document.getElementById(
-                                "student-program",
-                            ).textContent = data.program;
-
-                            // Update student details
-                            document.getElementById("student-id").textContent =
-                                data.studentID;
-                            document.getElementById(
-                                "student-program-details",
-                            ).textContent = data.program;
-                            document.getElementById(
-                                "student-year-details",
-                            ).textContent = data.yearLevelStr + " Year";
-
-                            // Update grades section if data exists
-                            if (data.grades && data.grades.length > 0) {
+                    // Listen for specific events
+                    eventSource.addEventListener(
+                        "student-data",
+                        function (e) {
+                            console.log(
+                                "STUDENT DATA EVENT RECEIVED - Full event object:",
+                                e,
+                            );
+                            console.log(
+                                "STUDENT DATA - Raw data string:",
+                                e.data,
+                            );
+                            try {
+                                const studentData = JSON.parse(e.data);
                                 console.log(
-                                    "Updating grades with:",
-                                    data.grades,
+                                    "Student data successfully parsed:",
+                                    studentData,
+                                );
+
+                                // Update student data fields
+                                updateStudentData(studentData);
+
+                                console.log("BEFORE VISIBILITY CHANGE:");
+                                console.log(
+                                    "welcome-section hidden?",
+                                    document
+                                        .getElementById("welcome-section")
+                                        .classList.contains("hidden"),
+                                );
+                                console.log(
+                                    "student-data-container hidden?",
+                                    document
+                                        .getElementById(
+                                            "student-data-container",
+                                        )
+                                        .classList.contains("hidden"),
+                                );
+                                console.log(
+                                    "error-page hidden?",
+                                    document
+                                        .getElementById("error-page")
+                                        .classList.contains("hidden"),
+                                );
+
+                                // Force hide welcome section with both approaches
+                                const welcomeSection =
+                                    document.getElementById(
+                                        "welcome-section",
+                                    );
+                                welcomeSection.classList.add("hidden");
+                                welcomeSection.style.display = "none";
+
+                                // Force show student data container with both approaches
+                                const studentDataContainer =
+                                    document.getElementById(
+                                        "student-data-container",
+                                    );
+                                studentDataContainer.classList.remove(
+                                    "hidden",
+                                );
+                                studentDataContainer.style.display = "grid";
+
+                                // Force hide error page
+                                document
+                                    .getElementById("error-page")
+                                    .classList.add("hidden");
+
+                                console.log("AFTER VISIBILITY CHANGE:");
+                                console.log(
+                                    "welcome-section hidden?",
+                                    document
+                                        .getElementById("welcome-section")
+                                        .classList.contains("hidden"),
+                                );
+                                console.log(
+                                    "welcome-section display:",
+                                    getComputedStyle(
+                                        document.getElementById(
+                                            "welcome-section",
+                                        ),
+                                    ).display,
+                                );
+                                console.log(
+                                    "student-data-container hidden?",
+                                    document
+                                        .getElementById(
+                                            "student-data-container",
+                                        )
+                                        .classList.contains("hidden"),
+                                );
+                                console.log(
+                                    "student-data-container display:",
+                                    getComputedStyle(
+                                        document.getElementById(
+                                            "student-data-container",
+                                        ),
+                                    ).display,
+                                );
+
+                                console.log(
+                                    "UI updated to show student data",
+                                );
+                            } catch (err) {
+                                console.error(
+                                    "Error parsing student data:",
+                                    err,
                                 );
                             }
+                        },
+                    );
 
-                            // Update bills section if data exists
-                            if (data.bills && data.bills.length > 0) {
-                                // Calculate total amount
-                                const totalAmount = data.bills.reduce(
+                    eventSource.addEventListener("not-found", function (e) {
+                        console.log("NOT FOUND EVENT RECEIVED");
+
+                        // Force hide welcome section and student data with both approaches
+                        const welcomeSection =
+                            document.getElementById("welcome-section");
+                        welcomeSection.classList.add("hidden");
+                        welcomeSection.style.display = "none";
+
+                        const studentDataContainer =
+                            document.getElementById(
+                                "student-data-container",
+                            );
+                        studentDataContainer.classList.add("hidden");
+                        studentDataContainer.style.display = "none";
+
+                        // Force show error page with both approaches
+                        const errorPage =
+                            document.getElementById("error-page");
+                        errorPage.classList.remove("hidden");
+                        errorPage.style.display = "flex";
+
+                        console.log("UI updated to show error page");
+                    });
+
+                    eventSource.addEventListener("ping", function (e) {
+                        console.log(
+                            "PING EVENT RECEIVED - Full event object:",
+                            e,
+                        );
+                        console.log("PING - Raw data string:", e.data);
+                        try {
+                            const pingData = JSON.parse(e.data);
+                            console.log("PING - Parsed data:", pingData);
+                        } catch (err) {
+                            console.error("Error parsing ping data:", err);
+                        }
+                    });
+                }
+
+                // Initialize the application with welcome screen visible
+                window.onload = function () {
+                    // Ensure welcome section is visible and others are hidden on load
+                    document.getElementById(
+                        "welcome-section",
+                    ).style.display = "flex";
+                    document.getElementById(
+                        "student-data-container",
+                    ).style.display = "none";
+                    document.getElementById("error-page").style.display =
+                        "none";
+
+                    setupSSE();
+                };
+
+                function updateStudentData(data) {
+                    try {
+                        // Update profile information
+                        document.getElementById(
+                            "student-name",
+                        ).textContent =
+                            data.firstName + " " + data.lastName;
+                        document.getElementById(
+                            "student-year",
+                        ).textContent = data.yearLevelStr + " Year";
+                        document.getElementById(
+                            "student-program",
+                        ).textContent = data.program;
+
+                        // Update student details
+                        document.getElementById("student-id").textContent =
+                            data.studentID;
+                        document.getElementById(
+                            "student-program-details",
+                        ).textContent = data.program;
+                        document.getElementById(
+                            "student-year-details",
+                        ).textContent = data.yearLevelStr + " Year";
+
+                        // Update grades section if data exists
+                        if (data.grades && data.grades.length > 0) {
+                            console.log(
+                                "Updating grades with:",
+                                data.grades,
+                            );
+                        }
+
+                        // Update bills section if data exists
+                        if (data.bills && data.bills.length > 0) {
+                            // Calculate total amount
+                            const totalAmount = data.bills.reduce(
+                                (sum, bill) => sum + bill.amount,
+                                0,
+                            );
+                            const paidAmount = data.bills
+                                .filter((bill) => bill.status === "Paid")
+                                .reduce(
                                     (sum, bill) => sum + bill.amount,
                                     0,
                                 );
-                                const paidAmount = data.bills
-                                    .filter((bill) => bill.status === "Paid")
-                                    .reduce(
-                                        (sum, bill) => sum + bill.amount,
-                                        0,
-                                    );
-                                const remainingAmount =
-                                    totalAmount - paidAmount;
+                            const remainingAmount =
+                                totalAmount - paidAmount;
 
-                                // Update bill summary
-                                document.querySelector(
-                                    ".bill-total .bill-amount",
-                                ).textContent = `P${totalAmount.toFixed(2)}`;
+                            // Update bill summary
+                            document.querySelector(
+                                ".bill-total .bill-amount",
+                            ).textContent = `P${totalAmount.toFixed(2)}`;
 
-                                // Update payment status
-                                const statusItems =
-                                    document.querySelectorAll(".status-item");
-                                if (statusItems.length >= 2) {
-                                    statusItems[0].querySelector(
-                                        ".status-amount",
-                                    ).textContent =
-                                        `P${paidAmount.toFixed(2)} (Paid)`;
-                                    statusItems[1].querySelector(
-                                        ".status-amount",
-                                    ).textContent =
-                                        `P${remainingAmount.toFixed(2)}`;
-                                }
-
-                                console.log("Bills section updated with data");
+                            // Update payment status
+                            const statusItems =
+                                document.querySelectorAll(".status-item");
+                            if (statusItems.length >= 2) {
+                                statusItems[0].querySelector(
+                                    ".status-amount",
+                                ).textContent =
+                                    `P${paidAmount.toFixed(2)} (Paid)`;
+                                statusItems[1].querySelector(
+                                    ".status-amount",
+                                ).textContent =
+                                    `P${remainingAmount.toFixed(2)}`;
                             }
-                        } catch (err) {
-                            console.error("Error updating DOM:", err);
+
+                            console.log("Bills section updated with data");
                         }
+                    } catch (err) {
+                        console.error("Error updating DOM:", err);
                     }
+                }
 
-                    // Test function for student data update
-                    function testStudentUpdate() {
-                        const testData = {
-                            studentID: "TEST-2023-001",
-                            firstName: "Test",
-                            lastName: "Student",
-                            middleName: "Demo",
-                            yearLevel: 1,
-                            yearLevelStr: "First",
-                            program: "Computer Science",
-                        };
+                // Test function for student data update
+                function testStudentUpdate() {
+                    const testData = {
+                        studentID: "TEST-2023-001",
+                        firstName: "Test",
+                        lastName: "Student",
+                        middleName: "Demo",
+                        yearLevel: 1,
+                        yearLevelStr: "First",
+                        program: "Computer Science",
+                    };
 
-                        updateStudentData(testData);
+                    updateStudentData(testData);
 
-                        // Update visibility with same approach as event handler
-                        document
-                            .getElementById("welcome-section")
-                            .classList.add("hidden");
-                        document.getElementById(
-                            "welcome-section",
-                        ).style.display = "none";
+                    // Update visibility with same approach as event handler
+                    document
+                        .getElementById("welcome-section")
+                        .classList.add("hidden");
+                    document.getElementById(
+                        "welcome-section",
+                    ).style.display = "none";
 
-                        document
-                            .getElementById("student-data-container")
-                            .classList.remove("hidden");
-                        document.getElementById(
-                            "student-data-container",
-                        ).style.display = "grid";
+                    document
+                        .getElementById("student-data-container")
+                        .classList.remove("hidden");
+                    document.getElementById(
+                        "student-data-container",
+                    ).style.display = "grid";
 
-                        document
-                            .getElementById("error-page")
-                            .classList.add("hidden");
-                        document.getElementById("error-page").style.display =
-                            "none";
-                    }
+                    document
+                        .getElementById("error-page")
+                        .classList.add("hidden");
+                    document.getElementById("error-page").style.display =
+                        "none";
+                }
 
-                    // Test function for not found
-                    function testNotFound() {
-                        // Update visibility with same approach as event handler
-                        document
-                            .getElementById("welcome-section")
-                            .classList.add("hidden");
-                        document.getElementById(
-                            "welcome-section",
-                        ).style.display = "none";
+                // Test function for not found
+                function testNotFound() {
+                    // Update visibility with same approach as event handler
+                    document
+                        .getElementById("welcome-section")
+                        .classList.add("hidden");
+                    document.getElementById(
+                        "welcome-section",
+                    ).style.display = "none";
 
-                        document
-                            .getElementById("student-data-container")
-                            .classList.add("hidden");
-                        document.getElementById(
-                            "student-data-container",
-                        ).style.display = "none";
+                    document
+                        .getElementById("student-data-container")
+                        .classList.add("hidden");
+                    document.getElementById(
+                        "student-data-container",
+                    ).style.display = "none";
 
-                        document
-                            .getElementById("error-page")
-                            .classList.remove("hidden");
-                        document.getElementById("error-page").style.display =
-                            "flex";
-                    }
-                </script>
+                    document
+                        .getElementById("error-page")
+                        .classList.remove("hidden");
+                    document.getElementById("error-page").style.display =
+                        "flex";
+                }
+            </script>
+        </div>
+        <!-- Welcome section -->
+        <div id="welcome-section">
+            <h1>Welcome to RFID</h1>
+            <p>
+                Please scan your RFID card to view your student information.
+            </p>
+            <i class="scan-icon fas fa-qrcode"></i>
+        </div>
+        <!-- Error page for 404 not found -->
+        <div id="error-page" class="error-container hidden">
+            <div class="error-code">404</div>
+            <div class="error-message">Student Not Found</div>
+            <div class="error-details">
+                The student ID you're looking for doesn't exist in our
+                database.
             </div>
-            <!-- Welcome section -->
-            <div id="welcome-section">
-                <h1>Welcome to RFID</h1>
-                <p>
-                    Please scan your RFID card to view your student information.
-                </p>
-                <i class="scan-icon fas fa-qrcode"></i>
-            </div>
-            <!-- Error page for 404 not found -->
-            <div id="error-page" class="error-container hidden">
-                <div class="error-code">404</div>
-                <div class="error-message">Student Not Found</div>
-                <div class="error-details">
-                    The student ID you're looking for doesn't exist in our
-                    database.
-                </div>
-            </div>
+        </div>
 
-            <!-- Main student data display area - completely restructured -->
-            <div id="student-data-container" class="hidden">
-                <!-- Student profile section -->
-                <div id="student-info" class="profile-section">
-                    <div class="profile">
-                        <div class="summary-header">Student Information</div>
-                        <div class="summary-content">
-                            <div class="profile-header">
-                                <img
-                                    src="/ui/static/images/profile-placeholder.png"
-                                    alt="Profile Picture"
-                                />
-                                <div class="profile-info">
-                                    <h3 id="student-name">
-                                        {{if .Student}}{{.Student.FirstName}}
-                                        {{.Student.LastName}}{{end}}
-                                    </h3>
-                                    <h5 id="student-year">
-                                        {{if .Student}}{{.YearLevel}}
-                                        Year{{end}}
-                                    </h5>
-                                    <h5 id="student-program">
-                                        {{if
-                                        .Student}}{{.Student.Program}}{{end}}
-                                    </h5>
-                                </div>
-                            </div>
-                            <div class="student-details">
-                                <table class="info-table">
-                                    <tr>
-                                        <th colspan="2">
-                                            Personal Information
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th>Student Number</th>
-                                        <td id="student-id">
-                                            {{if
-                                            .Student}}{{.Student.StudentID}}{{end}}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Birthday</th>
-                                        <td>01-01-2025</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Contact Number</th>
-                                        <td>09913445768</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email</th>
-                                        <td>tomatoma@gmail.com</td>
-                                    </tr>
-                                </table>
-
-                                <table
-                                    class="info-table"
-                                    style="margin-top: 15px"
-                                >
-                                    <tr>
-                                        <th colspan="2">
-                                            Academic Information
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th>Program</th>
-                                        <td id="student-program-details">
-                                            {{if
-                                            .Student}}{{.Student.Program}}{{end}}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Year Level</th>
-                                        <td id="student-year-details">
-                                            {{if .Student}}{{.YearLevel}}
-                                            Year{{end}}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Block</th>
-                                        <td>CS-22A</td>
-                                    </tr>
-                                </table>
-
-                                <table
-                                    class="info-table"
-                                    style="margin-top: 15px"
-                                >
-                                    <tr>
-                                        <th colspan="2">System Access</th>
-                                    </tr>
-                                    <tr>
-                                        <th>Last Access</th>
-                                        <td>2024-03-19 14:30:45</td>
-                                    </tr>
-                                    <tr>
-                                        <th>First Access</th>
-                                        <td>2024-01-15 08:15:22</td>
-                                    </tr>
-                                </table>
+        <!-- Main student data display area - completely restructured -->
+        <div id="student-data-container" class="hidden">
+            <!-- Student profile section -->
+            <div id="student-info" class="profile-section">
+                <div class="profile">
+                    <div class="summary-header">Student Information</div>
+                    <div class="summary-content">
+                        <div class="profile-header">
+                            <img src="/ui/static/images/profile-placeholder.png" alt="Profile Picture" />
+                            <div class="profile-info">
+                                <h3 id="student-name">
+                                    {{if .Student}}{{.Student.FirstName}}
+                                    {{.Student.LastName}}{{end}}
+                                </h3>
+                                <h5 id="student-year">
+                                    {{if .Student}}{{.YearLevel}}
+                                    Year{{end}}
+                                </h5>
+                                <h5 id="student-program">
+                                    {{if
+                                    .Student}}{{.Student.Program}}{{end}}
+                                </h5>
                             </div>
                         </div>
-                    </div>
-                </div>
+                        <div class="student-details">
+                            <table class="info-table">
+                                <tr>
+                                    <th colspan="2">
+                                        Personal Information
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>Student Number</th>
+                                    <td id="student-id">
+                                        {{if
+                                        .Student}}{{.Student.StudentID}}{{end}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Birthday</th>
+                                    <td>01-01-2025</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Number</th>
+                                    <td>09913445768</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>tomatoma@gmail.com</td>
+                                </tr>
+                            </table>
 
-                <!-- Grades and Bills container for the right column -->
-                <div id="grades-bills-container">
-                    <!-- Grades section -->
-                    <div
-                        id="grades-section"
-                        class="summary full-width summary-grades"
-                    >
-                        <div class="summary-header">Summary of Grades</div>
-                        <div class="summary-content">
-                            <table class="grades-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 40%">
-                                            Academic Year
-                                        </th>
-                                        <th style="width: 30%">
-                                            First Semester
-                                        </th>
-                                        <th style="width: 30%">
-                                            Second Semester
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="year-header">First Year</td>
-                                        <td>1.75</td>
-                                        <td>2.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="year-header">Second Year</td>
-                                        <td>2.25</td>
-                                        <td>1.50</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="year-header">Third Year</td>
-                                        <td>1.50</td>
-                                        <td>1.25</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="year-header">Fourth Year</td>
-                                        <td>1.25</td>
-                                        <td>1.00</td>
-                                    </tr>
-                                </tbody>
+                            <table class="info-table" style="margin-top: 15px">
+                                <tr>
+                                    <th colspan="2">
+                                        Academic Information
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>Program</th>
+                                    <td id="student-program-details">
+                                        {{if
+                                        .Student}}{{.Student.Program}}{{end}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Year Level</th>
+                                    <td id="student-year-details">
+                                        {{if .Student}}{{.YearLevel}}
+                                        Year{{end}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Block</th>
+                                    <td>CS-22A</td>
+                                </tr>
+                            </table>
+
+                            <table class="info-table" style="margin-top: 15px">
+                                <tr>
+                                    <th colspan="2">System Access</th>
+                                </tr>
+                                <tr>
+                                    <th>Last Access</th>
+                                    <td>2024-03-19 14:30:45</td>
+                                </tr>
+                                <tr>
+                                    <th>First Access</th>
+                                    <td>2024-01-15 08:15:22</td>
+                                </tr>
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Bills section -->
-                    <div
-                        id="bills-section"
-                        class="summary full-width summary-bills"
-                    >
-                        <div class="summary-header">Summary of Bills</div>
-                        <div class="summary-content">
-                            <div class="bill-summary">
-                                <div class="bill-total">
+            <!-- Grades and Bills container for the right column -->
+            <div id="grades-bills-container">
+                <!-- Grades section -->
+                <div id="grades-section" class="summary full-width summary-grades">
+                    <div class="summary-header">Summary of Grades</div>
+                    <div class="summary-content">
+                        <table class="grades-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">
+                                        Academic Year
+                                    </th>
+                                    <th style="width: 30%">
+                                        First Semester
+                                    </th>
+                                    <th style="width: 30%">
+                                        Second Semester
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="year-header">First Year</td>
+                                    <td>1.75</td>
+                                    <td>2.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="year-header">Second Year</td>
+                                    <td>2.25</td>
+                                    <td>1.50</td>
+                                </tr>
+                                <tr>
+                                    <td class="year-header">Third Year</td>
+                                    <td>1.50</td>
+                                    <td>1.25</td>
+                                </tr>
+                                <tr>
+                                    <td class="year-header">Fourth Year</td>
+                                    <td>1.25</td>
+                                    <td>1.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bills section -->
+                <div id="bills-section" class="summary full-width summary-bills">
+                    <div class="summary-header">Summary of Bills</div>
+                    <div class="summary-content">
+                        <div class="bill-summary">
+                            <div class="bill-total">
+                                <div class="bill-label">
+                                    Total Tuition & Misc. Fees
+                                </div>
+                                <div class="bill-amount">P25000.00</div>
+                            </div>
+
+                            <div class="bill-status">
+                                <div class="status-item">
                                     <div class="bill-label">
-                                        Total Tuition & Misc. Fees
+                                        Initial Payment
                                     </div>
-                                    <div class="bill-amount">P25000.00</div>
-                                </div>
-
-                                <div class="bill-status">
-                                    <div class="status-item">
-                                        <div class="bill-label">
-                                            Initial Payment
-                                        </div>
-                                        <div class="status-amount">
-                                            P5000.00 (Paid)
-                                        </div>
-                                    </div>
-                                    <div class="status-item">
-                                        <div class="bill-label">
-                                            Remaining Balance
-                                        </div>
-                                        <div class="status-amount">
-                                            P20000.00
-                                        </div>
+                                    <div class="status-amount">
+                                        P5000.00 (Paid)
                                     </div>
                                 </div>
+                                <div class="status-item">
+                                    <div class="bill-label">
+                                        Remaining Balance
+                                    </div>
+                                    <div class="status-amount">
+                                        P20000.00
+                                    </div>
+                                </div>
+                            </div>
 
-                                <div class="bill-label">Payment Per Exam</div>
-                                <div class="payment-schedule">
-                                    <div class="payment-item">
-                                        <div class="payment-title">Prelim</div>
-                                        <div class="payment-amount">
-                                            P5000.00
-                                        </div>
-                                        <div class="payment-date">
-                                            Exam: February 17
-                                        </div>
+                            <div class="bill-label">Payment Per Exam</div>
+                            <div class="payment-schedule">
+                                <div class="payment-item">
+                                    <div class="payment-title">Prelim</div>
+                                    <div class="payment-amount">
+                                        P5000.00
                                     </div>
-                                    <div class="payment-item">
-                                        <div class="payment-title">Midterm</div>
-                                        <div class="payment-amount">
-                                            P5000.00
-                                        </div>
-                                        <div class="payment-date">
-                                            Exam: March 17
-                                        </div>
+                                    <div class="payment-date">
+                                        Exam: February 17
                                     </div>
-                                    <div class="payment-item">
-                                        <div class="payment-title">
-                                            Pre-Finals
-                                        </div>
-                                        <div class="payment-amount">
-                                            P5000.00
-                                        </div>
-                                        <div class="payment-date">
-                                            Exam: April 17
-                                        </div>
+                                </div>
+                                <div class="payment-item">
+                                    <div class="payment-title">Midterm</div>
+                                    <div class="payment-amount">
+                                        P5000.00
                                     </div>
-                                    <div class="payment-item">
-                                        <div class="payment-title">Finals</div>
-                                        <div class="payment-amount">
-                                            P5000.00
-                                        </div>
-                                        <div class="payment-date">
-                                            Exam: May 17
-                                        </div>
+                                    <div class="payment-date">
+                                        Exam: March 17
+                                    </div>
+                                </div>
+                                <div class="payment-item">
+                                    <div class="payment-title">
+                                        Pre-Finals
+                                    </div>
+                                    <div class="payment-amount">
+                                        P5000.00
+                                    </div>
+                                    <div class="payment-date">
+                                        Exam: April 17
+                                    </div>
+                                </div>
+                                <div class="payment-item">
+                                    <div class="payment-title">Finals</div>
+                                    <div class="payment-amount">
+                                        P5000.00
+                                    </div>
+                                    <div class="payment-date">
+                                        Exam: May 17
                                     </div>
                                 </div>
                             </div>
@@ -721,5 +695,7 @@
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>
