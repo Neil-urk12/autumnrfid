@@ -1,3 +1,5 @@
 .env
 /tmp/build-errors.log
 /tmp/main
+.air.toml
+/tmp/main.exe
