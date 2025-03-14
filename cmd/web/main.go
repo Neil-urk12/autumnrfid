@@ -76,6 +76,7 @@ func main() {
 
 	// Routes
 	app.Get("/", appHandler.HandleGetIndex)
+	app.Get("/grades", appHandler.HandleGrades)
 
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
