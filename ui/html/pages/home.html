@@ -125,10 +125,8 @@
     </div>
 
     <main class="main">
-        <div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message"
-            hx-target=".container">
-
-            <div class="profile">
+        <div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message" hx-target=".container">
+            <div  class="profile">
                 <div class="summary-header">Student Information</div>
                 <div class="summary-content">
                     <div class="profile-header">
@@ -307,9 +305,6 @@
     </main>
 
     <script type="text/javascript">
-        // function goTo(url) {
-        //     window.location.href = url;
-        // }
         // Create and manage our own EventSource for maximum control
         let eventSource = null;
 
