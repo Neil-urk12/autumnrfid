@@ -78,9 +78,9 @@
 
 <body>
     <div class="navbar">
-        <button onclick="goTo('/ui/html/pages/home.html')" class="rfid">RFID</button>
-        <button onclick="goTo('/ui/html/pages/grades.html')" class="rfid">Grades</button>
-        <button onclick="goTo('/ui/html/pages/bills.html')" class="rfid">Bills</button>
+        <button hx-get="/" class="rfid">RFID</button>
+        <button hx-get="/grades/{grade}" class="rfid">Grades</button>
+        <button hx-get="/bills"  class="rfid">Bills</button>
     </div>
 
     <div id="welcome-section">
@@ -307,9 +307,9 @@
     </main>
 
     <script type="text/javascript">
-        function goTo(url) {
-            window.location.href = url;
-        }
+        // function goTo(url) {
+        //     window.location.href = url;
+        // }
         // Create and manage our own EventSource for maximum control
         let eventSource = null;
 
