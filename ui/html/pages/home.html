@@ -79,7 +79,7 @@
 <body>
     <div class="navbar">
         <a href="/ui/html/pages/home.html" class="rfid">RFID</a>
-        <a href="/ui/html/pages/grades.html" class="rfid">Grades</a>
+        <a hx-get="/grades" hx-target=".container" class="rfid">Grades</a>
         <a href="/ui/html/pages/bills.html" class="rfid">Bills</a>
     </div>
 
@@ -125,9 +125,10 @@
     </div>
 
     <main class="main">
-        <div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message" hx-target=".container">
+        <div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message"
+            hx-target=".container">
 
-            <div  class="profile">
+            <div class="profile">
                 <div class="summary-header">Student Information</div>
                 <div class="summary-content">
                     <div class="profile-header">
@@ -163,7 +164,7 @@
                             </tr>
                             <tr>
                                 <th>Birthday</th>
-                                <td>01-01-2025</td>
+                                <td>{{if .Student}}{{.Birthday}}{{end}}</td>
                             </tr>
                             <tr>
                                 <th>Contact Number</th>
