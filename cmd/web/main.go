@@ -28,7 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-
 	// Test the database connection
 	if err := testDBConnection(db.DB); err != nil {
 		log.Fatalf("Database connection test failed: %v", err)
@@ -45,7 +44,9 @@ func main() {
 	}()
 	// defer db.Close()
 
-	viewsEngine := html.New("./ui/html/pages", ".html")
+	viewsEngine := html.New("./ui/html", ".html")
+	viewsEngine.Reload(true)
+	viewsEngine.Debug(true)
 
 	app := fiber.New(fiber.Config{
 		Views:                 viewsEngine,

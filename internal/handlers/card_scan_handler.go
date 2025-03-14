@@ -70,7 +70,8 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	if student == nil {
 		// Send a not-found event to all SSE clients
 		GetBroadcaster().Broadcast("not-found", fmt.Sprintf(`{"rfid": "%s"}`, rfid))
-		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
+		// return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
+		return ctx.Render("error_page", fiber.Map{})
 	}
 
 	// Format student data as clean JSON for SSE - using compact format to avoid whitespace issues

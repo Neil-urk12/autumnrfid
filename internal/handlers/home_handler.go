@@ -15,5 +15,5 @@ func NewHandler(db *repositories.DatabaseClient) *AppHandler {
 }
 
 func (h *AppHandler) HandleGetIndex(ctx *fiber.Ctx) error {
-	return ctx.Render("home", fiber.Map{})
+	return ctx.Render("pages/home", fiber.Map{})
 }
