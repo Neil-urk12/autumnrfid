@@ -78,9 +78,9 @@
 
 <body>
     <div class="navbar">
-        <a href="/ui/html/pages/home.html" class="rfid">RFID</a>
-        <button hx-get="/grades" hx-target=".container" hx-swap="innerHTML" class="rfid">Grades</button>
-        <a href="/ui/html/pages/bills.html" class="rfid">Bills</a>
+        <button hx-get="/" class="rfid">RFID</button>
+        <button hx-get="/grades/{grade}" class="rfid">Grades</button>
+        <button hx-get="/bills"  class="rfid">Bills</button>
     </div>
 
     <div id="welcome-section">
