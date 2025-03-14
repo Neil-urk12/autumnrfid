@@ -78,9 +78,9 @@
 
 <body>
     <div class="navbar">
-        <a href="/ui/html/pages/home.html" class="rfid">RFID</a>
-        <a href="/ui/html/pages/grades.html" class="rfid">Grades</a>
-        <a href="/ui/html/pages/bills.html" class="rfid">Bills</a>
+        <button hx-get="/" class="rfid">RFID</button>
+        <button hx-get="/grades/{grade}" class="rfid">Grades</button>
+        <button hx-get="/bills"  class="rfid">Bills</button>
     </div>
 
     <div id="welcome-section">
@@ -126,7 +126,6 @@
 
     <main class="main">
         <div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message" hx-target=".container">
-
             <div  class="profile">
                 <div class="summary-header">Student Information</div>
                 <div class="summary-content">

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <title>RFID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/ui/static/grades.css">
+</head>
+
+<body>
+
+    <main>
+        <div class="container">
+            <div class="button-section">
+                <div class="button-left">
+                    <button class="sidebar-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <button class="semester-btn active">First Semester</button>
+                    <button class="semester-btn">Second Semester</button>
+                </div>
+                <div class="semester-info">
+                    <span>First Year Grades</span>
+                    <span>SY 2023-2024</span>
+                </div>
+            </div>
+
+            <div class="grades-section">
+                <div class="grades-content">
+                    <table class="grades-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Subject</th>
+                                <th>Prelim</th>
+                                <th>Midterm</th>
+                                <th>Pre-Finals</th>
+                                <th>Finals</th>
+                                <th>Final Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CS101</td>
+                                <td class="subject-name">Computer Programming 1</td>
+                                <td>1.25</td>
+                                <td>1.50</td>
+                                <td>1.25</td>
+                                <td>1.00</td>
+                                <td class="final-grade">1.25</td>
+                            </tr>
+                            <tr>
+                                <td>MATH101</td>
+                                <td class="subject-name">Discrete Mathematics</td>
+                                <td>1.75</td>
+                                <td>1.50</td>
+                                <td>1.50</td>
+                                <td>1.25</td>
+                                <td class="final-grade">1.50</td>
+                            </tr>
+                            <tr>
+                                <td>CS102</td>
+                                <td class="subject-name">Introduction to Computing</td>
+                                <td>1.50</td>
+                                <td>1.25</td>
+                                <td>1.00</td>
+                                <td>1.25</td>
+                                <td class="final-grade">1.25</td>
+                            </tr>
+                            <tr>
+                                <td>MATH102</td>
+                                <td class="subject-name">Mathematics in the Modern World</td>
+                                <td>2.00</td>
+                                <td>1.75</td>
+                                <td>1.50</td>
+                                <td>1.50</td>
+                                <td class="final-grade">1.75</td>
+                            </tr>
+                            <tr>
+                                <td>ENG101</td>
+                                <td class="subject-name">Purposive Communication</td>
+                                <td>1.50</td>
+                                <td>1.75</td>
+                                <td>1.25</td>
+                                <td>1.50</td>
+                                <td class="final-grade">1.50</td>
+                            </tr>
+                            <tr>
+                                <td>PSY101</td>
+                                <td class="subject-name">Understanding the Self</td>
+                                <td>1.75</td>
+                                <td>1.50</td>
+                                <td>1.50</td>
+                                <td>1.25</td>
+                                <td class="final-grade">1.50</td>
+                            </tr>
+                            <tr>
+                                <td>PE101</td>
+                                <td class="subject-name">Physical Education 1</td>
+                                <td>1.25</td>
+                                <td>1.00</td>
+                                <td>1.25</td>
+                                <td>1.00</td>
+                                <td class="final-grade">1.25</td>
+                            </tr>
+                            <tr>
+                                <td>NSTP101</td>
+                                <td class="subject-name">National Service Training Program 1</td>
+                                <td>1.50</td>
+                                <td>1.25</td>
+                                <td>1.00</td>
+                                <td>1.25</td>
+                                <td class="final-grade">1.25</td>
+                            </tr>
+                            <tr class="gwa-row">
+                                <td colspan="6" style="text-align: right;">General Weighted Average (GWA):</td>
+                                <td style="text-align: center;">1.40</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pagination">
+                        <button class="page-btn" onclick="changePage(1)" style="padding: 0 30px;">Previous</button>
+                        <button class="page-btn active" style="width: 40px;">1</button>
+                        <button class="page-btn" style="width: 40px;">2</button>
+                        <button class="page-btn" onclick="changePage(2)" style="padding: 0 30px;">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">Year and Semester</div>
+                <div class="year-section">
+                    <button class="year-btn active" data-year="1">
+                        First Year
+                        <span class="icon">▼</span>
+                    </button>
+                    <div class="semester-container show" data-year="1">
+                        <button class="semester-btn-sidebar active" data-semester="first">First Semester</button>
+                        <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                    </div>
+
+                    <button class="year-btn" data-year="2">
+                        Second Year
+                        <span class="icon">▼</span>
+                    </button>
+                    <div class="semester-container" data-year="2">
+                        <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
+                        <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                    </div>
+
+                    <button class="year-btn" data-year="3">
+                        Third Year
+                        <span class="icon">▼</span>
+                    </button>
+                    <div class="semester-container" data-year="3">
+                        <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
+                        <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                    </div>
+
+                    <button class="year-btn" data-year="4">
+                        Fourth Year
+                        <span class="icon">▼</span>
+                    </button>
+                    <div class="semester-container" data-year="4">
+                        <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
+                        <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const semesterBtns = document.querySelectorAll('.semester-btn');
+
+        semesterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                semesterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        const itemsPerPage = 8;
+        let currentPage = 1;
+
+        function showPage(pageNumber) {
+            const rows = document.querySelectorAll('.grades-table tbody tr:not(.gwa-row)');
+            const start = (pageNumber - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            rows.forEach((row, index) => {
+                if (index >= start && index < end) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updatePaginationButtons(pageNumber, rows);
+        }
+
+        function updatePaginationButtons(pageNumber, rows) {
+            const prevButton = document.querySelector('.page-btn[onclick="changePage(1)"]');
+            const nextButton = document.querySelector('.page-btn[onclick="changePage(2)"]');
+            const pageButtons = document.querySelectorAll('.page-btn:not([onclick])');
+            const page2Button = pageButtons[1];
+
+            pageButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.textContent) === pageNumber) {
+                    btn.classList.add('active');
+                }
+            });
+
+            prevButton.disabled = pageNumber === 1;
+            if (pageNumber === 2) {
+                page2Button.disabled = false;
+            } else {
+                page2Button.disabled = rows.length <= itemsPerPage;
+            }
+
+            nextButton.disabled = (pageNumber === 1 && rows.length <= itemsPerPage) ||
+                (pageNumber === 2);
+        }
+
+        function changePage(page) {
+            const rows = document.querySelectorAll('.grades-table tbody tr:not(.gwa-row)');
+
+            if (page >= 1 && page <= 2) {
+                if (page === 2 && rows.length <= itemsPerPage) {
+                    return;
+                }
+                currentPage = page;
+                showPage(currentPage);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebarBtn = document.querySelector(".sidebar-btn");
+            const sidebar = document.getElementById("sidebar");
+
+            sidebarBtn.addEventListener("click", function () {
+                sidebar.classList.toggle("active");
+            });
+
+            const yearBtns = document.querySelectorAll('.year-btn');
+            yearBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const year = this.dataset.year;
+                    const semesterContainer = document.querySelector(`.semester-container[data-year="${year}"]`);
+                    const wasActive = this.classList.contains('active');
+
+                    yearBtns.forEach(otherBtn => {
+                        otherBtn.classList.remove('active');
+                        const otherContainer = document.querySelector(`.semester-container[data-year="${otherBtn.dataset.year}"]`);
+                        otherContainer.classList.remove('show');
+                    });
+
+                    if (!wasActive) {
+                        this.classList.add('active');
+                        semesterContainer.classList.add('show');
+                    }
+                });
+            });
+
+            const semesterBtns = document.querySelectorAll('.semester-btn-sidebar');
+            semesterBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const yearContainer = this.closest('.semester-container');
+                    yearContainer.querySelectorAll('.semester-btn-sidebar').forEach(otherBtn => {
+                        otherBtn.classList.remove('active');
+                    });
+
+                    this.classList.add('active');
+
+                    const yearBtn = yearContainer.previousElementSibling;
+                    const yearText = yearBtn.textContent.trim().split('\n')[0];
+                    const semesterText = this.textContent.trim();
+                    const semesterInfo = document.querySelector('.semester-info');
+                    semesterInfo.innerHTML = `
+                        <span>${yearText} Grades</span>
+                        <span>SY 2023-2024</span>
+                    `;
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            showPage(1);
+        });
+    </script>
+</body>
+
+</html>
