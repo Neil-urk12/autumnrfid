@@ -45,8 +45,8 @@ func main() {
 	// defer db.Close()
 
 	viewsEngine := html.New("./ui/html", ".html")
-	viewsEngine.Reload(true)
-	viewsEngine.Debug(true)
+	viewsEngine.Reload(true) // Enable template reloading for development
+	viewsEngine.Debug(true)  // Enable debug mode for better error messages
 
 	app := fiber.New(fiber.Config{
 		Views:                 viewsEngine,
@@ -78,6 +78,8 @@ func main() {
 	// Routes
 	app.Get("/", appHandler.HandleGetIndex)
 	app.Get("/grades", appHandler.HandleGrades)
+	app.Get("/test-grades", appHandler.HandleTestGrades)
+	app.Get("/error", appHandler.HandleError)
 
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
