@@ -311,6 +311,69 @@ th {
     font-weight: bold;
 }
 
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 3rem;
+}
+
+.error-code {
+    font-size: 8rem;
+    font-weight: bold;
+    color: #d32f2f;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.error-details {
+    font-size: 1rem;
+    color: #666;
+    text-align: center;
+}
+
+/* Welcome section styling */
+#welcome-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: calc(100vh - 130px);
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+#welcome-section h1 {
+    color: var(--dark-blue);
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+}
+
+#welcome-section p {
+    color: #666;
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.scan-icon {
+    font-size: 5rem;
+    color: var(--aqua);
+    margin-bottom: 2rem;
+}
+
 @media (max-width: 1440px) {
     .profile-info h3 {
         font-size: 1.4rem;
