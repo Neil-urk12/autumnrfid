@@ -91,6 +91,12 @@ func main() {
 		return c.SendString("Fiber Web Server is running")
 	})
 
+	app.Get("/bills", func(c *fiber.Ctx) error {
+		return c.Render("partials/bills", fiber.Map{
+			"FragmentContent": "This is the updated content from the fragment!",
+		})
+	})
+
 	log.Fatal(app.Listen(":8080"))
 }
 
