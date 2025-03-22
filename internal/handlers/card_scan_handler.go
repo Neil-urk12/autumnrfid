@@ -201,7 +201,9 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 	fmt.Printf("SSE connection established from %s\n", c.IP())
 
 	// Send initial connection message
+	initMessage := "event: connected\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\", \"status\": \"connected\"}\n\n"
 	// initMessage := "event: connected\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\", \"status\": \"connected\"}\n\n"
+
 
 	// Get broadcaster instance
 	broadcaster := GetBroadcaster()
@@ -221,6 +223,16 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 		defer ticker.Stop()
 
 		// Send initial message first
+		if fw, err := w.Write([]byte(initMessage)); err != nil || fw == 0 {
+			fmt.Printf("Error sending initial SSE message: %v\n", err)
+			return
+		}
+		if err := w.Flush(); err != nil {
+			fmt.Printf("Error flushing initial SSE message: %v\n", err)
+			return
+		}
+
+		fmt.Println("Initial SSE message sent successfully")
 		// if fw, err := w.Write([]byte(initMessage)); err != nil || fw == 0 {
 		// 	fmt.Printf("Error sending initial SSE message: %v\n", err)
 		// 	return
@@ -237,6 +249,20 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 
 		for {
 			select {
+			// case <-ticker.C:
+			// 	// Send heartbeat
+			// 	pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
+			// 	fw, err := w.Write([]byte(pingMsg))
+			// 	if err != nil || fw == 0 {
+			// 		fmt.Printf("Error sending SSE ping: %v\n", err)
+			// 		close(done)
+			// 		return
+			// 	}
+			// 	if err = w.Flush(); err != nil {
+			// 		fmt.Printf("Error flushing SSE ping: %v\n", err)
+			// 		close(done)
+			// 		return
+			// 	}
 			// case msg, ok := <-client.channel:
 			// 	if !ok {
 			// 		return
