@@ -10,77 +10,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <title>RFID</title>
     <link rel="stylesheet" href="/ui/static/styles.css" />
-    <style>
-        .error-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 3rem;
-        }
-
-        .error-code {
-            font-size: 8rem;
-            font-weight: bold;
-            color: #d32f2f;
-            margin-bottom: 1rem;
-        }
-
-        .error-message {
-            font-size: 1.5rem;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .error-details {
-            font-size: 1rem;
-            color: #666;
-            text-align: center;
-        }
-
-        /* Welcome section styling */
-        #welcome-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            height: calc(100vh - 130px);
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin: 20px auto;
-        }
-
-        #welcome-section h1 {
-            color: var(--dark-blue);
-            margin-bottom: 1rem;
-            font-size: 2.5rem;
-        }
-
-        #welcome-section p {
-            color: #666;
-            font-size: 1.2rem;
-            max-width: 800px;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .scan-icon {
-            font-size: 5rem;
-            color: var(--aqua);
-            margin-bottom: 2rem;
-        }
-    </style>
 </head>
 
 <body>
     <div class="navbar">
         <button hx-get="/" class="rfid">RFID</button>
-        <button hx-get="/grades/{grade}" class="rfid">Grades</button>
-        <button hx-get="/bills"  class="rfid">Bills</button>
+        <button hx-get="/test-grades" hx-swap="innerHTML" hx-target="#student-data-container"
+            class="rfid">Grades</button>
+        <button hx-get="/bills" class="rfid">Bills</button>
     </div>
 
     <div id="welcome-section">
@@ -91,14 +28,14 @@
         <i class="scan-icon fas fa-qrcode"></i>
     </div>
     <!-- Error page for 404 not found -->
-    <div id="error-page" class="error-container hidden">
+    <!-- <div id="error-page" class="error-container hidden">
         <div class="error-code">404</div>
         <div class="error-message">Student Not Found</div>
         <div class="error-details">
             The student ID you're looking for doesn't exist in our
             database.
         </div>
-    </div>
+    </div> -->
 
     <div style="position: fixed; top: 10px; right: 10px; z-index: 9999">
         <button id="test-update-btn" onclick="testStudentUpdate()" style="
@@ -111,7 +48,7 @@
                 ">
             Test Update UI
         </button>
-        <button id="test-404-btn" onclick="testNotFound()" style="
+        <!-- <button id="test-404-btn" hx-get="/error" hx-swap="innerHTML" hx-target="#student-data-container" style="
                     background: #dc3545;
                     color: white;
                     border: none;
@@ -121,12 +58,14 @@
                     cursor: pointer;
                 ">
             Test 404
-        </button>
+        </button> -->
     </div>
 
     <main class="main">
-        <div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message" hx-target=".container">
-            <div  class="profile">
+        <div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message"
+            hx-target=".container">
+
+            <div class="profile">
                 <div class="summary-header">Student Information</div>
                 <div class="summary-content">
                     <div class="profile-header">
@@ -162,7 +101,7 @@
                             </tr>
                             <tr>
                                 <th>Birthday</th>
-                                <td>01-01-2025</td>
+                                <td>{{if .Student}}{{.Birthday}}{{end}}</td>
                             </tr>
                             <tr>
                                 <th>Contact Number</th>
@@ -361,12 +300,12 @@
                                 )
                                 .classList.contains("hidden"),
                         );
-                        console.log(
-                            "error-page hidden?",
-                            document
-                                .getElementById("error-page")
-                                .classList.contains("hidden"),
-                        );
+                        // console.log(
+                        //     "error-page hidden?",
+                        //     document
+                        //         .getElementById("error-page")
+                        //         .classList.contains("hidden"),
+                        // );
 
                         // Force hide welcome section with both approaches
                         const welcomeSection =
@@ -387,9 +326,9 @@
                         studentDataContainer.style.display = "grid";
 
                         // Force hide error page
-                        document
-                            .getElementById("error-page")
-                            .classList.add("hidden");
+                        // document
+                        //     .getElementById("error-page")
+                        //     .classList.add("hidden");
 
                         console.log("AFTER VISIBILITY CHANGE:");
                         console.log(
@@ -452,10 +391,7 @@
                 studentDataContainer.style.display = "none";
 
                 // Force show error page with both approaches
-                const errorPage =
-                    document.getElementById("error-page");
-                errorPage.classList.remove("hidden");
-                errorPage.style.display = "flex";
+
 
                 console.log("UI updated to show error page");
             });
@@ -484,8 +420,8 @@
             document.getElementById(
                 "student-data-container",
             ).style.display = "none";
-            document.getElementById("error-page").style.display =
-                "none";
+            // document.getElementById("error-page").style.display =
+            //     "none";
 
             setupSSE();
         };
@@ -593,11 +529,11 @@
                 "student-data-container",
             ).style.display = "grid";
 
-            document
-                .getElementById("error-page")
-                .classList.add("hidden");
-            document.getElementById("error-page").style.display =
-                "none";
+            // document
+            //     .getElementById("error-page")
+            //     .classList.add("hidden");
+            // document.getElementById("error-page").style.display =
+            //     "none";
         }
 
         // Test function for not found
@@ -617,11 +553,11 @@
                 "student-data-container",
             ).style.display = "none";
 
-            document
-                .getElementById("error-page")
-                .classList.remove("hidden");
-            document.getElementById("error-page").style.display =
-                "flex";
+            // document
+            //     .getElementById("error-page")
+            //     .classList.remove("hidden");
+            // document.getElementById("error-page").style.display =
+            //     "flex";
         }
     </script>
 </body>

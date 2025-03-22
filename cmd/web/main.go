@@ -28,7 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-
 	// Test the database connection
 	if err := testDBConnection(db.DB); err != nil {
 		log.Fatalf("Database connection test failed: %v", err)
@@ -45,7 +44,9 @@ func main() {
 	}()
 	// defer db.Close()
 
-	viewsEngine := html.New("./ui/html/pages", ".html")
+	viewsEngine := html.New("./ui/html", ".html")
+	viewsEngine.Reload(true) // Enable template reloading for development
+	viewsEngine.Debug(true)  // Enable debug mode for better error messages
 
 	app := fiber.New(fiber.Config{
 		Views:                 viewsEngine,
@@ -76,6 +77,9 @@ func main() {
 
 	// Routes
 	app.Get("/", appHandler.HandleGetIndex)
+	app.Get("/grades", appHandler.HandleGrades)
+	app.Get("/test-grades", appHandler.HandleTestGrades)
+	app.Get("/error", appHandler.HandleError)
 
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
