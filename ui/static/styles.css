@@ -40,7 +40,8 @@ body {
     background: var(--medium-blue);
 }
 
-.container {
+/*START OF HOME PAGE STYLES*/
+.container-home {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 20px;
@@ -277,31 +278,31 @@ th {
     border-top: 1px solid var(--medium-blue);
 }
 
-.grades-table {
+.grades-table-home {
     width: 100%;
     border-collapse: collapse;
 }
 
-.grades-table th,
-.grades-table td {
+.grades-table-home th,
+.grades-table-home td {
     padding: 8px 10px;
     text-align: left;
     border: 1px solid var(--medium-blue);
     font-size: 15px;
 }
 
-.grades-table th {
+.grades-table-home th {
     background: var(--light-blue);
     color: var(--dark-blue);
     font-weight: bold;
 }
 
-.grades-table td {
+.grades-table-home td {
     background: var(--white);
 }
 
-.grades-table td:not(.year-header),
-.grades-table th:not(:first-child) {
+.grades-table-home td:not(.year-header),
+.grades-table-home th:not(:first-child) {
     text-align: center;
 }
 
@@ -384,8 +385,8 @@ th {
 
     }
 
-    .grades-table th,
-    .grades-table td {
+    .grades-table-home th,
+    .grades-table-home td {
         padding: 7px 8px;
         font-size: 15px;
     }
@@ -415,7 +416,7 @@ th {
 }
 
 @media (max-width: 1024px) {
-    .container {
+    .container-home {
         grid-template-columns: 1fr 1.4fr;
         gap: 20px;
     }
@@ -429,8 +430,8 @@ th {
         height: 65px;
     }
 
-    .grades-table th,
-    .grades-table td {
+    .grades-table-home th,
+    .grades-table-home td {
         padding: 7px 8px;
         font-size: 13.2px;
     }
@@ -482,3 +483,563 @@ th {
         font-size: 1rem;
     }
 }
+
+/*END OF HOME PAGE STYLES*/
+
+/*START OF GRADES PAGE STYLES*/
+.container-grades {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: calc(100vh - 70 - 40);
+}
+
+.button-section {
+    background: var(--light-aqua);
+    padding: 0 0 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--medium-blue);
+}
+
+.button-left {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.semester-info {
+    background: var(--white);
+    width: 320px;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 4px;
+    font-size: 15px;
+    border: 1px solid var(--medium-blue);
+}
+
+.semester-info span:first-child {
+    color: var(--darkest-blue);
+    font-size: 1.1em;
+    margin-right: 15px;
+    padding-right: 15px;
+    border-right: 2px solid var(--medium-blue);
+}
+
+.semester-info span:last-child {
+    color: var(--dark-blue);
+}
+
+.grades-section {
+    background: var(--white);
+    border-radius: 4px;
+    border: 1px solid var(--medium-blue);
+}
+
+.grades-content {
+    padding: 20px 17px;
+    flex: 1;
+}
+
+.sidebar-btn {
+    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    width: 42px;
+    height: 42px;
+    font-size: 1.1em;
+    box-shadow: 0 2px 4px rgba(30, 84, 112, 0.1);
+}
+
+.sidebar-btn:hover {
+    background: linear-gradient(to bottom, var(--dark-blue), var(--darkest-blue));
+}
+
+.semester-btn {
+    background: var(--white);
+    color: var(--dark-blue);
+    border: 1px solid var(--medium-blue);
+    padding: 0 30px;
+    font-weight: bold;
+    height: 42px;
+    border-radius: 4px;
+    font-size: 1.05em;
+    letter-spacing: 0.3px;
+}
+
+.semester-btn.active {
+    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    color: var(--white);
+    border: none;
+}
+
+.semester-btn:hover:not(.active) {
+    background: var(--light-blue);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(30, 84, 112, 0.2);
+}
+
+.grades-table-grades {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 4px;
+    overflow: hidden;
+    border: none;
+}
+
+.grades-table-grades th,
+.grades-table-grades td {
+    padding: 11px 8px;
+    text-align: left;
+    border: 1px solid var(--medium-blue);
+    font-size: 15px;
+}
+
+.grades-table-grades th {
+    background: var(--light-blue);
+    color: var(--dark-blue);
+    padding: 15px;
+    font-size: 1em;
+    letter-spacing: 0.3px;
+    font-weight: bold;
+}
+
+.grades-table-grades th:first-child {
+    width: 12%;
+}
+
+.grades-table-grades th:nth-child(n+3) {
+    width: 11.6%;
+}
+
+.grades-table-grades th:nth-child(n+3),
+.grades-table-grades td:nth-child(n+3) {
+    text-align: center;
+}
+
+
+.subject-name {
+    background: var(--light-aqua) !important;
+    color: var(--darkest-blue) !important;
+    font-weight: bold !important;
+}
+
+.final-grade {
+    background: var(--light-aqua) !important;
+    color: var(--darkest-blue) !important;
+    font-weight: bold;
+}
+
+.gwa-row td {
+    background: var(--light-blue) !important;
+    color: var(--darkest-blue) !important;
+    font-weight: bold !important;
+    padding: 15px !important;
+}
+
+.gwa-row td:last-child {
+    text-align: center !important;
+}
+
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--medium-blue);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--light-aqua) !important;
+    color: var(--medium-blue) !important;
+    border: 1px solid var(--medium-blue) !important;
+}
+
+.page-btn:not(:disabled) {
+    opacity: 1;
+    cursor: pointer;
+    background-color: var(--white);
+    color: var(--dark-blue);
+    border: 1px solid var(--medium-blue);
+}
+
+.page-btn.active:not(:disabled) {
+    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    color: var(--white);
+    border: none;
+}
+
+
+.page-btn {
+    min-width: 42px;
+    height: 42px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: bold;
+    background: var(--white);
+    border: 1px solid var(--medium-blue);
+    color: var(--dark-blue);
+}
+
+.page-btn.active {
+    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    color: var(--white);
+    border: none;
+}
+
+.page-btn:hover:not(.active) {
+    background: var(--light-blue);
+}
+
+
+.sidebar {
+    position: absolute;
+    left: -290px;
+    top: 176.5px;
+    width: 250px;
+    height: 506px;
+    background: var(--white);
+    border: 1px solid var(--medium-blue);
+    border-radius: 4px;
+    transition: left 0.3s ease;
+    padding: 20px;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    color: var(--darkest-blue);
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--medium-blue);
+}
+
+.year-btn {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--white);
+    color: var(--darkest-blue);
+    border: 1px solid var(--medium-blue);
+    border-radius: 4px;
+    text-align: left;
+    margin-bottom: 15px;
+    font-size: 1.05em;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.year-btn:hover {
+    background: var(--light-blue);
+
+}
+
+.year-btn.active {
+    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    color: var(--white);
+    border: none;
+}
+
+.year-btn.active .icon {
+    transform: rotate(180deg);
+    color: var(--white);
+}
+
+.semester-container {
+    display: none;
+    padding: 5px 0 5px 15px;
+    margin-bottom: 10px;
+}
+
+.semester-container.show {
+    display: block;
+    margin: 0;
+    padding: 0 0 0 15px;
+}
+
+.semester-btn-sidebar {
+    width: 100%;
+    padding: 10px 15px;
+    background: var(--white);
+    color: var(--dark-blue);
+    border: 1px solid var(--medium-blue);
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 0.95em;
+    position: relative;
+}
+
+.semester-btn-sidebar.active {
+    background: var(--light-aqua);
+    color: var(--darkest-blue);
+    font-weight: bold;
+    border-left: 3px solid var(--dark-blue);
+}
+
+@media screen and (max-width: 1440px) {
+    .sidebar {
+        height: 506px;
+    }
+
+    .semester-btn {
+        padding: 0 25px;
+        font-size: 1em;
+    }
+
+    .grades-table-grades th,
+    .grades-table-grades td {
+        padding: 10px 12px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .sidebar {
+        height: 455px;
+    }
+
+    .sidebar-header {
+        font-size: 1.1rem;
+    }
+
+    .year-btn {
+        font-size: 1rem;
+    }
+
+    .semester-btn {
+        padding: 0 20px;
+        font-size: 0.95em;
+    }
+
+    .grades-table-grades th,
+    .grades-table-grades td {
+        padding: 9.8px 10px;
+        font-size: 13.2px;
+    }
+}
+
+/*END OF GRADES PAGE STYLES*/
+
+/*START OF BILLS PAGE STYLES*/
+.container-bills {
+    height: calc(100vh - 70);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 0.8fr 0.8fr 2fr;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.left-section {
+    grid-column: 1 / 3;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+}
+
+.balance-section,
+.history-section,
+.right-section {
+    background: var(--white);
+    border: 1px solid var(--medium-blue);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.section-header {
+    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    color: var(--white);
+    padding: 10px 15px;
+    font-weight: bold;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.section-content {
+    padding: 17px;
+    height: calc(100% - 50px);
+    overflow: hidden;
+}
+
+.balance-card {
+    padding: 12px;
+    background-color: var(--light-aqua);
+    border-radius: 4px;
+}
+
+.balance-details h4 {
+    margin: 15px;
+    color: var(--dark-blue);
+}
+
+.balance-title {
+    font-size: 0.9rem;
+    color: var(--dark-blue);
+}
+
+.balance-amount {
+    font-size: 1.6rem;
+    margin: 6px 0;
+    font-weight: bold;
+    color: var(--dark-blue);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 15px;
+}
+
+.history-table tr {
+    height: 15px;
+}
+
+.history-table th,
+.history-table td {
+    padding: 8px 12px;
+    border: 1px solid var(--light-blue);
+    height: 18px;
+}
+
+.history-table th {
+    background: var(--light-aqua);
+    color: var(--darkest-blue);
+    font-weight: 600;
+    text-align: left;
+
+}
+
+.payment-status {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-paid {
+    background: var(--light-aqua);
+    color: var(--darkest-blue);
+}
+
+.status-pending {
+    background: var(--light-blue);
+    color: var(--dark-blue);
+}
+
+.fee-table-container {
+    margin-bottom: 17px;
+}
+
+.fee-details {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.fee-details th,
+.fee-details td {
+    padding: 8px;
+    border: 1px solid var(--medium-blue);
+}
+
+.fee-details th {
+    background: var(--light-aqua);
+    color: var(--darkest-blue);
+    font-weight: 600;
+    text-align: left;
+    width: 70%;
+}
+
+.fee-details td {
+    text-align: right;
+    font-weight: 500;
+    background: var(--white);
+}
+
+.fee-category {
+    background: var(--medium-blue) !important;
+    color: var(--white) !important;
+    font-weight: bold !important;
+}
+
+.total-row th,
+.total-row td {
+    background: var(--light-blue) !important;
+    color: var(--darkest-blue);
+    font-weight: bold;
+}
+
+@media (max-width: 1440px) {
+    .container-bills {
+        grid-template-columns: 0.9fr 0.9fr 1.8fr;
+    }
+
+    .section-content {
+        padding: 17px;
+        height: calc(100% - 70px);
+    }
+
+    .fee-details th,
+    .fee-details td {
+        padding: 9.2px 10px;
+        font-size: 15px;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 9.2px 10px;
+        border: 1px solid var(--light-blue);
+        height: 12.5px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .container-bills {
+        grid-template-columns: 0.9fr 0.9fr 1.5fr;
+    }
+
+    .section-content {
+        padding: 15px;
+        height: calc(100% - 75px);
+    }
+
+    .balance-amount {
+        font-size: 1.4rem;
+    }
+
+    .fee-details th,
+    .fee-details td {
+        padding: 8.5px 8px;
+        font-size: 13.2px;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 8.5px 8px;
+        border: 1px solid var(--light-blue);
+        height: 7px;
+        font-size: 13.2px;
+    }
+}
+
+/*END OF BILLS PAGE STYLES*/
