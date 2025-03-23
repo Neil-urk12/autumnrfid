@@ -17,10 +17,16 @@ type Broadcaster struct {
 	mu     sync.Mutex
 }
 
+type Client struct {
+	channel chan string
+}
+
 // Global broadcaster instance
 var (
 	broadcaster *Broadcaster
 	once        sync.Once
+	clients     = make(map[*Client]bool)
+	clientsMux  sync.RWMutex
 )
 
 // GetBroadcaster returns the singleton broadcaster instance
@@ -52,6 +58,7 @@ func (b *Broadcaster) Broadcast(event string, data string) {
 }
 
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
+	// var fragmentToRender string
 	rfid := ctx.FormValue("rfid")
 	if rfid == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("RFID is required")
@@ -73,6 +80,8 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		// return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 		return ctx.Render("error_page", fiber.Map{})
 	}
+
+	// htmxInstruction := fmt.Sprintf("<div hx-get=\"/ui//fragments/%s.html\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-target=\"#student-data-container\"></div>", fragmentToRender)
 
 	// Format student data as clean JSON for SSE - using compact format to avoid whitespace issues
 	// Include dummy grades and bills data
@@ -178,11 +187,23 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 	c.Set("Connection", "keep-alive")
 	c.Set("Transfer-Encoding", "chunked")
 
+	client := &Client{
+		channel: make(chan string, 10),
+	}
+
+	clientsMux.Lock()
+	clients[client] = true
+	clientsMux.Unlock()
+
+	c.Context().SetUserValue("client", client)
+
 	// Log SSE connection
 	fmt.Printf("SSE connection established from %s\n", c.IP())
 
 	// Send initial connection message
 	initMessage := "event: connected\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\", \"status\": \"connected\"}\n\n"
+	// initMessage := "event: connected\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\", \"status\": \"connected\"}\n\n"
+
 
 	// Get broadcaster instance
 	broadcaster := GetBroadcaster()
@@ -192,6 +213,12 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 
 	// Setup cleanup when connection is closed
 	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		defer func() {
+			clientsMux.Lock()
+			delete(clients, client)
+			close(client.channel)
+			clientsMux.Unlock()
+		}()
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 
@@ -206,13 +233,22 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 		}
 
 		fmt.Println("Initial SSE message sent successfully")
+		// if fw, err := w.Write([]byte(initMessage)); err != nil || fw == 0 {
+		// 	fmt.Printf("Error sending initial SSE message: %v\n", err)
+		// 	return
+		// }
+		// if err := w.Flush(); err != nil {
+		// 	fmt.Printf("Error flushing initial SSE message: %v\n", err)
+		// 	return
+		// }
+
+		fmt.Fprintf(w, "data: {\"message\": \"Connected to SSE\"}\n\n")
+		w.Flush()
+		// fmt.Println("Initial SSE message sent successfully")
 		eventsChannel := broadcaster.events
 
 		for {
 			select {
-			case <-done:
-				fmt.Println("SSE connection closing (done channel triggered)")
-				return
 			// case <-ticker.C:
 			// 	// Send heartbeat
 			// 	pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
@@ -227,6 +263,34 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 			// 		close(done)
 			// 		return
 			// 	}
+			// case msg, ok := <-client.channel:
+			// 	if !ok {
+			// 		return
+			// 	}
+			// 	_, err := fmt.Fprintf(w, "data: %s\n\n", msg)
+			// 	if err != nil {
+			// 		return
+			// 	}
+			// 	if err := w.Flush(); err != nil {
+			// 		return
+			// 	}
+			case <-done:
+				fmt.Println("SSE connection closing (done channel triggered)")
+				return
+			case <-ticker.C:
+				// Send heartbeat
+				pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
+				fw, err := w.Write([]byte(pingMsg))
+				if err != nil || fw == 0 {
+					fmt.Printf("Error sending SSE ping: %v\n", err)
+					close(done)
+					return
+				}
+				if err = w.Flush(); err != nil {
+					fmt.Printf("Error flushing SSE ping: %v\n", err)
+					close(done)
+					return
+				}
 			case msg := <-eventsChannel:
 				// Send message from broadcaster
 				fmt.Printf("Broadcasting message: %s\n", msg)

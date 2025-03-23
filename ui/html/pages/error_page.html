@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/ui/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Error - Student Not Found</title>
+</head>
+
+<body>
+    <div class="navbar">
+        <button hx-get="/" class="rfid">RFID</button>
+        <button hx-get="/test-grades" class="rfid">Grades</button>
+        <button hx-get="/bills" class="rfid">Bills</button>
+    </div>
+
+    <div id="error-page" class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="error-code">404</div>
+        <div class="error-message">Student Not Found</div>
+        <div class="error-details">
+            The student ID you're looking for doesn't exist in our database.
+        </div>
+        <button class="error-button" onclick="window.location.href='/'">
+            <i class="fas fa-home"></i> Return Home
+        </button>
+    </div>
+</body>
+
+</html>
