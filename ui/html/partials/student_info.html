@@ -1,179 +1,97 @@
-<div class="container" id="student-data-container" hx-ext="sse" sse-connect="/stream" sse-swap="message"
-            hx-target=".container">
-
-            <div class="profile">
-                <div class="summary-header">Student Information</div>
-                <div class="summary-content">
-                    <div class="profile-header">
-                        <img src="/ui/static/images/profile-placeholder.png" alt="Profile Picture" />
-                        <div class="profile-info">
-                            <h3 id="student-name">
-                                {{if .Student}}{{.Student.FirstName}}
-                                {{.Student.LastName}}{{end}}
-                            </h3>
-                            <h5 id="student-year">
-                                {{if .Student}}{{.YearLevel}}
-                                Year{{end}}
-                            </h5>
-                            <h5 id="student-program">
-                                {{if
-                                .Student}}{{.Student.Program}}{{end}}
-                            </h5>
-                        </div>
-                    </div>
-                    <div class="student-details">
-                        <table class="info-table">
-                            <tr>
-                                <th colspan="2">
-                                    Personal Information
-                                </th>
-                            </tr>
-                            <tr>
-                                <th>Student Number</th>
-                                <td id="student-id">
-                                    {{if
-                                    .Student}}{{.Student.StudentID}}{{end}}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Birthday</th>
-                                <td>{{if .Student}}{{.Birthday}}{{end}}</td>
-                            </tr>
-                            <tr>
-                                <th>Contact Number</th>
-                                <td>09913445768</td>
-                            </tr>
-                            <tr>
-                                <th>Email</th>
-                                <td>tomatoma@gmail.com</td>
-                            </tr>
-                        </table>
-
-                        <table class="info-table" style="margin-top: 15px">
-                            <tr>
-                                <th colspan="2">
-                                    Academic Information
-                                </th>
-                            </tr>
-                            <tr>
-                                <th>Program</th>
-                                <td id="student-program-details">
-                                    {{if
-                                    .Student}}{{.Student.Program}}{{end}}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Year Level</th>
-                                <td id="student-year-details">
-                                    {{if .Student}}{{.YearLevel}}
-                                    Year{{end}}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Block</th>
-                                <td>CS-22A</td>
-                            </tr>
-                        </table>
-
-                        <table class="info-table" style="margin-top: 15px">
-                            <tr>
-                                <th colspan="2">System Access</th>
-                            </tr>
-                            <tr>
-                                <th>Last Access</th>
-                                <td>2024-03-19 14:30:45</td>
-                            </tr>
-                            <tr>
-                                <th>First Access</th>
-                                <td>2024-01-15 08:15:22</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="content">
-                <div class="summary full-width summary-grades">
-                    <div class="summary-header">Summary of Grades</div>
-                    <div class="summary-content">
-                        <table class="grades-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40%;">Academic Year</th>
-                                    <th style="width: 30%;">First Semester</th>
-                                    <th style="width: 30%;">Second Semester</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="year-header">First Year</td>
-                                    <td>1.50</td>
-                                    <td>1.23</td>
-                                </tr>
-                                <tr>
-                                    <td class="year-header">Second Year</td>
-                                    <td>1.40</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td class="year-header">Third Year</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td class="year-header">Fourth Year</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="summary full-width summary-bills">
-                    <div class="summary-header">Summary of Bills</div>
-                    <div class="summary-content">
-                        <div class="bill-summary">
-                            <div class="bill-total">
-                                <div class="bill-label">Total Tuition & Misc. Fees</div>
-                                <div class="bill-amount">P14621.83</div>
-                            </div>
-
-                            <div class="bill-status">
-                                <div class="status-item">
-                                    <div class="bill-label">Initial Payment</div>
-                                    <div class="status-amount">P2750.00 (Paid)</div>
-                                </div>
-                                <div class="status-item">
-                                    <div class="bill-label">Remaining Balance</div>
-                                    <div class="status-amount">P11871.83</div>
-                                </div>
-                            </div>
-
-                            <div class="bill-label">Payment Per Exam</div>
-                            <div class="payment-schedule">
-                                <div class="payment-item">
-                                    <div class="payment-title">Prelim</div>
-                                    <div class="payment-amount">P2967.96</div>
-                                    <div class="payment-date">Status: Paid</div>
-                                </div>
-                                <div class="payment-item">
-                                    <div class="payment-title">Midterm</div>
-                                    <div class="payment-amount">P2967.96</div>
-                                    <div class="payment-date">Status: Paid</div>
-                                </div>
-                                <div class="payment-item">
-                                    <div class="payment-title">Pre-Finals</div>
-                                    <div class="payment-amount">P2967.96</div>
-                                    <div class="payment-date">Status: Not Paid</div>
-                                </div>
-                                <div class="payment-item">
-                                    <div class="payment-title">Finals</div>
-                                    <div class="payment-amount">P2967.96</div>
-                                    <div class="payment-date">Status: Not Paid</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- Student Info Fragment -->
+<div class="profile">
+    <div class="summary-header">Student Information</div>
+    <div class="summary-content">
+        <div class="profile-header">
+            <img src="/ui/static/images/profile-placeholder.png" alt="Profile Picture" />
+            <div class="profile-info">
+                <h3 id="student-name">{{if .Student}}{{.Student.FirstName}} {{.Student.LastName}}{{end}}</h3>
+                <h5 id="student-year">{{if .Student}}{{.YearLevel}} Year{{end}}</h5>
+                <h5 id="student-program">{{if .Student}}{{.Student.Program}}{{end}}</h5>
             </div>
         </div>
+        <div class="student-details">
+            <table class="info-table">
+                <tr>
+                    <th colspan="2">Personal Information</th>
+                </tr>
+                <tr>
+                    <th>Student Number</th>
+                    <td id="student-id">{{if .Student}}{{.Student.StudentID}}{{end}}</td>
+                </tr>
+                <tr>
+                    <th>Birthday</th>
+                    <td>{{if .Student}}{{.Birthday}}{{end}}</td>
+                </tr>
+                <tr>
+                    <th>Contact Number</th>
+                    <td>09913445768</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>tomatoma@gmail.com</td>
+                </tr>
+            </table>
+
+            <table class="info-table" style="margin-top: 15px">
+                <tr>
+                    <th colspan="2">
+                        Academic Information
+                    </th>
+                </tr>
+                <tr>
+                    <th>Program</th>
+                    <td id="student-program-details">
+                        {{if
+                        .Student}}{{.Student.Program}}{{end}}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Year Level</th>
+                    <td id="student-year-details">
+                        {{if .Student}}{{.YearLevel}}
+                        Year{{end}}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Block</th>
+                    <td>CS-22A</td>
+                </tr>
+            </table>
+
+            <table class="info-table" style="margin-top: 15px">
+                <tr>
+                    <th colspan="2">System Access</th>
+                </tr>
+                <tr>
+                    <th>Last Access</th>
+                    <td>2024-03-19 14:30:45</td>
+                </tr>
+                <tr>
+                    <th>First Access</th>
+                    <td>2024-01-15 08:15:22</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="summary-header">Summary of Bills</div>
+<div class="summary-content">
+    <div class="bill-summary">
+        <div class="bill-total">
+            <div class="bill-label">Total Tuition & Misc. Fees</div>
+            <div class="bill-amount">P14621.83</div>
+        </div>
+        <div class="bill-status">
+            <div class="status-item">
+                <div class="bill-label">Initial Payment</div>
+                <div class="status-amount">P2750.00 (Paid)</div>
+            </div>
+            <div class="status-item">
+                <div class="bill-label">Remaining Balance</div>
+                <div class="status-amount">P11871.83</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -14,7 +14,6 @@ import (
 // SSE broadcaster for sending messages to connected clients
 type Broadcaster struct {
 	events chan string
-	mu     sync.Mutex
 }
 
 type Client struct {
@@ -58,7 +57,6 @@ func (b *Broadcaster) Broadcast(event string, data string) {
 }
 
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
-	// var fragmentToRender string
 	rfid := ctx.FormValue("rfid")
 	if rfid == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("RFID is required")
@@ -67,7 +65,6 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	rfidRepo := repositories.NewRFIDRepository(h.db)
 	student, err := rfidRepo.GetStudentByRFID(rfid)
 	if err != nil {
-		// Log the actual error
 		fmt.Printf("Database error: %v\n", err)
 		GetBroadcaster().Broadcast("error", fmt.Sprintf(`{"message": "Database error: %v"}`, err))
 		return ctx.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("Database error: %v", err))
@@ -115,26 +112,24 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		getYearLevelString(student.YearLevel),
 		student.Program)
 
-	// Remove all whitespace to ensure proper JSON formatting for SSE
 	studentData = removeWhitespace(studentData)
-
-	// Send student data to all connected SSE clients
 	GetBroadcaster().Broadcast("student-data", studentData)
 
-	// Log that we've broadcast the event (for debugging)
-	fmt.Printf("Broadcast sent with event: 'student-data' and data: %s\n", studentData)
-
-	// Handle response based on content type
-	if ctx.Accepts("application/json") == "application/json" {
-		// For API clients, return JSON response
-		fmt.Println("Returning JSON response")
+	// Handle response based on content type and HX-Request header
+	if ctx.Get("HX-Request") == "true" {
+		// If it's an HTMX request, render the partial without layout
+		return ctx.Render("partials/student_info", fiber.Map{
+			"Student":   student,
+			"YearLevel": getYearLevelString(student.YearLevel),
+		}, "") // Empty layout for fragment
+	} else if ctx.Accepts("application/json") == "application/json" {
+		// For API clients, return JSON
 		return ctx.JSON(fiber.Map{
 			"status": "success",
 			"data":   student,
 		})
 	} else {
-		// For direct requests, render the template
-		fmt.Println("Rendering template")
+		// For direct browser requests, render full page
 		return ctx.Render("home", fiber.Map{
 			"Student":   student,
 			"Title":     "Student Information",
@@ -204,7 +199,6 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 	initMessage := "event: connected\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\", \"status\": \"connected\"}\n\n"
 	// initMessage := "event: connected\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\", \"status\": \"connected\"}\n\n"
 
-
 	// Get broadcaster instance
 	broadcaster := GetBroadcaster()
 
@@ -232,7 +226,7 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 			return
 		}
 
-		fmt.Println("Initial SSE message sent successfully")
+		// fmt.Println("Initial SSE message sent successfully")
 		// if fw, err := w.Write([]byte(initMessage)); err != nil || fw == 0 {
 		// 	fmt.Printf("Error sending initial SSE message: %v\n", err)
 		// 	return
@@ -305,7 +299,7 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 					close(done)
 					return
 				}
-				fmt.Println("SSE message sent successfully")
+				fmt.Println("Student info sent")
 			}
 		}
 	})
