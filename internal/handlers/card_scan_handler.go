@@ -51,12 +51,14 @@ func (b *Broadcaster) Broadcast(event string, data string) {
 	select {
 	case b.events <- message:
 		// Message sent successfully
+		fmt.Printf("[SSE DEBUG] Message sent successfully\n")
 	default:
 		fmt.Println("Warning: SSE message buffer full, dropping message")
 	}
 }
 
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
+	// var fragmentToRender string
 	rfid := ctx.FormValue("rfid")
 	if rfid == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("RFID is required")
@@ -64,8 +66,9 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 
 	rfidRepo := repositories.NewRFIDRepository(h.db)
 	student, err := rfidRepo.GetStudentByRFID(rfid)
+
 	if err != nil {
-		fmt.Printf("Database error: %v\n", err)
+		// fmt.Printf("Database error: %v\n", err)
 		GetBroadcaster().Broadcast("error", fmt.Sprintf(`{"message": "Database error: %v"}`, err))
 		return ctx.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("Database error: %v", err))
 	}
@@ -74,68 +77,89 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	if student == nil {
 		// Send a not-found event to all SSE clients
 		GetBroadcaster().Broadcast("not-found", fmt.Sprintf(`{"rfid": "%s"}`, rfid))
+		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
 		// return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
+		// return ctx.Render("error_page", fiber.Map{})
+	}
+	fmt.Printf("Student found: %s\n", student.StudentID)
+	fmt.Printf("Student found: %s\n", student.StudentID)
+
+	htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#student-data-container"></div>`, rfid)
+
+	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
+	return ctx.SendString("Processing")
+	// htmxInstruction := fmt.Sprintf("<div hx-get=\"/ui//fragments/%s.html\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-target=\"#student-data-container\"></div>", fragmentToRender)
+
+	// studentData := fmt.Sprintf(`{
+	// 	"studentID":"%s",
+	// 	"firstName":"%s",
+	// 	"lastName":"%s",
+	// 	"middleName":"%s",
+	// 	"yearLevel":%d,
+	// 	"yearLevelStr":"%s",
+	// 	"program":"%s",
+	// 	"grades":[
+	// 		{"subject":"Mathematics", "code":"MATH101", "units":3, "grade":"1.00", "remarks":"Passed"},
+	// 		{"subject":"English", "code":"ENG101", "units":3, "grade":"1.25", "remarks":"Passed"},
+	// 		{"subject":"Science", "code":"SCI101", "units":4, "grade":"1.50", "remarks":"Passed"},
+	// 		{"subject":"History", "code":"HIST101", "units":3, "grade":"1.75", "remarks":"Passed"},
+	// 		{"subject":"Physical Education", "code":"PE101", "units":2, "grade":"1.00", "remarks":"Passed"}
+	// 	],
+	// 	"bills":[
+	// 		{"description":"Tuition Fee", "amount":15000.00, "status":"Paid", "dueDate":"2024-01-15"},
+	// 		{"description":"Library Fee", "amount":1500.00, "status":"Paid", "dueDate":"2024-01-15"},
+	// 		{"description":"Laboratory Fee", "amount":2500.00, "status":"Unpaid", "dueDate":"2024-02-15"},
+	// 		{"description":"Miscellaneous Fee", "amount":1000.00, "status":"Unpaid", "dueDate":"2024-02-15"}
+	// 	]
+	// }`,
+	// 	student.StudentID,
+	// 	student.FirstName,
+	// 	student.LastName,
+	// 	student.MiddleName,
+	// 	student.YearLevel,
+	// 	getYearLevelString(student.YearLevel),
+	// 	student.Program)
+
+	// studentData = removeWhitespace(studentData)
+	// GetBroadcaster().Broadcast("student-data", studentData)
+
+	// // Handle response based on content type and HX-Request header
+	// if ctx.Get("HX-Request") == "true" {
+	// 	// If it's an HTMX request, render the partial without layout
+	// 	return ctx.Render("partials/student_info", fiber.Map{
+	// 		"Student":   student,
+	// 		"YearLevel": getYearLevelString(student.YearLevel),
+	// 	}, "") // Empty layout for fragment
+	// } else if ctx.Accepts("application/json") == "application/json" {
+	// 	// For API clients, return JSON
+	// 	return ctx.JSON(fiber.Map{
+	// 		"status": "success",
+	// 		"data":   student,
+	// 	})
+	// } else {
+	// 	// For direct browser requests, render full page
+	// 	return ctx.Render("home", fiber.Map{
+	// 		"Student":   student,
+	// 		"Title":     "Student Information",
+	// 		"YearLevel": getYearLevelString(student.YearLevel),
+	// 	})
+	// }
+}
+
+func (h *AppHandler) GetStudentPartial(ctx *fiber.Ctx) error {
+	rfid := ctx.Params("rfid") // or from query parameter
+
+	rfidRepo := repositories.NewRFIDRepository(h.db)
+	student, err := rfidRepo.GetStudentByRFID(rfid)
+
+	if err != nil || student == nil {
 		return ctx.Render("error_page", fiber.Map{})
 	}
 
-	// htmxInstruction := fmt.Sprintf("<div hx-get=\"/ui//fragments/%s.html\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-target=\"#student-data-container\"></div>", fragmentToRender)
-
-	// Format student data as clean JSON for SSE - using compact format to avoid whitespace issues
-	// Include dummy grades and bills data
-	studentData := fmt.Sprintf(`{
-		"studentID":"%s",
-		"firstName":"%s",
-		"lastName":"%s",
-		"middleName":"%s",
-		"yearLevel":%d,
-		"yearLevelStr":"%s",
-		"program":"%s",
-		"grades":[
-			{"subject":"Mathematics", "code":"MATH101", "units":3, "grade":"1.00", "remarks":"Passed"},
-			{"subject":"English", "code":"ENG101", "units":3, "grade":"1.25", "remarks":"Passed"},
-			{"subject":"Science", "code":"SCI101", "units":4, "grade":"1.50", "remarks":"Passed"},
-			{"subject":"History", "code":"HIST101", "units":3, "grade":"1.75", "remarks":"Passed"},
-			{"subject":"Physical Education", "code":"PE101", "units":2, "grade":"1.00", "remarks":"Passed"}
-		],
-		"bills":[
-			{"description":"Tuition Fee", "amount":15000.00, "status":"Paid", "dueDate":"2024-01-15"},
-			{"description":"Library Fee", "amount":1500.00, "status":"Paid", "dueDate":"2024-01-15"},
-			{"description":"Laboratory Fee", "amount":2500.00, "status":"Unpaid", "dueDate":"2024-02-15"},
-			{"description":"Miscellaneous Fee", "amount":1000.00, "status":"Unpaid", "dueDate":"2024-02-15"}
-		]
-	}`,
-		student.StudentID,
-		student.FirstName,
-		student.LastName,
-		student.MiddleName,
-		student.YearLevel,
-		getYearLevelString(student.YearLevel),
-		student.Program)
-
-	studentData = removeWhitespace(studentData)
-	GetBroadcaster().Broadcast("student-data", studentData)
-
-	// Handle response based on content type and HX-Request header
-	if ctx.Get("HX-Request") == "true" {
-		// If it's an HTMX request, render the partial without layout
-		return ctx.Render("partials/student_info", fiber.Map{
-			"Student":   student,
-			"YearLevel": getYearLevelString(student.YearLevel),
-		}, "") // Empty layout for fragment
-	} else if ctx.Accepts("application/json") == "application/json" {
-		// For API clients, return JSON
-		return ctx.JSON(fiber.Map{
-			"status": "success",
-			"data":   student,
-		})
-	} else {
-		// For direct browser requests, render full page
-		return ctx.Render("home", fiber.Map{
-			"Student":   student,
-			"Title":     "Student Information",
-			"YearLevel": getYearLevelString(student.YearLevel),
-		})
-	}
+	return ctx.Render("partials/student_info", fiber.Map{
+		"Student":   student,
+		"YearLevel": getYearLevelString(student.YearLevel),
+	}, "")
 }
 
 func getYearLevelString(year int) string {
@@ -173,6 +197,22 @@ func removeWhitespace(s string) string {
 	}
 
 	return result.String()
+}
+
+func (h *AppHandler) HandleStudentPartial(c *fiber.Ctx) error {
+	rfid := c.Params("rfid")
+
+	rfidRepo := repositories.NewRFIDRepository(h.db)
+	student, err := rfidRepo.GetStudentByRFID(rfid)
+
+	if err != nil || student == nil {
+		return c.Status(fiber.StatusNotFound).SendString("Student not found")
+	}
+
+	return c.Render("partials/student_info", fiber.Map{
+		"Student":   student,
+		"YearLevel": getYearLevelString(student.YearLevel),
+	}, "")
 }
 
 // HandleSSE establishes a server-sent events connection
@@ -213,6 +253,7 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 			close(client.channel)
 			clientsMux.Unlock()
 		}()
+
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 
@@ -274,32 +315,43 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 			case <-ticker.C:
 				// Send heartbeat
 				pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
-				fw, err := w.Write([]byte(pingMsg))
-				if err != nil || fw == 0 {
-					fmt.Printf("Error sending SSE ping: %v\n", err)
+				if _, err := w.Write([]byte(pingMsg)); err != nil {
 					close(done)
 					return
 				}
-				if err = w.Flush(); err != nil {
-					fmt.Printf("Error flushing SSE ping: %v\n", err)
-					close(done)
-					return
-				}
+				w.Flush()
+				// pingMsg := "event: ping\ndata: {\"time\": \"" + time.Now().Format(time.RFC3339) + "\"}\n\n"
+				// fw, err := w.Write([]byte(pingMsg))
+				// if err != nil || fw == 0 {
+				// 	fmt.Printf("Error sending SSE ping: %v\n", err)
+				// 	close(done)
+				// 	return
+				// }
+				// if err = w.Flush(); err != nil {
+				// 	fmt.Printf("Error flushing SSE ping: %v\n", err)
+				// 	close(done)
+				// 	return
+				// }
 			case msg := <-eventsChannel:
 				// Send message from broadcaster
 				fmt.Printf("Broadcasting message: %s\n", msg)
-				fw, err := w.Write([]byte(msg))
-				if err != nil || fw == 0 {
-					fmt.Printf("Error sending SSE message: %v\n", err)
+				if _, err := w.Write([]byte(msg)); err != nil {
 					close(done)
 					return
 				}
-				if err = w.Flush(); err != nil {
-					fmt.Printf("Error flushing SSE message: %v\n", err)
-					close(done)
-					return
-				}
-				fmt.Println("Student info sent")
+				w.Flush()
+				// fw, err := w.Write([]byte(msg))
+				// if err != nil || fw == 0 {
+				// 	fmt.Printf("Error sending SSE message: %v\n", err)
+				// 	close(done)
+				// 	return
+				// }
+				// if err = w.Flush(); err != nil {
+				// 	fmt.Printf("Error flushing SSE message: %v\n", err)
+				// 	close(done)
+				// 	return
+				// }
+				// fmt.Println("Student info sent")
 			}
 		}
 	})

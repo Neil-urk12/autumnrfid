@@ -26,7 +26,7 @@ func NewRFIDRepository(dbClient *DatabaseClient) *RFIDRepository {
 func (r *RFIDRepository) GetStudentByRFID(studentId string) (*Student, error) {
 	query := `
 		SELECT student_ID, department_ID, first_Name, last_Name, middle_Name, year_Level, program
-		FROM Students 
+		FROM Students
 		WHERE student_ID = ?
 	`
 
