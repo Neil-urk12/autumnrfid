@@ -13,6 +13,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/html/v2"
 )
 
@@ -42,7 +43,7 @@ func main() {
 		db.Close()
 		os.Exit(0)
 	}()
-	// defer db.Close()
+	defer db.Close()
 
 	viewsEngine := html.New("./ui/html", ".html")
 	viewsEngine.Reload(true) // Enable template reloading for development
@@ -62,6 +63,10 @@ func main() {
 		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: true, // Keep credentials enabled for cookies/auth
 		ExposeHeaders:    "Content-Type, Content-Length, Content-Disposition",
+	}))
+
+	app.Use(logger.New(logger.Config{
+		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
 
 	// Serve static files
