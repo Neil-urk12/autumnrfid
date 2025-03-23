@@ -1,154 +1,158 @@
-<div class="container">
-    <div class="left-section">
-        <div class="balance-section">
-            <div class="section-header">Current Balance</div>
-            <div class="section-content">
-                <div class="balance-card">
-                    <div class="balance-title">Remaining Balance</div>
-                    <div class="balance-amount">₱13,400.00</div>
-                </div>
-                <div class="balance-details">
-                    <h4 style="margin: 15px; color: var(--dark-blue);">Payment Summary</h4>
-                    <table class="fee-details">
-                        <tr>
-                            <th>Total Assessment</th>
-                            <td>₱20,000.00</td>
-                        </tr>
-                        <tr>
-                            <th>Total Payments</th>
-                            <td>₱6,600.00</td>
-                        </tr>
-                        <tr>
-                            <th>Remaining Balance</th>
-                            <td>₱13,400.00</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
+<div class="container-grades">
+    <div class="button-section">
+        <div class="button-left">
+            <button class="sidebar-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <button class="semester-btn active">First Semester</button>
+            <button class="semester-btn">Second Semester</button>
         </div>
+        <div class="semester-info">
+            <span>First Year Grades</span>
+            <span>SY 2023-2024</span>
+        </div>
+    </div>
 
-        <div class="history-section">
-            <div class="section-header">Payment History</div>
-            <div class="section-content">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
+    <div class="grades-section">
+        <div class="grades-content">
+            <table class="grades-table-grades">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Subject</th>
+                        <th>Prelim</th>
+                        <th>Midterm</th>
+                        <th>Pre-Finals</th>
+                        <th>Finals</th>
+                        <th>Final Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>CS101</td>
+                        <td class="subject-name">Computer Programming 1</td>
+                        <td>1.25</td>
+                        <td>1.50</td>
+                        <td>1.25</td>
+                        <td>1.00</td>
+                        <td class="final-grade">1.25</td>
+                    </tr>
+                    <tr>
+                        <td>MATH101</td>
+                        <td class="subject-name">Discrete Mathematics</td>
+                        <td>1.75</td>
+                        <td>1.50</td>
+                        <td>1.50</td>
+                        <td>1.25</td>
+                        <td class="final-grade">1.50</td>
+                    </tr>
+                    <tr>
+                        <td>CS102</td>
+                        <td class="subject-name">Introduction to Computing</td>
+                        <td>1.50</td>
+                        <td>1.25</td>
+                        <td>1.00</td>
+                        <td>1.25</td>
+                        <td class="final-grade">1.25</td>
+                    </tr>
+                    <tr>
+                        <td>MATH102</td>
+                        <td class="subject-name">Mathematics in the Modern World</td>
+                        <td>2.00</td>
+                        <td>1.75</td>
+                        <td>1.50</td>
+                        <td>1.50</td>
+                        <td class="final-grade">1.75</td>
+                    </tr>
+                    <tr>
+                        <td>ENG101</td>
+                        <td class="subject-name">Purposive Communication</td>
+                        <td>1.50</td>
+                        <td>1.75</td>
+                        <td>1.25</td>
+                        <td>1.50</td>
+                        <td class="final-grade">1.50</td>
+                    </tr>
+                    <tr>
+                        <td>PSY101</td>
+                        <td class="subject-name">Understanding the Self</td>
+                        <td>1.75</td>
+                        <td>1.50</td>
+                        <td>1.50</td>
+                        <td>1.25</td>
+                        <td class="final-grade">1.50</td>
+                    </tr>
+                    <tr>
+                        <td>PE101</td>
+                        <td class="subject-name">Physical Education 1</td>
+                        <td>1.25</td>
+                        <td>1.00</td>
+                        <td>1.25</td>
+                        <td>1.00</td>
+                        <td class="final-grade">1.25</td>
+                    </tr>
+                    <tr>
+                        <td>NSTP101</td>
+                        <td class="subject-name">National Service Training Program 1</td>
+                        <td>1.50</td>
+                        <td>1.25</td>
+                        <td>1.00</td>
+                        <td>1.25</td>
+                        <td class="final-grade">1.25</td>
+                    </tr>
+                    <tr class="gwa-row">
+                        <td colspan="6" style="text-align: right;">General Weighted Average (GWA):</td>
+                        <td style="text-align: center;">1.40</td>
+                    </tr>
+                </tbody>
+            </table>
 
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>January 15, 2025</td>
-                            <td>Initial Payment</td>
-                            <td>₱2,750.00</td>
-                            <td><span class="payment-status status-paid">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>February 17, 2025</td>
-                            <td>Prelim Payment</td>
-                            <td>₱3,850.00</td>
-                            <td><span class="payment-status status-paid">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>March 17, 2025</td>
-                            <td>Midterm Payment</td>
-                            <td>₱3,350.00</td>
-                            <td><span class="payment-status status-pending">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="pagination">
+                <button class="page-btn" onclick="changePage(1)" style="padding: 0 30px;">Previous</button>
+                <button class="page-btn active" style="width: 40px;">1</button>
+                <button class="page-btn" style="width: 40px;">2</button>
+                <button class="page-btn" onclick="changePage(2)" style="padding: 0 30px;">Next</button>
             </div>
         </div>
     </div>
 
-    <div class="right-section">
-        <div class="section-header">Statement of Account</div>
-        <div class="section-content">
-            <div class="fee-table-container">
-                <table class="fee-details">
-                    <tr>
-                        <th class="fee-category" colspan="2">Tuition Fees</th>
-                    </tr>
-                    <tr>
-                        <th>Basic Tuition Fee</th>
-                        <td>₱12,000.00</td>
-                    </tr>
-                    <tr>
-                        <th>Laboratory Fee</th>
-                        <td>₱3,500.00</td>
-                    </tr>
-
-                </table>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">Year and Semester</div>
+        <div class="year-section">
+            <button class="year-btn active" data-year="1">
+                First Year
+                <span class="icon">▼</span>
+            </button>
+            <div class="semester-container show" data-year="1">
+                <button class="semester-btn-sidebar active" data-semester="first">First Semester</button>
+                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
             </div>
 
-            <div class="fee-table-container">
-                <table class="fee-details">
-                    <tr>
-                        <th class="fee-category" colspan="2">Miscellaneous Fees</th>
-                    </tr>
-                    <tr>
-                        <th>Library Fee</th>
-                        <td>₱800.00</td>
-                    </tr>
-                    <tr>
-                        <th>Computer Laboratory Fee</th>
-                        <td>₱1,500.00</td>
-                    </tr>
-                    <tr>
-                        <th>Student Activities</th>
-                        <td>₱700.00</td>
-                    </tr>
-                    <tr class="total-row">
-                        <th>Total Assessment</th>
-                        <td>₱20,000.00</td>
-                    </tr>
-                    <tr>
-                        <th>Old Continuing Discount (10%)</th>
-                        <td>-₱3,000.00</td>
-                    </tr>
-                    <tr class="total-row">
-                        <th>Total Amount</th>
-                        <td>₱17,000.00</td>
-                    </tr>
-                    <tr>
-                        <th>Full Payment (paid before exam)</th>
-                        <td>₱16,000.00</td>
-                    </tr>
-                    <tr>
-                        <th>Per Exam</th>
-                        <td>₱3,850.00</td>
-                    </tr>
-                </table>
+            <button class="year-btn" data-year="2">
+                Second Year
+                <span class="icon">▼</span>
+            </button>
+            <div class="semester-container" data-year="2">
+                <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
+                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
             </div>
 
-            <div class="payment-info">
-                <table class="fee-details">
-                    <tr>
-                        <th>Initial Payment</th>
-                        <td>₱2,750.00</td>
-                    </tr>
-                    <tr class="total-row">
-                        <th>Remaining Balance</th>
-                        <td>₱13,400.00</td>
-                    </tr>
-                </table>
+            <button class="year-btn" data-year="3">
+                Third Year
+                <span class="icon">▼</span>
+            </button>
+            <div class="semester-container" data-year="3">
+                <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
+                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+            </div>
+
+            <button class="year-btn" data-year="4">
+                Fourth Year
+                <span class="icon">▼</span>
+            </button>
+            <div class="semester-container" data-year="4">
+                <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
+                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
             </div>
         </div>
     </div>
