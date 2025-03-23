@@ -14,6 +14,7 @@
 </head>
 
 <body>
+
     <div class="navbar">
         <button hx-get="/" class="rfid">RFID</button>
         <button hx-get="/test-grades" hx-swap="innerHTML" hx-target="#student-data-container"
@@ -31,32 +32,10 @@
         </div>
     </div> -->
 
-    <!-- <div style="position: fixed; top: 10px; right: 10px; z-index: 9999">
-        <button id="test-update-btn" onclick="testStudentUpdate()" style="
-                    background: #007bff;
-                    color: white;
-                    border: none;
-                    padding: 8px 15px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                ">
-            Test Update UI
-        </button> -->
-    <!-- <button id="test-404-btn" hx-get="/error" hx-swap="innerHTML" hx-target="#student-data-container" style="
-        <button id="test-404-btn" hx-get="/error" hx-swap="innerHTML" hx-target="body" style="
-                    background: #dc3545;
-                    color: white;
-                    border: none;
-                    padding: 8px 15px;
-                    border-radius: 4px;
-                    margin-left: 5px;
-                    cursor: pointer;
-                ">
-            Test 404
-        </button> -->
     </div>
 
     <main>
+
         <div class="container-home" id="student-data-container" hx-ext="sse" sse-connect="/stream"
             sse-swap="studentcallback" hx-target=".container-home">
 
@@ -81,351 +60,40 @@
 
         </div>
         <p hx-ext="sse" sse-connect="/stream" sse-swap="ping">asdf</p>
+
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const messages = document.querySelectorAll('.message-item');
-            let currentIndex = 0;
+            const messages = document.querySelectorAll('.message-item')
+            let currentIndex = 0
 
             function showNextMessage() {
-                messages.forEach(msg => msg.classList.remove('active'));
-                messages[currentIndex].classList.add('active');
-                currentIndex = (currentIndex + 1) % messages.length;
+                messages.forEach(msg => msg.classList.remove('active'))
+                messages[currentIndex].classList.add('active')
+                currentIndex = (currentIndex + 1) % messages.length
             }
 
-            showNextMessage();
-            setInterval(showNextMessage, 4000);
+            showNextMessage()
+            setInterval(showNextMessage, 4000)
 
             // Add SSE ping logging
-            const sseSource = new EventSource('/stream');
-            
-            sseSource.addEventListener('ping', function(e) {
-                console.log('SSE Ping received:', JSON.parse(e.data));
-            });
+            const sseSource = new EventSource('/stream')
 
-            sseSource.addEventListener('connected', function(e) {
-                console.log('SSE Connected:', JSON.parse(e.data));
-            });
+            sseSource.addEventListener('ping', function (e) {
+                console.log('SSE Ping received:', JSON.parse(e.data))
+            })
 
-            sseSource.onerror = function(e) {
-                console.error('SSE Error:', e);
-            };
-        });
+            sseSource.addEventListener('connected', function (e) {
+                console.log('SSE Connected:', JSON.parse(e.data))
+            })
+
+            sseSource.onerror = function (e) {
+                console.error('SSE Error:', e)
+            }
+        })
     </script>
 
-    <!-- <script type="text/javascript">
-        // Create and manage our own EventSource for maximum control
-        let eventSource = null;
-
-        // Setup EventSource connection
-        function setupSSE() {
-            console.log("Setting up SSE connection");
-            // if (eventSource) {
-            //     console.log('Closing existing EventSource');
-            //     eventSource.close();
-            // }
-
-            // Create new EventSource
-            eventSource = new EventSource("/stream");
-
-            // Handle connection error and auto-reconnect
-            eventSource.onerror = function () {
-                setTimeout(setupSSE, 5000);
-            };
-
-            // Listen for specific events
-            eventSource.addEventListener(
-                "student-data",
-                function (e) {
-                    console.log(
-                        "STUDENT DATA EVENT RECEIVED - Full event object:",
-                        e,
-                    );
-                    console.log(
-                        "STUDENT DATA - Raw data string:",
-                        e.data,
-                    );
-                    try {
-                        const studentData = JSON.parse(e.data);
-                        console.log(
-                            "Student data successfully parsed:",
-                            studentData,
-                        );
-
-                        // Update student data fields
-                        updateStudentData(studentData);
-
-                        console.log("BEFORE VISIBILITY CHANGE:");
-                        console.log(
-                            "welcome-section hidden?",
-                            document
-                                .getElementById("welcome-section")
-                                .classList.contains("hidden"),
-                        );
-                        console.log(
-                            "student-data-container hidden?",
-                            document
-                                .getElementById(
-                                    "student-data-container",
-                                )
-                                .classList.contains("hidden"),
-                        );
-                        // console.log(
-                        //     "error-page hidden?",
-                        //     document
-                        //         .getElementById("error-page")
-                        //         .classList.contains("hidden"),
-                        // );
-
-                        // Force hide welcome section with both approaches
-                        const welcomeSection =
-                            document.getElementById(
-                                "welcome-section",
-                            );
-                        welcomeSection.classList.add("hidden");
-                        welcomeSection.style.display = "none";
-
-                        // Force show student data container with both approaches
-                        const studentDataContainer =
-                            document.getElementById(
-                                "student-data-container",
-                            );
-                        studentDataContainer.classList.remove(
-                            "hidden",
-                        );
-                        studentDataContainer.style.display = "grid";
-
-                        // Force hide error page
-                        // document
-                        //     .getElementById("error-page")
-                        //     .classList.add("hidden");
-
-                        console.log("AFTER VISIBILITY CHANGE:");
-                        console.log(
-                            "welcome-section hidden?",
-                            document
-                                .getElementById("welcome-section")
-                                .classList.contains("hidden"),
-                        );
-                        console.log(
-                            "welcome-section display:",
-                            getComputedStyle(
-                                document.getElementById(
-                                    "welcome-section",
-                                ),
-                            ).display,
-                        );
-                        console.log(
-                            "student-data-container hidden?",
-                            document
-                                .getElementById(
-                                    "student-data-container",
-                                )
-                                .classList.contains("hidden"),
-                        );
-                        console.log(
-                            "student-data-container display:",
-                            getComputedStyle(
-                                document.getElementById(
-                                    "student-data-container",
-                                ),
-                            ).display,
-                        );
-
-                        console.log(
-                            "UI updated to show student data",
-                        );
-                    } catch (err) {
-                        console.error(
-                            "Error parsing student data:",
-                            err,
-                        );
-                    }
-                },
-            );
-
-            eventSource.addEventListener("not-found", function (e) {
-                console.log("NOT FOUND EVENT RECEIVED");
-
-                // Force hide welcome section and student data with both approaches
-                const welcomeSection =
-                    document.getElementById("welcome-section");
-                welcomeSection.classList.add("hidden");
-                welcomeSection.style.display = "none";
-
-                const studentDataContainer =
-                    document.getElementById(
-                        "student-data-container",
-                    );
-                studentDataContainer.classList.add("hidden");
-                studentDataContainer.style.display = "none";
-
-                // Force show error page with both approaches
-
-                console.log("UI updated to show error page");
-            });
-
-            eventSource.addEventListener("ping", function (e) {
-                console.log("PING EVENT RECEIVED - Full event object:", e);
-                console.log("PING - Raw data string:", e.data);
-                try {
-                    const pingData = JSON.parse(e.data);
-                    console.log("PING - Parsed data:", pingData);
-                } catch (err) {
-                    console.error("Error parsing ping data:", err);
-                }
-            });
-        }
-
-        // Initialize the application with welcome screen visible
-        window.onload = function () {
-            // Ensure welcome section is visible and others are hidden on load
-            // document.getElementById(
-            //     "welcome-section",
-            // ).style.display = "flex";
-            // document.getElementById(
-            //     "student-data-container",
-            // ).style.display = "none";
-            // document.getElementById("error-page").style.display =
-            //     "none";
-
-            setupSSE();
-        };
-
-        // function updateStudentData(data) {
-        // try {
-        //     // Update profile information
-        //     document.getElementById(
-        //         "student-name",
-        //     ).textContent =
-        //         data.firstName + " " + data.lastName;
-        //     document.getElementById(
-        //         "student-year",
-        //     ).textContent = data.yearLevelStr + " Year";
-        //     document.getElementById(
-        //         "student-program",
-        //     ).textContent = data.program;
-
-        //     // Update student details
-        //     document.getElementById("student-id").textContent =
-        //         data.studentID;
-        //     document.getElementById(
-        //         "student-program-details",
-        //     ).textContent = data.program;
-        //     document.getElementById(
-        //         "student-year-details",
-        //     ).textContent = data.yearLevelStr + " Year";
-
-        //     // Update grades section if data exists
-        //     if (data.grades && data.grades.length > 0) {
-        //         console.log(
-        //             "Updating grades with:",
-        //             data.grades,
-        //         );
-        //     }
-
-        //     // Update bills section if data exists
-        //     if (data.bills && data.bills.length > 0) {
-        //         // Calculate total amount
-        //         const totalAmount = data.bills.reduce(
-        //             (sum, bill) => sum + bill.amount,
-        //             0,
-        //         );
-        //         const paidAmount = data.bills
-        //             .filter((bill) => bill.status === "Paid")
-        //             .reduce(
-        //                 (sum, bill) => sum + bill.amount,
-        //                 0,
-        //             );
-        //         const remainingAmount =
-        //             totalAmount - paidAmount;
-
-        //         // Update bill summary
-        //         document.querySelector(
-        //             ".bill-total .bill-amount",
-        //         ).textContent = `P${totalAmount.toFixed(2)}`;
-
-        //         // Update payment status
-        //         const statusItems =
-        //             document.querySelectorAll(".status-item");
-        //         if (statusItems.length >= 2) {
-        //             statusItems[0].querySelector(
-        //                 ".status-amount",
-        //             ).textContent =
-        //                 `P${paidAmount.toFixed(2)} (Paid)`;
-        //             statusItems[1].querySelector(
-        //                 ".status-amount",
-        //             ).textContent =
-        //                 `P${remainingAmount.toFixed(2)}`;
-        //         }
-
-        //         console.log("Bills section updated with data");
-        //     }
-        // } catch (err) {
-        //     console.error("Error updating DOM:", err);
-        // }
-        // }
-
-        // Test function for student data update
-        function testStudentUpdate() {
-            const testData = {
-                studentID: "TEST-2023-001",
-                firstName: "Test",
-                lastName: "Student",
-                middleName: "Demo",
-                yearLevel: 1,
-                yearLevelStr: "First",
-                program: "Computer Science",
-            };
-
-            // updateStudentData(testData);
-
-            // // Update visibility with same approach as event handler
-            // document
-            //     .getElementById("welcome-section")
-            //     .classList.add("hidden");
-            // document.getElementById(
-            //     "welcome-section",
-            // ).style.display = "none";
-
-            // document
-            //     .getElementById("student-data-container")
-            //     .classList.remove("hidden");
-            // document.getElementById(
-            //     "student-data-container",
-            // ).style.display = "grid";
-
-            // document
-            //     .getElementById("error-page")
-            //     .classList.add("hidden");
-            // document.getElementById("error-page").style.display =
-            //     "none";
-        }
-
-        // Test function for not found
-        function testNotFound() {
-            // Update visibility with same approach as event handler
-            document
-                .getElementById("welcome-section")
-                .classList.add("hidden");
-            document.getElementById("welcome-section").style.display =
-                "none";
-
-            document
-                .getElementById("student-data-container")
-                .classList.add("hidden");
-            document.getElementById(
-                "student-data-container",
-            ).style.display = "none";
-
-            // document
-            //     .getElementById("error-page")
-            //     .classList.remove("hidden");
-            // document.getElementById("error-page").style.display =
-            //     "flex";
-        }
-    </script> -->
 </body>
 
 </html>

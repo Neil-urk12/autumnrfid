@@ -52,9 +52,20 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views:                 viewsEngine,
 		DisableStartupMessage: false,
-		IdleTimeout:           time.Second * 60,
-		ReadTimeout:           time.Second * 60,
-		WriteTimeout:          time.Second * 60,
+		// IdleTimeout:           time.Second * 60,
+		ReadTimeout:  time.Second * 60,
+		WriteTimeout: time.Second * 60,
+		ColorScheme: fiber.Colors{
+			Black:   "\u001b[93m",
+			Red:     "\u001b[91m",
+			Green:   "\u001b[92m",
+			Yellow:  "\u001b[93m",
+			Blue:    "\u001b[94m",
+			Magenta: "\u001b[95m",
+			Cyan:    "\u001b[96m",
+			White:   "\u001b[97m",
+			Reset:   "\u001b[0m",
+		},
 	})
 
 	// Configure middleware with enhanced CORS settings for SSE
