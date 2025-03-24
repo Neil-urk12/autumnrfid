@@ -15,6 +15,14 @@ type Student struct {
 	Program      string
 }
 
+type Bills struct {
+	// Add bills data here
+}
+
+type Grades struct {
+	// Add grades data here
+}
+
 type RFIDRepository struct {
 	dbClient *DatabaseClient
 }
@@ -23,10 +31,11 @@ func NewRFIDRepository(dbClient *DatabaseClient) *RFIDRepository {
 	return &RFIDRepository{dbClient: dbClient}
 }
 
+// Modify this later to query all student data
 func (r *RFIDRepository) GetStudentByRFID(studentId string) (*Student, error) {
 	query := `
 		SELECT student_ID, department_ID, first_Name, last_Name, middle_Name, year_Level, program
-		FROM Students 
+		FROM Students
 		WHERE student_ID = ?
 	`
 
@@ -53,4 +62,12 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*Student, error) {
 	}
 
 	return student, nil
+}
+
+func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*Bills, error) {
+	return nil, nil
+}
+
+func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*Grades, error) {
+	return nil, nil
 }
