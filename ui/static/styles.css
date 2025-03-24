@@ -341,30 +341,40 @@ th {
 }
 
 /* Welcome section styling */
-#welcome-section {
+.welcome-wrapper {
+    width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    height: calc(100vh - 130px);
+}
+
+.welcome-content {
     background-color: var(--white);
     border-radius: 8px;
-    padding: 2rem;
+    padding: 3rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+#welcome-section {
+    max-width: 100%;
+    height: calc(100vh - 110px);
+    margin: 0;
+    padding: 0;
 }
 
 #welcome-section h1 {
     color: var(--dark-blue);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     font-size: 2.5rem;
 }
 
 #welcome-section p {
     color: #666;
     font-size: 1.2rem;
-    max-width: 800px;
     margin-bottom: 2rem;
     line-height: 1.6;
 }
@@ -372,7 +382,50 @@ th {
 .scan-icon {
     font-size: 5rem;
     color: var(--aqua);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Message styles */
+.message-wrapper {
+    position: fixed;
+    top: 50%;
+    right: 40px;
+    transform: translateY(-50%);
+    width: 400px;
+    background: linear-gradient(to right, transparent, var(--light-aqua));
+    padding: 30px 20px;
+    text-align: left;
+    border-radius: 8px;
+}
+
+.message-content {
+    margin: 0;
+    animation: slideMessages 24s infinite;
+}
+
+.message-item {
+    height: 40px;
+    margin: 0;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    color: var(--darkest-blue);
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.message-item.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@keyframes slideMessages {
+    0%, 16% { transform: translateY(0); }
+    20%, 36% { transform: translateY(-40px); }
+    40%, 56% { transform: translateY(-80px); }
+    60%, 76% { transform: translateY(-120px); }
+    80%, 96% { transform: translateY(-160px); }
+    100% { transform: translateY(0); }
 }
 
 @media (max-width: 1440px) {
@@ -481,6 +534,23 @@ th {
 
     .status-amount {
         font-size: 1rem;
+    }
+
+    .welcome-content {
+        padding: 2rem;
+        max-width: 90%;
+    }
+
+    #welcome-section h1 {
+        font-size: 2rem;
+    }
+
+    #welcome-section p {
+        font-size: 1rem;
+    }
+
+    .scan-icon {
+        font-size: 4rem;
     }
 }
 
@@ -1043,3 +1113,59 @@ th {
 }
 
 /*END OF BILLS PAGE STYLES*/
+
+.message-wrapper {
+    position: fixed;
+    top: 50%;
+    right: 40px;
+    transform: translateY(-50%);
+    width: 400px;
+    background: linear-gradient(to right, transparent, var(--light-aqua));
+    padding: 30px 20px;
+    text-align: left;
+    border-radius: 8px;
+}
+
+.message-content {
+    margin: 0;
+    animation: slideMessages 24s infinite;
+}
+
+.message-item {
+    height: 40px;
+    margin: 0;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    color: var(--darkest-blue);
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.message-item.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@keyframes slideMessages {
+    0%, 16% { transform: translateY(0); }
+    20%, 36% { transform: translateY(-40px); }
+    40%, 56% { transform: translateY(-80px); }
+    60%, 76% { transform: translateY(-120px); }
+    80%, 96% { transform: translateY(-160px); }
+    100% { transform: translateY(0); }
+}
+
+@media (max-width: 1024px) {
+    .message-wrapper {
+        right: 20px;
+        width: 300px;
+        padding: 20px 15px;
+    }
+
+    .message-item {
+        font-size: 1em;
+        height: 35px;
+        padding: 8px 15px;
+    }
+}

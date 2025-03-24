@@ -13,6 +13,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/html/v2"
 )
 
@@ -42,7 +43,7 @@ func main() {
 		db.Close()
 		os.Exit(0)
 	}()
-	// defer db.Close()
+	defer db.Close()
 
 	viewsEngine := html.New("./ui/html", ".html")
 	viewsEngine.Reload(true) // Enable template reloading for development
@@ -54,6 +55,17 @@ func main() {
 		IdleTimeout:           time.Second * 60,
 		ReadTimeout:           time.Second * 60,
 		WriteTimeout:          time.Second * 60,
+		ColorScheme: fiber.Colors{
+			Black:   "\u001b[93m",
+			Red:     "\u001b[91m",
+			Green:   "\u001b[92m",
+			Yellow:  "\u001b[93m",
+			Blue:    "\u001b[94m",
+			Magenta: "\u001b[95m",
+			Cyan:    "\u001b[96m",
+			White:   "\u001b[97m",
+			Reset:   "\u001b[0m",
+		}, // Custom colors for better visibility
 	})
 
 	// Configure middleware with enhanced CORS settings for SSE
@@ -62,6 +74,10 @@ func main() {
 		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: true, // Keep credentials enabled for cookies/auth
 		ExposeHeaders:    "Content-Type, Content-Length, Content-Disposition",
+	}))
+
+	app.Use(logger.New(logger.Config{
+		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
 
 	// Serve static files
@@ -80,6 +96,7 @@ func main() {
 	app.Get("/grades", appHandler.HandleGrades)
 	app.Get("/test-grades", appHandler.HandleTestGrades)
 	app.Get("/error", appHandler.HandleError)
+	app.Get("/student-partial/:rfid", appHandler.GetStudentPartial)
 
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
