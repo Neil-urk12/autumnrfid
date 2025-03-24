@@ -12,12 +12,18 @@ import (
 
 // SSE broadcaster for sending messages to connected clients
 type Broadcaster struct {
-	clients    map[*Client]bool
-	register   chan *Client
+	// clients tracks all connected SSE clients with a bool indicating active status
+	clients map[*Client]bool
+	// register receives new clients that want to subscribe to SSE events
+	register chan *Client
+	// unregister receives clients that should be removed from broadcasting
 	unregister chan *Client
-	broadcast  chan Message
-	mutex      sync.RWMutex
-	done       chan struct{}
+	// broadcast channel receives messages that should be sent to all connected clients
+	broadcast chan Message
+	// mutex protects concurrent access to the clients map
+	mutex sync.RWMutex
+	// done channel signals when the broadcaster should shut down
+	done chan struct{}
 }
 
 type Message struct {
@@ -26,8 +32,12 @@ type Message struct {
 }
 
 type Client struct {
+	// messages is a buffered channel that receives SSE messages for this specific client
+	// Buffer size of 20 allows for message queuing before potential backpressure
 	messages chan Message
-	done     chan struct{}
+	// done signals when this client's connection should be terminated
+	// closed when the client disconnects or encounters an error
+	done chan struct{}
 }
 
 var (
@@ -108,6 +118,10 @@ func (b *Broadcaster) run() {
 }
 
 func (b *Broadcaster) Broadcast(event string, data string) {
+	if event == "" {
+		event = "message"
+	}
+
 	message := Message{Event: event, Data: data}
 
 	fmt.Printf("[SSE DEBUG] Raw message being sent:\n%s\n\n", message)

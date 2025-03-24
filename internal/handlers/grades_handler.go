@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"regexp"
 	"rfidsystem/internal/repositories"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,6 +13,16 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 
 	if studentId == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
+	}
+
+	// Validate student ID format (assuming it should be alphanumeric and 8-12 characters)
+	// You can adjust the regex as needed
+	match, err := regexp.MatchString(`^[A-Za-z0-9]{8,12}$`, studentId)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error validating student ID")
+	}
+	if !match {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid student ID format. Must be 8-12 alphanumeric characters")
 	}
 
 	gradesRepo := repositories.NewRFIDRepository(h.db)
