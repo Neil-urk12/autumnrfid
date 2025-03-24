@@ -49,6 +49,10 @@ func GetBroadcaster() *Broadcaster {
 	return broadcaster
 }
 
+func (b *Broadcaster) Close() {
+	close(b.done)
+}
+
 func (b *Broadcaster) run() {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
@@ -60,6 +64,7 @@ func (b *Broadcaster) run() {
 				close(client.messages)
 				delete(b.clients, client)
 			}
+			b.Close()
 			return
 
 		case client := <-b.register:
