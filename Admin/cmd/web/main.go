@@ -13,6 +13,7 @@ func main() {
 	mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/login", loginPageHandler)
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/static/"))))
+	mux.HandleFunc("/logout", logoutHandler)
 
 	fmt.Println("Server running on port: 8080")
 	http.ListenAndServe(":8080", mux)
@@ -98,111 +99,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func loginPageHandler(w http.ResponseWriter, r *http.Request) {
-// 	if isAuthenticated(r) {
-// 		http.Redirect(w, r, "/", http.StatusSeeOther)
-// 		return
-// 	}
-
-// 	switch r.Method {
-// 	case http.MethodGet:
-// 		tmpl := template.Must(template.ParseFiles("ui/html/templates/login.html"))
-// 		if err := tmpl.Execute(w, nil); err != nil {
-// 			fmt.Println(err)
-// 		}
-// 	case http.MethodPost:
-// 		// if r.Body == nil {
-// 		// 	http.Error(w, "Missing request body", http.StatusBadRequest)
-// 		// 	return
-// 		// }
-// 		// defer r.Body.Close()
-
-// 		// body, err := io.ReadAll(r.Body)
-// 		// if err != nil {
-// 		// 	http.Error(w, "Failed to request body", http.StatusInternalServerError)
-// 		// 	log.Printf("Error reading POST body: %v", err)
-// 		// 	return
-// 		// }
-
-// 		// if len(body) == 0 {
-// 		// 	http.Error(w, "Empty request body", http.StatusBadRequest)
-// 		// 	return
-// 		// }
-
-// 		// var data LoginDetails
-// 		// err = json.Unmarshal(body, &data)
-// 		//
-// 		err := r.ParseForm()
-// 		if err != nil {
-// 			http.Error(w, "Failed to parse form data", http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		email := r.FormValue("email")
-// 		password := r.FormValue("password")
-
-// 		if r.Header.Get("HX-Request") == "true" {
-// 			if authenticated, err := authenticateUser(email, password); authenticated {
-// 				if err != nil {
-// 					http.Error(w, err.Error(), http.StatusInternalServerError)
-// 					return
-// 				}
-// 				sessionToken := createSession(email)
-
-// 				http.SetCookie(w, &http.Cookie{
-// 					Name:     "session_token",
-// 					Value:    sessionToken,
-// 					Path:     "/",
-// 					HttpOnly: true,
-// 					Expires:  time.Now().Add(time.Hour * 24),
-// 				})
-
-// 				w.Header().Set("HX-Redirect", "/")
-// 			} else {
-// 				w.Header().Set("Content-Type", "text/html")
-// 				errorMsg := ""
-// 				if err != nil {
-// 					errorMsg = err.Error()
-// 				} else {
-// 					errorMsg = "Authentication failed"
-// 				}
-
-// 				tmpl := template.Must(template.ParseFiles("ui/html/templates/login.html"))
-// 				data := struct {
-// 					Error string
-// 				}{
-// 					Error: errorMsg,
-// 				}
-// 				tmpl.Execute(w, data)
-// 			}
-// 		} else {
-// 			if authenticated, err := authenticateUser(email, password); authenticated {
-// 				sessionToken := createSession(email)
-// 				http.SetCookie(w, &http.Cookie{
-// 					Name:     "session_token",
-// 					Value:    sessionToken,
-// 					Path:     "/",
-// 					HttpOnly: true,
-// 					Expires:  time.Now().Add(time.Hour * 24),
-// 				})
-
-// 				http.Redirect(w, r, "/", http.StatusSeeOther)
-// 			} else {
-// 				tmpl := template.Must(template.ParseFiles("ui/html/templates/login.html"))
-// 				data := struct {
-// 					Error string
-// 				}{
-// 					Error: "Invalid email or password",
-// 				}
-
-//					if err != nil {
-//						data.Error = err.Error()
-//					}
-//					tmpl.Execute(w, data)
-//				}
-//			}
-//		}
-//	}
 func loginPageHandler(w http.ResponseWriter, r *http.Request) {
 	// If already logged in, redirect to dashboard
 	if isAuthenticated(r) {
@@ -281,18 +177,18 @@ func loginPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func authenticateUser(email, password string) (bool, error) {
 	if email == "" || password == "" {
-		return false, errors.New("Email and password are required")
+		return false, errors.New("email and password are required")
 	}
 
 	// Check if user exists
 	storedPassword, exists := users[email]
 	if !exists {
-		return false, errors.New("Invalid email or password")
+		return false, errors.New("invalid email or password")
 	}
 
 	// Check if password matches
 	if storedPassword != password {
-		return false, errors.New("Invalid email or password")
+		return false, errors.New("invalid email or password")
 	}
 
 	return true, nil
@@ -301,4 +197,37 @@ func authenticateUser(email, password string) (bool, error) {
 type LoginDetails struct {
 	EmailAddress string `json:"email"`
 	Password     string `json:"password"`
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Clear session cookie
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	cookie, err := r.Cookie("session_token")
+	if err == nil {
+		sessionToken := cookie.Value
+		delete(sessions, sessionToken)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Now().Add(-1 * time.Hour),
+		MaxAge:   -1,
+	})
+
+	// Check if this is an HTMX request
+	if r.Header.Get("HX-Request") == "true" {
+		// Use HX-Redirect for HTMX requests to do a client-side redirect
+		w.Header().Set("HX-Redirect", "/login")
+		w.WriteHeader(http.StatusOK)
+	} else {
+		// Regular redirect for non-HTMX requests
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
 }

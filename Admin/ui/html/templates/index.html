@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.Title}}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
         :root {
             --primary-color: #4e73df;
@@ -22,7 +22,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -77,6 +77,7 @@
         .sidebar-menu li a:hover {
             color: white;
             background-color: rgba(0, 0, 0, 0.1);
+            cursor: pointer;
         }
 
         .sidebar-menu li a i {
@@ -475,25 +476,46 @@
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            Student Management
-        </div>
+        <div class="sidebar-header">Student Management</div>
         <div class="sidebar-menu">
             <h3>Core</h3>
             <ul>
-                <li class="active"><a href="#"><i class="fas fa-fw fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="active">
+                    <a href="#"><i class="fas fa-fw fa-tachometer-alt"></i>
+                        Dashboard</a>
+                </li>
             </ul>
             <h3>Management</h3>
             <ul>
-                <li><a href="#"><i class="fas fa-fw fa-users"></i> Students</a></li>
-                <li><a href="#"><i class="fas fa-fw fa-book"></i> Courses</a></li>
-                <li><a href="#"><i class="fas fa-fw fa-calendar-alt"></i> Bills</a></li>
-                <li><a href="#"><i class="fas fa-fw fa-chart-bar"></i> Grades</a></li>
+                <li>
+                    <a href="#"><i class="fas fa-fw fa-users"></i> Students</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-fw fa-book"></i> Courses</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-fw fa-calendar-alt"></i> Bills</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-fw fa-chart-bar"></i> Grades</a>
+                </li>
             </ul>
             <h3>Settings</h3>
             <ul>
-                <li><a href="#"><i class="fas fa-fw fa-cog"></i> Settings</a></li>
-                <li><a href="#"><i class="fas fa-fw fa-user-shield"></i> Admin</a></li>
+                <li>
+                    <a href="#"><i class="fas fa-fw fa-cog"></i> Settings</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-fw fa-user-shield"></i> Admin</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-fw fa-user"></i> Profile</a>
+                </li>
+                <li>
+                    <a hx-post="/logout" hx-trigger="click">
+                        <i class="fas fa-fw fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -507,11 +529,11 @@
             </div>
             <div class="top-nav-right">
                 <div class="search-bar">
-                    <input type="text" placeholder="Search...">
+                    <input type="text" placeholder="Search..." />
                     <i class="fas fa-search"></i>
                 </div>
                 <div class="user-profile">
-                    <img src="https://via.placeholder.com/150" alt="User">
+                    <img src="https://via.placeholder.com/150" alt="User" />
                     <span>Admin</span>
                 </div>
             </div>
@@ -596,11 +618,19 @@
                                     <td>John Cez</td>
                                     <td>john@example.com</td>
                                     <td>Computer Science</td>
-                                    <td><span class="badge badge-success">Active</span></td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-success btn-sm"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                        <span class="badge badge-success">Active</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -608,11 +638,19 @@
                                     <td>Jan Doe Rosalijos</td>
                                     <td>jane@example.com</td>
                                     <td>Business Administration</td>
-                                    <td><span class="badge badge-success">Active</span></td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-success btn-sm"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                        <span class="badge badge-success">Active</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -620,11 +658,19 @@
                                     <td>Jan</td>
                                     <td>jan@example.com</td>
                                     <td>Computer Engineering</td>
-                                    <td><span class="badge badge-warning">Active</span></td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-success btn-sm"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                        <span class="badge badge-warning">Active</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -632,11 +678,19 @@
                                     <td>Emily Casupanan</td>
                                     <td>emily@example.com</td>
                                     <td>IT</td>
-                                    <td><span class="badge badge-success">Active</span></td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-success btn-sm"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                        <span class="badge badge-success">Active</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -644,11 +698,19 @@
                                     <td>Michael Bullahan</td>
                                     <td>michael@example.com</td>
                                     <td>Computer Science</td>
-                                    <td><span class="badge badge-danger">Inactive</span></td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-success btn-sm"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                        <span class="badge badge-danger">Inactive</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -656,8 +718,6 @@
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
 
@@ -667,17 +727,19 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5>Add New Student</h5>
-                    <button class="close" onclick="closeModal()">&times;</button>
+                    <button class="close" onclick="closeModal()">
+                        &times;
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form>
                         <div class="form-group">
                             <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" placeholder="Enter full name">
+                            <input type="text" class="form-control" placeholder="Enter full name" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" placeholder="Enter email">
+                            <input type="email" class="form-control" placeholder="Enter email" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">Course</label>
@@ -701,29 +763,36 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
                     <button class="btn btn-primary">Save Student</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script>
         function openModal() {
-            document.getElementById('addStudentModal').classList.add('show');
+            document
+                .getElementById("addStudentModal")
+                .classList.add("show");
         }
 
         function closeModal() {
-            document.getElementById('addStudentModal').classList.remove('show');
+            document
+                .getElementById("addStudentModal")
+                .classList.remove("show");
         }
 
         // Close modal when clicking outside of it
         window.onclick = function (event) {
-            const modal = document.getElementById('addStudentModal');
+            const modal = document.getElementById("addStudentModal");
             if (event.target === modal) {
                 closeModal();
             }
-        }
+        };
     </script>
 </body>
 
