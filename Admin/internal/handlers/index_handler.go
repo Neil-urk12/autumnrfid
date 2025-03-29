@@ -1,12 +1,21 @@
 package handlers
 
 import (
+	"admin/repositories"
 	"fmt"
 	"html/template"
 	"net/http"
 )
 
-func IndexHandler(templates *template.Template) http.HandlerFunc {
+type AppHandler struct {
+	db *repositories.DatabaseClient
+}
+
+func NewHandler(db *repositories.DatabaseClient) *AppHandler {
+	return &AppHandler{db: db}
+}
+
+func (h *AppHandler) IndexHandler(templates *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !IsAuthenticated(r) {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
