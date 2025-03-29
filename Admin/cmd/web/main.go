@@ -8,24 +8,7 @@ import (
 	"time"
 )
 
-func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", indexHandler)
-	mux.HandleFunc("/login", loginPageHandler)
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/static/"))))
-	mux.HandleFunc("/logout", logoutHandler)
-
-	fmt.Println("Server running on port: 8080")
-	http.ListenAndServe(":8080", mux)
-}
-
-func authHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthenticated(r) {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-}
-
+var templates *template.Template
 var users = map[string]string{
 	"admin@example.com": "admin123",
 	"user@example.com":  "user123",
@@ -35,6 +18,103 @@ var sessions = map[string]session{}
 type session struct {
 	email  string
 	expiry time.Time
+}
+
+func main() {
+	mux := http.NewServeMux()
+	initTemplates()
+	mux.HandleFunc("/", indexHandler)
+	mux.HandleFunc("/login", loginPageHandler)
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/static/"))))
+	mux.HandleFunc("/logout", logoutHandler)
+	mux.HandleFunc("/students", studentsPageHandler)
+	mux.HandleFunc("/dashboard", dashboardHandler)
+
+	fmt.Println("Server running on port: 8080")
+	http.ListenAndServe(":8080", mux)
+}
+
+func initTemplates() {
+	// Parse all templates at startup
+	var err error
+	templates, err = template.ParseFiles(
+		"ui/html/templates/index.html",
+		"ui/html/templates/login.html",
+		"ui/html/partials/dashboard.html",
+		"ui/html/partials/student_management.html",
+	)
+	if err != nil {
+		// Prevent the admin from running if there are template errors
+		panic(fmt.Sprintf("Failed to parse templates: %v", err))
+	}
+}
+
+func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Title              string
+		CurrentPage        string
+		TotalStudents      int
+		TotalCourses       int
+		AverageScansPerDay int
+	}{
+		Title:              "Student Management System",
+		CurrentPage:        "dashboard",
+		TotalStudents:      1220,
+		TotalCourses:       45,
+		AverageScansPerDay: 169,
+	}
+
+	if r.Header.Get("HX-Request") == "true" {
+		if err := templates.ExecuteTemplate(w, "dashboard", data); err != nil {
+			fmt.Println("Template error:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	} else {
+		if err := templates.ExecuteTemplate(w, "index.html", data); err != nil {
+			fmt.Println("Template error:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	}
+}
+
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthenticated(r) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+}
+
+func studentsPageHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Url is hit!")
+	if !isAuthenticated(r) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	students := []map[string]string{
+		{"ID": "ST001", "Name": "Jan Doe rosa", "Email": "janros@gmail.com", "Course": "Computer Science", "Status": "Active"},
+		{"ID": "ST002", "Name": "Jan Cez Casupanan", "Email": "cez@casupanan.com", "Course": "Information Science", "Status": "Active"},
+	}
+
+	data := struct {
+		Students []map[string]string
+		Courses  []string
+	}{
+		Students: students,
+		Courses:  []string{"Computer Science", "Business Administration", "Electrical Engineering"},
+	}
+
+	if r.Header.Get("HX-Request") == "true" {
+		if err := templates.ExecuteTemplate(w, "students", data); err != nil {
+			fmt.Println("Template error:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	} else {
+		if err := templates.ExecuteTemplate(w, "index.html", data); err != nil {
+			fmt.Println("Template error:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	}
 }
 
 func createSession(email string) string {
@@ -83,20 +163,24 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Title              string
+		CurrentPage        string
 		TotalStudents      int
 		TotalCourses       int
 		TotalBills         int
 		AverageScansPerDay int
 	}{
 		Title:              "Student Management System",
+		CurrentPage:        "dashboard",
 		TotalStudents:      1220,
 		TotalCourses:       45,
 		AverageScansPerDay: 169,
 	}
-	tmpl := template.Must(template.ParseFiles("ui/html/templates/index.html"))
-	if err := tmpl.Execute(w, data); err != nil {
-		fmt.Println(err)
+	if err := templates.ExecuteTemplate(w, "index.html", data); err != nil {
+		fmt.Println("Template error:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+
+	fmt.Println("User authenticated, serving index page")
 }
 
 func loginPageHandler(w http.ResponseWriter, r *http.Request) {
