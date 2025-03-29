@@ -3,17 +3,8 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+	"rfidsystem/internal/model"
 )
-
-type Student struct {
-	StudentID    string
-	DepartmentID int
-	FirstName    string
-	LastName     string
-	MiddleName   string
-	YearLevel    int
-	Program      string
-}
 
 type Bills struct {
 	// Add bills data here
@@ -32,7 +23,7 @@ func NewRFIDRepository(dbClient *DatabaseClient) *RFIDRepository {
 }
 
 // Modify this later to query all student data
-func (r *RFIDRepository) GetStudentByRFID(studentId string) (*Student, error) {
+func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, error) {
 	query := `
 		SELECT student_ID, department_ID, first_Name, last_Name, middle_Name, year_Level, program
 		FROM Students
@@ -41,7 +32,7 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*Student, error) {
 
 	fmt.Printf("Executing query with student ID: %s\n", studentId)
 
-	student := &Student{}
+	student := &model.Student{}
 	err := r.dbClient.DB.QueryRow(query, studentId).Scan(
 		&student.StudentID,
 		&student.DepartmentID,
