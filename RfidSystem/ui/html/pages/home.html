@@ -17,9 +17,9 @@
 
     <div class="navbar">
         <button hx-get="/" class="rfid">RFID</button>
-        <button hx-get="/test-grades" hx-swap="innerHTML" hx-target="#student-data-container"
+        <button hx-get="/test-grades" hx-swap="outerHTML" hx-target="#student-data-container"
             class="rfid">Grades</button>
-        <button hx-get="/bills" class="rfid">Bills</button>
+        <button hx-get="/bills" hx-swap="outerHTML" hx-target="#student-data-container" class="rfid">Bills</button>
     </div>
 
     <!-- Error page for 404 not found -->

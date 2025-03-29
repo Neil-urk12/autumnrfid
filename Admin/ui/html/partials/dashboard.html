@@ -1,0 +1,200 @@
+{{define "dashboard"}}
+<!--Top Navigation -->
+<div class="top-nav">
+    <div class="top-nav-left">
+        <h1>Dashboard</h1>
+    </div>
+    <div class="top-nav-right">
+        <div class="search-bar">
+            <input type="text" placeholder="Search..." />
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="user-profile">
+            <img src="https://via.placeholder.com/150" alt="User" />
+            <span>Admin</span>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Content -->
+<div class="dashboard-content">
+    <!-- Stats Cards -->
+    <div class="cards-row">
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{.TotalStudents}}</h3>
+                    <p>Total Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{.TotalCourses}}</h3>
+                    <p>Total Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{.AverageScansPerDay}}</h3>
+                    <p>Average scans per day</p>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="card">
+        <div class="stat-card">
+            <div class="stat-icon danger">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>12</h3>
+                <p>Pending Issues</p>
+            </div>
+        </div>
+    </div> -->
+    </div>
+
+    <!-- Add Student Button -->
+    <button class="btn btn-primary" onclick="openModal()">
+        <i class="fas fa-plus"></i> Add Student
+    </button>
+
+    <!-- Students Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2>Recent Students</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ST001</td>
+                            <td>John Cez</td>
+                            <td>john@example.com</td>
+                            <td>Computer Science</td>
+                            <td>
+                                <span class="badge badge-success">Active</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>ST002</td>
+                            <td>Jan Doe Rosalijos</td>
+                            <td>jane@example.com</td>
+                            <td>Business Administration</td>
+                            <td>
+                                <span class="badge badge-success">Active</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>ST003</td>
+                            <td>Jan</td>
+                            <td>jan@example.com</td>
+                            <td>Computer Engineering</td>
+                            <td>
+                                <span class="badge badge-warning">Active</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>ST004</td>
+                            <td>Emily Casupanan</td>
+                            <td>emily@example.com</td>
+                            <td>IT</td>
+                            <td>
+                                <span class="badge badge-success">Active</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>ST005</td>
+                            <td>Michael Bullahan</td>
+                            <td>michael@example.com</td>
+                            <td>Computer Science</td>
+                            <td>
+                                <span class="badge badge-danger">Inactive</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}
