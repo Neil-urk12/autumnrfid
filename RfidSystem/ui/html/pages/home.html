@@ -15,11 +15,10 @@
 
 <body>
 
-    <div class="navbar">
-        <button hx-get="/" class="rfid">RFID</button>
-        <button hx-get="/test-grades" hx-swap="outerHTML" hx-target="#student-data-container"
-            class="rfid">Grades</button>
-        <button hx-get="/bills" hx-swap="outerHTML" hx-target="#student-data-container" class="rfid">Bills</button>
+    <div class="navbar" id="main-navbar" style="display: none;">
+        <button hx-get="/" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
+        <button hx-get="/test-grades" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
+        <button hx-get="/bills" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
     </div>
 
     <!-- Error page for 404 not found -->
@@ -34,7 +33,7 @@
 
     </div>
 
-    <main>
+    <main id="main">
 
         <div class="container-home" id="student-data-container" hx-ext="sse" sse-connect="/stream"
             sse-swap="studentcallback" hx-target=".container-home">
@@ -59,7 +58,7 @@
             </div>
 
         </div>
-        <p hx-ext="sse" sse-connect="/stream" sse-swap="ping">asdf</p>
+        <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p>
 
     </main>
 
@@ -91,6 +90,40 @@
             sseSource.onerror = function (e) {
                 console.error('SSE Error:', e)
             }
+
+            // HTMX event listener to control navbar visibility
+            document.body.addEventListener('htmx:afterSwap', function (event) {
+                const navbar = document.getElementById('main-navbar');
+                const target = event.detail.target;
+                const requestPath = event.detail.pathInfo ? event.detail.pathInfo.requestPath : null;
+
+                // Ensure the swap happened in the correct container and we have a navbar element
+                if (target && target.id === 'student-data-container' && navbar && requestPath) {
+
+                    // Determine if the navbar should be shown based on the requested path
+                    const showNav = requestPath.startsWith('/student-partial/') ||
+                        requestPath === '/grades' ||
+                        requestPath === '/bills';
+
+                    // Determine if the navbar should be hidden (error or home page)
+                    const hideNav = requestPath === '/error' || requestPath === '/';
+
+                    if (showNav) {
+                        navbar.style.display = 'flex'; // Or 'block', depending on your CSS
+                    } else if (hideNav) {
+                        navbar.style.display = 'none';
+                    }
+                    // Optional: Handle cases where the path doesn't match known patterns,
+                    // potentially leaving the navbar state unchanged or hiding it by default.
+                    // else {
+                    //     navbar.style.display = 'none'; // Default to hidden if path is unknown
+                    // }
+                } else if (target && target.id === 'student-data-container' && navbar && requestPath === '/') {
+                    // Explicitly hide if the RFID button (hx-get="/") was clicked, resetting to welcome
+                    // This case might be redundant due to the hideNav check above, but kept for clarity.
+                    navbar.style.display = 'none';
+                }
+            });
         })
     </script>
 
