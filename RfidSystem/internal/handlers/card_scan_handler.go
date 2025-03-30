@@ -148,7 +148,9 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 
 	if student == nil {
-		GetBroadcaster().Broadcast("not-found", fmt.Sprintf(`{"rfid": "%s"}`, rfid))
+		htmxInstruction := fmt.Sprintf(`<div hx-get="/error" hx-trigger="load" hx-swap="innerHTML" hx-target="#student-data-container"></div>`)
+		GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
+		// GetBroadcaster().Broadcast("not-found", fmt.Sprintf(`{"rfid": "%s"}`, rfid))
 		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
 		// return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 		// return ctx.Render("error_page", fiber.Map{})
