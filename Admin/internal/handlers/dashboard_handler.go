@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func DashboardHandler(templates *template.Template) http.HandlerFunc {
+func (h *AppHandler) DashboardHandler(templates *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !IsAuthenticated(r) {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)

@@ -13,7 +13,7 @@ var users = map[string]string{
 	"user@example.com":  "user123",
 }
 
-func LoginPageHandler(templates *template.Template) http.HandlerFunc {
+func (h *AppHandler) LoginPageHandler(templates *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// If already logged in, redirect to dashboard
 		if IsAuthenticated(r) {

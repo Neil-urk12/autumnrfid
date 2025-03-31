@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func StudentsPageHandler(templates *template.Template) http.HandlerFunc {
+func (h *AppHandler) StudentsPageHandler(templates *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Url is hit!")
 		if !IsAuthenticated(r) {
