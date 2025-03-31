@@ -9,6 +9,7 @@ import (
 	"rfidsystem/internal/config"
 	"rfidsystem/internal/handlers"
 	"rfidsystem/internal/repositories"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,6 +49,18 @@ func main() {
 	viewsEngine := html.New("./ui/html", ".html")
 	viewsEngine.Reload(true) // Enable template reloading for development
 	viewsEngine.Debug(true)  // Enable debug mode for better error messages
+
+	// Register template functions
+	viewsEngine.AddFunc("lower", strings.ToLower)
+	viewsEngine.AddFunc("feesByCategory", func(fees []repositories.FeeBreakdown, category string) []repositories.FeeBreakdown {
+		var filtered []repositories.FeeBreakdown
+		for _, fee := range fees {
+			if fee.Category == category {
+				filtered = append(filtered, fee)
+			}
+		}
+		return filtered
+	})
 
 	app := fiber.New(fiber.Config{
 		Views:                 viewsEngine,
@@ -108,11 +121,8 @@ func main() {
 		return c.SendString("Fiber Web Server is running")
 	})
 
-	app.Get("/bills", func(c *fiber.Ctx) error {
-		return c.Render("partials/bills", fiber.Map{
-			"FragmentContent": "This is the updated content from the fragment!",
-		})
-	})
+	// Bills route using query parameter
+	app.Get("/bills", appHandler.HandleBills)
 
 	log.Fatal(app.Listen(":8080"))
 }

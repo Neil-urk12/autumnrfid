@@ -82,8 +82,8 @@ func (h *AppHandler) GetStudentPartial(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Render("partials/student_info", fiber.Map{
-		"Student":   student,
-		"YearLevel": getYearLevelString(student.YearLevel),
+		"Student": student,
+		// "YearLevel": getYearLevelString(student.YearLevel),
 	}, "")
 }
 
@@ -113,8 +113,8 @@ func (h *AppHandler) HandleStudentPartial(c *fiber.Ctx) error {
 	}
 
 	return c.Render("partials/student_info", fiber.Map{
-		"Student":   student,
-		"YearLevel": getYearLevelString(student.YearLevel),
+		"Student": student,
+		// "YearLevel": getYearLevelString(student.YearLevel),
 	}, "")
 }
 
