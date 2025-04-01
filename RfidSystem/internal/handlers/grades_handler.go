@@ -39,8 +39,18 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 
 	var preparedGrades []fiber.Map
 
+	// Prepare grades with safe handling of nil values
 	for _, grade := range gradesData.Grades {
-		preparedGrades = append(preparedGrades, fiber.Map{
+		// preparedGrades = append(preparedGrades, fiber.Map{
+		// 	"SubjectCode":    grade.SubjectCode,
+		// 	"SubjectName":    grade.SubjectName,
+		// 	"PrelimGrade":    formatGrade(grade.PrelimGrade),
+		// 	"MidtermGrade":   formatGrade(grade.MidtermGrade),
+		// 	"PrefinalGrade":  formatGrade(grade.PrefinalGrade),
+		// 	"FinalTermGrade": formatGrade(grade.FinalTermGrade),
+		// 	"FinalGrade":     formatGrade(grade.FinalGrade),
+		// })
+		gradeMap := fiber.Map{
 			"SubjectCode":    grade.SubjectCode,
 			"SubjectName":    grade.SubjectName,
 			"PrelimGrade":    formatGrade(grade.PrelimGrade),
@@ -48,39 +58,53 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 			"PrefinalGrade":  formatGrade(grade.PrefinalGrade),
 			"FinalTermGrade": formatGrade(grade.FinalTermGrade),
 			"FinalGrade":     formatGrade(grade.FinalGrade),
-		})
+		}
+		preparedGrades = append(preparedGrades, gradeMap)
 	}
 
+	// Calculate GWA with nil safety checks
 	var totalGrade float64
 	var countGrades int
 	for _, grade := range gradesData.Grades {
 		if grade.FinalGrade != nil {
-			log.Printf("Grade for subject %s: %.2f", grade.SubjectCode, *grade.FinalGrade)
 			totalGrade += *grade.FinalGrade
 			countGrades++
+			log.Printf("Grade for subject %s: %.2f", grade.SubjectCode, *grade.FinalGrade)
 		}
 	}
 
 	var gwa float64
+	var gwaString string
 	if countGrades > 0 {
 		gwa = totalGrade / float64(countGrades)
+		gwaString = fmt.Sprintf("%.2f", gwa)
+	} else {
+		// Use a placeholder dash when no grades are available for GWA calculation
+		gwaString = "N/A"
 	}
 
 	log.Printf("Student %s has %d grades with a total of %.2f and a GWA of %.2f", studentId, countGrades, totalGrade, gwa)
 
 	return ctx.Render("partials/grades", fiber.Map{
-		"Title":  "Student Grades",
-		"Term":   gradesData.CurrentTerm,
-		"Grades": gradesData.Grades,
-		"GWA":    fmt.Sprintf("%.2f", gwa),
+		"Title": "Student Grades",
+		"Term":  gradesData.CurrentTerm,
+		// "Grades": gradesData.Grades,
+		"Grades": preparedGrades,
+		"GWA":    gwaString,
 	})
 }
 
+// formatGrade safely handles nil grade values and formats non-nil grades
+// Returns:
+//   - "-" when the grade is nil (grade not yet available/recorded)
+//   - formatted string with 2 decimal places for actual grade values
 func formatGrade(grade *float64) string {
 	if grade == nil {
-		return "-" // Placeholder for nil values
+		// Return a dash placeholder for nil grades
+		// This indicates that the grade is not yet available or has not been recorded
+		return "-"
 	}
-	return fmt.Sprintf("%.2f", *grade) // Dereference and format
+	return fmt.Sprintf("%.2f", *grade)
 }
 
 func (h *AppHandler) HandleTestGrades(ctx *fiber.Ctx) error {
