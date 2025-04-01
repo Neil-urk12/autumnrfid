@@ -18,18 +18,10 @@
     <div class="navbar" id="main-navbar" style="display: none;">
         <button hx-get="/" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
         <button hx-get="/test-grades" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
-        <button hx-get="/bills" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
+        <!-- <button hx-get="/bills?student-id=${studentId}" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button> -->
+        <button hx-get="/bills?student-id=ACLC-2023-001" hx-target="#main" hx-swap="innerHTML"
+            class="rfid">Bills</button>
     </div>
-
-    <!-- Error page for 404 not found -->
-    <!-- <div id="error-page" class="error-container hidden">
-        <div class="error-code">404</div>
-        <div class="error-message">Student Not Found</div>
-        <div class="error-details">
-            The student ID you're looking for doesn't exist in our
-            database.
-        </div>
-    </div> -->
 
     </div>
 
@@ -82,6 +74,21 @@
             sseSource.addEventListener('ping', function (e) {
                 console.log('SSE Ping received:', JSON.parse(e.data))
             })
+
+            // Store student ID when received
+            let currentStudentId = '';
+
+            sseSource.addEventListener('studentcallback', function (e) {
+                const data = JSON.parse(e.data);
+                if (data.student && data.student.StudentID) {
+                    currentStudentId = data.student.StudentID;
+                    // Update bills button href with current student ID
+                    const billsButton = document.querySelector('button[hx-get^="/bills"]');
+                    if (billsButton) {
+                        billsButton.setAttribute('hx-get', `/bills?student-id=${currentStudentId}`);
+                    }
+                }
+            });
 
             sseSource.addEventListener('connected', function (e) {
                 console.log('SSE Connected:', JSON.parse(e.data))

@@ -35,15 +35,15 @@
                 </tr>
                 <tr>
                     <th>Birthday</th>
-                    <td>{{if .Student}}{{.Birthday}}{{end}}</td>
+                    <td>{{if .Student}}{{.Student.Birthday}}{{end}}</td>
                 </tr>
                 <tr>
                     <th>Contact Number</th>
-                    <td>09913445768</td>
+                    <td>{{if .Student}}{{.Student.ContactNumber}}{{end}}</td>
                 </tr>
                 <tr>
                     <th>Email</th>
-                    <td>tomatoma@gmail.com</td>
+                    <td>{{if .Student}}{{.Student.Email}}{{end}}</td>
                 </tr>
             </table>
 
@@ -69,7 +69,7 @@
                 </tr>
                 <tr>
                     <th>Block</th>
-                    <td>CS-22A</td>
+                    <td>{{if .Student}}{{.Student.BlockSection}}{{end}}</td>
                 </tr>
             </table>
 
@@ -79,11 +79,11 @@
                 </tr>
                 <tr>
                     <th>Last Access</th>
-                    <td>2024-03-19 14:30:45</td>
+                    <td>{{if .Student}}{{.Student.LastAccessTimestamp}}{{end}}</td>
                 </tr>
                 <tr>
                     <th>First Access</th>
-                    <td>2024-01-15 08:15:22</td>
+                    <td>{{if .Student}}{{.Student.FirstAccessTimestamp}}{{end}}</td>
                 </tr>
             </table>
         </div>
@@ -103,26 +103,13 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {{range $year := .GradesSummary}}
                     <tr>
-                        <td class="year-header">First Year</td>
-                        <td>1.50</td>
-                        <td>1.23</td>
+                        <td class="year-header">{{$year.YearName}}</td>
+                        <td>{{$year.FirstSem}}</td>
+                        <td>{{$year.SecondSem}}</td>
                     </tr>
-                    <tr>
-                        <td class="year-header">Second Year</td>
-                        <td>1.40</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td class="year-header">Third Year</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td class="year-header">Fourth Year</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
+                    {{end}}
                 </tbody>
             </table>
         </div>
@@ -131,46 +118,37 @@
         <div class="summary-header">Summary of Bills</div>
         <div class="summary-content">
             <div class="bill-summary">
+                {{if .Assessment}}
                 <div class="bill-total">
                     <div class="bill-label">Total Tuition & Misc. Fees</div>
-                    <div class="bill-amount">P14621.83</div>
+                    <div class="bill-amount">P{{printf "%.2f" .Assessment.TotalFeeAmount}}</div>
                 </div>
 
                 <div class="bill-status">
                     <div class="status-item">
                         <div class="bill-label">Initial Payment</div>
-                        <div class="status-amount">P2750.00 (Paid)</div>
+                        <div class="status-amount">P{{if .Assessment.InitialPayment}}{{printf "%.2f"
+                            .Assessment.InitialPayment}} (Paid){{else}}0.00{{end}}</div>
                     </div>
                     <div class="status-item">
                         <div class="bill-label">Remaining Balance</div>
-                        <div class="status-amount">P11871.83</div>
+                        <div class="status-amount">P{{printf "%.2f" .Assessment.RemainingBalance}}</div>
                     </div>
                 </div>
 
                 <div class="bill-label">Payment Per Exam</div>
                 <div class="payment-schedule">
+                    {{range $schedule := .PaymentSchedules}}
                     <div class="payment-item">
-                        <div class="payment-title">Prelim</div>
-                        <div class="payment-amount">P2967.96</div>
-                        <div class="payment-date">Status: Paid</div>
+                        <div class="payment-title">{{$schedule.TermDescription}}</div>
+                        <div class="payment-amount">P{{printf "%.2f" $schedule.ExpectedAmount}}</div>
+                        <div class="payment-date">Due: {{$schedule.DueDate.Format "Jan 02, 2006"}}</div>
                     </div>
-                    <div class="payment-item">
-                        <div class="payment-title">Midterm</div>
-                        <div class="payment-amount">P2967.96</div>
-                        <div class="payment-date">Status: Paid</div>
-                    </div>
-                    <div class="payment-item">
-                        <div class="payment-title">Pre-Finals</div>
-                        <div class="payment-amount">P2967.96</div>
-                        <div class="payment-date">Status: Not Paid</div>
-                    </div>
-                    <div class="payment-item">
-                        <div class="payment-title">Finals</div>
-                        <div class="payment-amount">P2967.96</div>
-                        <div class="payment-date">Status: Not Paid</div>
-                    </div>
+                    {{end}}
                 </div>
+                {{end}}
             </div>
         </div>
     </div>
+</div>
 </div>
