@@ -9,7 +9,7 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     background-color: var(--light-aqua);
     margin: 0;
     padding: 0;
@@ -27,7 +27,11 @@ body {
     text-align: center;
     text-decoration: none;
     font-weight: bold;
-    background: linear-gradient(to bottom, var(--dark-blue), var(--darkest-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--dark-blue),
+        var(--darkest-blue)
+    );
     border: none;
     color: white;
     cursor: pointer;
@@ -160,7 +164,11 @@ body {
 }
 
 .summary-header {
-    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--medium-blue),
+        var(--dark-blue)
+    );
     color: var(--white);
     padding: 10px 15px;
     font-weight: bold;
@@ -218,7 +226,6 @@ th {
     color: var(--dark-blue);
     font-weight: bold;
     margin: 7px 0;
-
 }
 
 .bill-label {
@@ -411,7 +418,9 @@ th {
     color: var(--darkest-blue);
     opacity: 0;
     transform: translateX(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
 }
 
 .message-item.active {
@@ -420,12 +429,29 @@ th {
 }
 
 @keyframes slideMessages {
-    0%, 16% { transform: translateY(0); }
-    20%, 36% { transform: translateY(-40px); }
-    40%, 56% { transform: translateY(-80px); }
-    60%, 76% { transform: translateY(-120px); }
-    80%, 96% { transform: translateY(-160px); }
-    100% { transform: translateY(0); }
+    0%,
+    16% {
+        transform: translateY(0);
+    }
+    20%,
+    36% {
+        transform: translateY(-40px);
+    }
+    40%,
+    56% {
+        transform: translateY(-80px);
+    }
+    60%,
+    76% {
+        transform: translateY(-120px);
+    }
+    80%,
+    96% {
+        transform: translateY(-160px);
+    }
+    100% {
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 1440px) {
@@ -435,7 +461,6 @@ th {
 
     .profile-info h5 {
         font-size: 0.9rem;
-
     }
 
     .grades-table-home th,
@@ -505,7 +530,6 @@ th {
 
     .profile-info h5 {
         font-size: 0.8rem;
-
     }
 
     .bill-summary {
@@ -615,7 +639,11 @@ th {
 }
 
 .sidebar-btn {
-    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--medium-blue),
+        var(--dark-blue)
+    );
     color: var(--white);
     border: none;
     border-radius: 4px;
@@ -626,7 +654,11 @@ th {
 }
 
 .sidebar-btn:hover {
-    background: linear-gradient(to bottom, var(--dark-blue), var(--darkest-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--dark-blue),
+        var(--darkest-blue)
+    );
 }
 
 .semester-btn {
@@ -642,7 +674,11 @@ th {
 }
 
 .semester-btn.active {
-    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--medium-blue),
+        var(--dark-blue)
+    );
     color: var(--white);
     border: none;
 }
@@ -682,15 +718,14 @@ th {
     width: 12%;
 }
 
-.grades-table-grades th:nth-child(n+3) {
+.grades-table-grades th:nth-child(n + 3) {
     width: 11.6%;
 }
 
-.grades-table-grades th:nth-child(n+3),
-.grades-table-grades td:nth-child(n+3) {
+.grades-table-grades th:nth-child(n + 3),
+.grades-table-grades td:nth-child(n + 3) {
     text-align: center;
 }
-
 
 .subject-name {
     background: var(--light-aqua) !important;
@@ -741,11 +776,14 @@ th {
 }
 
 .page-btn.active:not(:disabled) {
-    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--medium-blue),
+        var(--dark-blue)
+    );
     color: var(--white);
     border: none;
 }
-
 
 .page-btn {
     min-width: 42px;
@@ -759,7 +797,11 @@ th {
 }
 
 .page-btn.active {
-    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--medium-blue),
+        var(--dark-blue)
+    );
     color: var(--white);
     border: none;
 }
@@ -767,7 +809,6 @@ th {
 .page-btn:hover:not(.active) {
     background: var(--light-blue);
 }
-
 
 .sidebar {
     position: absolute;
@@ -815,11 +856,14 @@ th {
 
 .year-btn:hover {
     background: var(--light-blue);
-
 }
 
 .year-btn.active {
-    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--medium-blue),
+        var(--dark-blue)
+    );
     color: var(--white);
     border: none;
 }
@@ -933,7 +977,11 @@ th {
 }
 
 .section-header {
-    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
+    background: linear-gradient(
+        to bottom,
+        var(--medium-blue),
+        var(--dark-blue)
+    );
     color: var(--white);
     padding: 10px 15px;
     font-weight: bold;
@@ -993,7 +1041,6 @@ th {
     color: var(--darkest-blue);
     font-weight: 600;
     text-align: left;
-
 }
 
 .payment-status {
@@ -1139,7 +1186,9 @@ th {
     color: var(--darkest-blue);
     opacity: 0;
     transform: translateX(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
 }
 
 .message-item.active {
@@ -1148,12 +1197,29 @@ th {
 }
 
 @keyframes slideMessages {
-    0%, 16% { transform: translateY(0); }
-    20%, 36% { transform: translateY(-40px); }
-    40%, 56% { transform: translateY(-80px); }
-    60%, 76% { transform: translateY(-120px); }
-    80%, 96% { transform: translateY(-160px); }
-    100% { transform: translateY(0); }
+    0%,
+    16% {
+        transform: translateY(0);
+    }
+    20%,
+    36% {
+        transform: translateY(-40px);
+    }
+    40%,
+    56% {
+        transform: translateY(-80px);
+    }
+    60%,
+    76% {
+        transform: translateY(-120px);
+    }
+    80%,
+    96% {
+        transform: translateY(-160px);
+    }
+    100% {
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 1024px) {
@@ -1168,4 +1234,10 @@ th {
         height: 35px;
         padding: 8px 15px;
     }
+}
+.no-grades-message {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
 }
