@@ -1,11 +1,13 @@
-<div class="container-bills">
+<div class="container-bills tar">
     <div class="left-section">
         <div class="balance-section">
             <div class="section-header">Current Balance</div>
             <div class="section-content">
                 <div class="balance-card">
                     <div class="balance-title">Remaining Balance</div>
-                    <div class="balance-amount">₱{{.Bills.RemainingBalance}}</div>
+                    <div class="balance-amount">
+                        ₱{{.Bills.RemainingBalance}}
+                    </div>
                 </div>
                 <div class="balance-details">
                     <h4>Payment Summary</h4>
@@ -40,12 +42,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{ range .Bills.PaymentHistory }}
+                        {{ range .PaymentHistory }}
                         <tr>
                             <td>{{ .PaymentDate }}</td>
-                            <td>{{ if .Description }}{{ .Description }}{{ else }}Payment{{ end }}</td>
+                            <td>
+                                {{ if .Description }}{{ .Description }}{{ else
+                                }}Payment{{ end }}
+                            </td>
                             <td>₱{{ .Amount }}</td>
-                            <td><span class="payment-status status-{{ lower .Status }}">{{ .Status }}</span></td>
+                            <td>
+                                <span
+                                    class="payment-status status-{{ lower .Status }}"
+                                    >{{ .Status }}</span
+                                >
+                            </td>
                         </tr>
                         {{ end }}
                     </tbody>
@@ -57,11 +67,9 @@
     <div class="right-section">
         <div class="section-header">Statement of Account</div>
         <div class="section-content">
-            {{/* Group fees by category */}}
-            {{ $tuitionFees := feesByCategory .Bills.FeeBreakdown "Tuition" }}
-            {{ $miscFees := feesByCategory .Bills.FeeBreakdown "Miscellaneous" }}
-
-            {{/* Tuition Fees */}}
+            {{/* Group fees by category */}} {{ $tuitionFees := feesByCategory
+            .FeeBreakdown "Tuition" }} {{ $miscFees := feesByCategory
+            .FeeBreakdown "Miscellaneous" }} {{/* Tuition Fees */}}
             <div class="fee-table-container">
                 <table class="fee-details">
                     <tr>
@@ -80,7 +88,9 @@
             <div class="fee-table-container">
                 <table class="fee-details">
                     <tr>
-                        <th class="fee-category" colspan="2">Miscellaneous Fees</th>
+                        <th class="fee-category" colspan="2">
+                            Miscellaneous Fees
+                        </th>
                     </tr>
                     {{ range $miscFees }}
                     <tr>
@@ -92,10 +102,12 @@
                         <th>Total Assessment</th>
                         <td>₱{{.Bills.TotalFeeAmount}}</td>
                     </tr>
-                    {{/* Display Discounts */}}
-                    {{ range .Bills.Discounts }}
+                    {{/* Display Discounts */}} {{ range .Discounts }}
                     <tr>
-                        <th>{{ .Name }}{{ if .IsPercentage }} ({{ .Value }}%){{ end }}</th>
+                        <th>
+                            {{ .Name }}{{ if .IsPercentage }} ({{ .Value }}%){{
+                            end }}
+                        </th>
                         <td>-₱{{ .AppliedAmount }}</td>
                     </tr>
                     {{ end }}

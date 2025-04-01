@@ -71,6 +71,20 @@ type Assessment struct {
 	PerExamFee          *float64 `json:"per_exam_fee,omitempty" db:"per_Exam_Fee"`
 }
 
+type AssessmentViewModel struct {
+	ID                  int64
+	StudentID           *string
+	TermID              *int64
+	TotalFeeAmount      string
+	NetAssessmentAmount string
+	InitialPayment      string
+	TotalPaymentAmount  string
+	RemainingBalance    string
+	TotalDiscountAmount string
+	FullPmtIfB4Prelim   string
+	PerExamFee          string
+}
+
 // TotalAmount == TotalAssessment
 // NetAmount == Total Amount
 // InitialPayment == InitialPayment
