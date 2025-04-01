@@ -5,22 +5,22 @@
             <div class="section-content">
                 <div class="balance-card">
                     <div class="balance-title">Remaining Balance</div>
-                    <div class="balance-amount">₱{{ printf "%.2f" .Bills.Assessment.RemainingBalance }}</div>
+                    <div class="balance-amount">₱{{.Bills.RemainingBalance}}</div>
                 </div>
                 <div class="balance-details">
                     <h4>Payment Summary</h4>
                     <table class="fee-details">
                         <tr>
                             <th>Total Assessment</th>
-                            <td>₱{{ printf "%.2f" .Bills.Assessment.TotalFeeAmount }}</td>
+                            <td>₱{{.Bills.TotalFeeAmount}}</td>
                         </tr>
                         <tr>
                             <th>Total Payments</th>
-                            <td>₱{{ printf "%.2f" .Bills.Assessment.TotalPaymentAmount }}</td>
+                            <td>₱{{.Bills.TotalPaymentAmount}}</td>
                         </tr>
                         <tr>
                             <th>Remaining Balance</th>
-                            <td>₱{{ printf "%.2f" .Bills.Assessment.RemainingBalance }}</td>
+                            <td>₱{{.Bills.RemainingBalance}}</td>
                         </tr>
                     </table>
                 </div>
@@ -44,7 +44,7 @@
                         <tr>
                             <td>{{ .PaymentDate }}</td>
                             <td>{{ if .Description }}{{ .Description }}{{ else }}Payment{{ end }}</td>
-                            <td>₱{{ printf "%.2f" .Amount }}</td>
+                            <td>₱{{ .Amount }}</td>
                             <td><span class="payment-status status-{{ lower .Status }}">{{ .Status }}</span></td>
                         </tr>
                         {{ end }}
@@ -70,7 +70,7 @@
                     {{ range $tuitionFees }}
                     <tr>
                         <th>{{ .Name }}</th>
-                        <td>₱{{ printf "%.2f" .Amount }}</td>
+                        <td>₱{{ .Amount }}</td>
                     </tr>
                     {{ end }}
                 </table>
@@ -85,31 +85,31 @@
                     {{ range $miscFees }}
                     <tr>
                         <th>{{ .Name }}</th>
-                        <td>₱{{ printf "%.2f" .Amount }}</td>
+                        <td>₱{{ .Amount }}</td>
                     </tr>
                     {{ end }}
                     <tr class="total-row">
                         <th>Total Assessment</th>
-                        <td>₱{{ printf "%.2f" .Bills.Assessment.TotalFeeAmount }}</td>
+                        <td>₱{{.Bills.TotalFeeAmount}}</td>
                     </tr>
                     {{/* Display Discounts */}}
                     {{ range .Bills.Discounts }}
                     <tr>
-                        <th>{{ .Name }}{{ if .IsPercentage }} ({{ printf "%.0f" .Value }}%){{ end }}</th>
-                        <td>-₱{{ printf "%.2f" .AppliedAmount }}</td>
+                        <th>{{ .Name }}{{ if .IsPercentage }} ({{ .Value }}%){{ end }}</th>
+                        <td>-₱{{ .AppliedAmount }}</td>
                     </tr>
                     {{ end }}
                     <tr class="total-row">
                         <th>Total Amount</th>
-                        <td>₱{{ printf "%.2f" .Bills.Assessment.NetAssessmentAmount }}</td>
+                        <td>₱{{.Bills.NetAssessmentAmount}}</td>
                     </tr>
                     <tr>
                         <th>Full Payment (paid before exam)</th>
-                        <td>₱{{ printf "%.2f" .Bills.Assessment.FullPmtIfB4Prelim }}</td>
+                        <td>₱{{.Bills.FullPmtIfB4Prelim}}</td>
                     </tr>
                     <tr>
                         <th>Per Exam</th>
-                        <td>₱{{ printf "%.2f" .Bills.Assessment.PerExamFee }}</td>
+                        <td>₱{{.Bills.PerExamFee}}</td>
                     </tr>
                 </table>
             </div>
@@ -118,11 +118,11 @@
                 <table class="fee-details">
                     <tr>
                         <th>Initial Payment</th>
-                        <td>₱{{ printf "%.2f" .Bills.Assessment.InitialPayment }}</td>
+                        <td>₱{{.Bills.InitialPayment}}</td>
                     </tr>
                     <tr class="total-row">
                         <th>Remaining Balance</th>
-                        <td>₱{{ printf "%.2f" .Bills.Assessment.RemainingBalance }}</td>
+                        <td>₱{{.Bills.RemainingBalance}}</td>
                     </tr>
                 </table>
             </div>

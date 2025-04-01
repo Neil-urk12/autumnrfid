@@ -1,17 +1,5 @@
 package model
 
-import "time"
-
-// type Student struct {
-// 	StudentID    string
-// 	DepartmentID int
-// 	FirstName    string
-// 	LastName     string
-// 	MiddleName   string
-// 	YearLevel    int
-// 	Program      string
-// }
-
 type StudentInfo struct {
 	Student *Student
 }
@@ -27,11 +15,14 @@ type Subject struct {
 }
 
 type AcademicTerm struct {
-	ID           int64      `json:"term_id" db:"term_id"`
-	AcademicYear string     `json:"academic_year" db:"academic_year"`
-	Semester     *time.Time `json:"semester" db:"semester"`
-	StartDate    *time.Time `json:"start_date,omitempty" db:"start_date"`
-	EndDate      *time.Time `json:"end_date,omitempty" db:"end_date"`
+	ID           int64  `json:"term_id" db:"term_id"`
+	AcademicYear string `json:"academic_year" db:"academic_year"`
+	// Semester     *time.Time `json:"semester" db:"semester"`
+	Semester string `json:"semester" db:"semester"`
+	// StartDate    *time.Time `json:"start_date,omitempty" db:"start_date"`
+	// EndDate      *time.Time `json:"end_date,omitempty" db:"end_date"`
+	StartDate string `json:"start_date,omitempty" db:"start_date"`
+	EndDate   string `json:"end_date,omitempty" db:"end_date"`
 }
 
 type FeeType struct {
@@ -87,11 +78,12 @@ type Assessment struct {
 // Old Continuing Discount == Total Discount
 
 type Enrollment struct {
-	ID             int64    `json:"enrollment_id" db:"enrollment_ID"`
-	StudentID      *string  `json:"student_id,omitempty" db:"student_ID"`
-	SubjectCode    *string  `json:"subject_code,omitempty" db:"subject_Code"`
-	TermID         *int64   `json:"term_id,omitempty" db:"term_id"`
-	PrelimGrade    *float64 `json:"prelim_grade,omitempty" db:"prelim_grade"`
+	ID          int64    `json:"enrollment_id" db:"enrollment_ID"`
+	StudentID   *string  `json:"student_id,omitempty" db:"student_ID"`
+	SubjectCode *string  `json:"subject_code,omitempty" db:"subject_Code"`
+	TermID      *int64   `json:"term_id,omitempty" db:"term_id"`
+	PrelimGrade *float64 `json:"prelim_grade,omitempty" db:"prelim_grade"`
+
 	MidtermGrade   *float64 `json:"midterm_grade,omitempty" db:"midterm_grade"`
 	PrefinalGrade  *float64 `json:"prefinal_grade,omitempty" db:"prefinal_grade"`
 	FinalTermGrade *float64 `json:"final_term_grade,omitempty" db:"final_term_grade"`

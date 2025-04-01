@@ -26,10 +26,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	if student == nil {
 		htmxInstruction := fmt.Sprintf(`<div hx-get="/error" hx-trigger="load" hx-swap="innerHTML" hx-target="#student-data-container"></div>`)
 		GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
-		// GetBroadcaster().Broadcast("not-found", fmt.Sprintf(`{"rfid": "%s"}`, rfid))
 		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
-		// return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
-		// return ctx.Render("error_page", fiber.Map{})
 	}
 
 	fmt.Printf("Student found: %s\n", student.StudentID)
@@ -38,37 +35,6 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 
 	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 	return ctx.SendString("Processing")
-	// htmxInstruction := fmt.Sprintf("<div hx-get=\"/ui//fragments/%s.html\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-target=\"#student-data-container\"></div>", fragmentToRender)
-
-	// studentData := fmt.Sprintf(`{
-	// 	"studentID":"%s",
-	// 	"firstName":"%s",
-	// 	"lastName":"%s",
-	// 	"middleName":"%s",
-	// 	"yearLevel":%d,
-	// 	"yearLevelStr":"%s",
-	// 	"program":"%s",
-	// 	"grades":[
-	// 		{"subject":"Mathematics", "code":"MATH101", "units":3, "grade":"1.00", "remarks":"Passed"},
-	// 		{"subject":"English", "code":"ENG101", "units":3, "grade":"1.25", "remarks":"Passed"},
-	// 		{"subject":"Science", "code":"SCI101", "units":4, "grade":"1.50", "remarks":"Passed"},
-	// 		{"subject":"History", "code":"HIST101", "units":3, "grade":"1.75", "remarks":"Passed"},
-	// 		{"subject":"Physical Education", "code":"PE101", "units":2, "grade":"1.00", "remarks":"Passed"}
-	// 	],
-	// 	"bills":[
-	// 		{"description":"Tuition Fee", "amount":15000.00, "status":"Paid", "dueDate":"2024-01-15"},
-	// 		{"description":"Library Fee", "amount":1500.00, "status":"Paid", "dueDate":"2024-01-15"},
-	// 		{"description":"Laboratory Fee", "amount":2500.00, "status":"Unpaid", "dueDate":"2024-02-15"},
-	// 		{"description":"Miscellaneous Fee", "amount":1000.00, "status":"Unpaid", "dueDate":"2024-02-15"}
-	// 	]
-	// }`,
-	// 	student.StudentID,
-	// 	student.FirstName,
-	// 	student.LastName,
-	// 	student.MiddleName,
-	// 	student.YearLevel,
-	// 	getYearLevelString(student.YearLevel),
-	// 	student.Program)
 }
 
 func (h *AppHandler) GetStudentPartial(ctx *fiber.Ctx) error {
@@ -83,7 +49,6 @@ func (h *AppHandler) GetStudentPartial(ctx *fiber.Ctx) error {
 
 	return ctx.Render("partials/student_info", fiber.Map{
 		"Student": student,
-		// "YearLevel": getYearLevelString(student.YearLevel),
 	}, "")
 }
 
@@ -114,7 +79,6 @@ func (h *AppHandler) HandleStudentPartial(c *fiber.Ctx) error {
 
 	return c.Render("partials/student_info", fiber.Map{
 		"Student": student,
-		// "YearLevel": getYearLevelString(student.YearLevel),
 	}, "")
 }
 
