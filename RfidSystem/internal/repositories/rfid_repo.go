@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"rfidsystem/internal/model"
 )
 
@@ -37,8 +38,20 @@ type Bills struct {
 	PaymentHistory []PaymentRecord
 }
 
+type GradesRecord struct {
+	SubjectCode    string   `json:"subject_code"`
+	SubjectName    string   `json:"subject_name"`
+	PrelimGrade    *float64 `json:"prelim_grade"`
+	MidtermGrade   *float64 `json:"midterm_grade"`
+	PrefinalGrade  *float64 `json:"prefinal_grade"`
+	FinalGrade     *float64 `json:"final_grade"`
+	FinalTermGrade *float64 `json:"final_term_grade"`
+}
+
 type Grades struct {
-	// Add grades data here
+	Student     *model.Student
+	CurrentTerm *model.AcademicTerm
+	Grades      []GradesRecord
 }
 
 type RFIDRepository struct {
@@ -52,7 +65,7 @@ func NewRFIDRepository(dbClient *DatabaseClient) *RFIDRepository {
 func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, error) {
 	query := `
 	SELECT student_ID, department_ID, first_Name, last_Name, middle_Name, birthday, contact_number, email, year_Level, program, block_section, first_access_timestamp, last_access_timestamp
-	FROM Students 
+	FROM Students
 	WHERE student_ID = ?
 	`
 
@@ -132,7 +145,7 @@ func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*Bills, error)
 func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, error) {
 	fmt.Printf("Getting assessment for student ID: %s\n", studentId)
 	query := `
-	SELECT 
+	SELECT
 		assessment_Number,
 		student_ID,
 		term_id,
@@ -144,7 +157,7 @@ func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, err
 		full_pmt_if_b4_prelim,
 		remaining_Balance,
 		per_Exam_Fee
-	FROM Assessment 
+	FROM Assessment
 	WHERE student_ID = ?
 	ORDER BY assessment_Number DESC
 	LIMIT 1
@@ -187,7 +200,7 @@ func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, err
 
 func (r *RFIDRepository) getFeeBreakdown(assessmentId int64) ([]FeeBreakdown, error) {
 	query := `
-	SELECT 
+	SELECT
 		ft.category,
 		ft.name,
 		af.amount
@@ -217,7 +230,7 @@ func (r *RFIDRepository) getFeeBreakdown(assessmentId int64) ([]FeeBreakdown, er
 
 func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]DiscountRecord, error) {
 	query := `
-	SELECT 
+	SELECT
 		dt.name,
 		dt.is_percentage,
 		dt.value,
@@ -254,7 +267,7 @@ func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]DiscountRecord, err
 
 func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]PaymentRecord, error) {
 	query := `
-	SELECT 
+	SELECT
 		payment_date,
 		description,
 		amount,
@@ -292,5 +305,100 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]PaymentRecord,
 }
 
 func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*Grades, error) {
-	return nil, nil
+	student, err := r.GetStudentByRFID(studentId)
+	if err != nil {
+		return nil, fmt.Errorf("error getting student: %v", err)
+	}
+	if student == nil {
+		return nil, fmt.Errorf("student not found")
+	}
+
+	currentTerm, err := r.getCurrentTerm()
+	if err != nil {
+		return nil, fmt.Errorf("error getting current term: %v", err)
+	}
+
+	query := `
+	SELECT
+		e.subject_Code,
+		s.subject_name,
+		e.prelim_grade,
+		e.midterm_grade,
+		e.prefinal_grade,
+		e.final_term_grade,
+		e.final_grade
+	FROM Enrollments e
+	JOIN Subjects s ON e.subject_Code = s.subject_Code
+	WHERE e.student_id = ? AND e.term_id = ?
+	ORDER BY s.subject_code
+	`
+	log.Printf("TermID %d", currentTerm.ID)
+	log.Printf("StudentID %s", studentId)
+	rows, err := r.dbClient.DB.Query(query, studentId, currentTerm.ID)
+	if err != nil {
+		return nil, fmt.Errorf("error querying grades: %v", err)
+	}
+
+	defer rows.Close()
+
+	var gradeRecords []GradesRecord
+	for rows.Next() {
+		var grade GradesRecord
+		err := rows.Scan(
+			&grade.SubjectCode,
+			&grade.SubjectName,
+			&grade.PrelimGrade,
+			&grade.MidtermGrade,
+			&grade.PrefinalGrade,
+			&grade.FinalTermGrade,
+			&grade.FinalGrade,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning grade record: %v", err)
+		}
+		gradeRecords = append(gradeRecords, grade)
+	}
+	log.Printf("Grade records: %v", gradeRecords)
+
+	return &Grades{
+		Student:     student,
+		CurrentTerm: currentTerm,
+		Grades:      gradeRecords,
+	}, nil
+}
+
+func (r *RFIDRepository) getCurrentTerm() (*model.AcademicTerm, error) {
+	query := `
+	SELECT
+		term_id,
+		academic_year,
+		semester,
+		DATE_FORMAT(start_date, '%Y-%m-%d') as start_date,
+        DATE_FORMAT(end_date, '%Y-%m-%d') as end_date
+	FROM AcademicTerms
+	WHERE CURRENT_DATE BETWEEN start_date AND end_date
+	LIMIT 1
+	`
+
+	term := &model.AcademicTerm{}
+	err := r.dbClient.DB.QueryRow(query).Scan(
+		&term.ID,
+		&term.AcademicYear,
+		&term.Semester,
+		&term.StartDate,
+		&term.EndDate,
+	)
+
+	if err == sql.ErrNoRows {
+		log.Printf("No current term found")
+		return nil, nil
+	}
+	if err != nil {
+		log.Printf("Error scanning current term: %v", err)
+		return nil, err
+	}
+
+	log.Printf("Retrieved current term: ID=%d, Year=%s, Semester=%s",
+		term.ID, term.AcademicYear, term.Semester)
+	return term, nil
 }
