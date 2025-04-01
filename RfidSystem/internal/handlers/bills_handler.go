@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"regexp"
+	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,6 +18,22 @@ func formatNullableAmount(amount *float64) string {
 		return "0.00"
 	}
 	return fmt.Sprintf("%.2f", *amount)
+}
+
+func formatAssessmentForView(assessment *model.Assessment) model.AssessmentViewModel {
+	return model.AssessmentViewModel{
+		ID:                  assessment.ID,
+		StudentID:           assessment.StudentID,
+		TermID:              assessment.TermID,
+		TotalFeeAmount:      formatAmount(assessment.TotalFeeAmount),
+		NetAssessmentAmount: formatAmount(assessment.NetAssessmentAmount),
+		InitialPayment:      formatNullableAmount(assessment.InitialPayment),
+		TotalPaymentAmount:  formatAmount(assessment.TotalPaymentAmount),
+		RemainingBalance:    formatAmount(assessment.RemainingBalance),
+		TotalDiscountAmount: formatAmount(assessment.TotalDiscountAmount),
+		FullPmtIfB4Prelim:   formatNullableAmount(assessment.FullPmtIfB4Prelim),
+		PerExamFee:          formatNullableAmount(assessment.PerExamFee),
+	}
 }
 
 func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
@@ -55,27 +72,32 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 
 	fmt.Printf("Successfully retrieved bills data for student ID: %s\n", studentId)
 
-	assessmentMap := fiber.Map{
-		"ID":        billsData.Assessment.ID,
-		"StudentID": billsData.Assessment.StudentID,
-		"TermID":    billsData.Assessment.TermID,
+	// assessmentMap := fiber.Map{
+	// 	"ID":        billsData.Assessment.ID,
+	// 	"StudentID": billsData.Assessment.StudentID,
+	// 	"TermID":    billsData.Assessment.TermID,
 
-		// For regular amounts (non-nullable)
-		"TotalFeeAmount":      formatAmount(billsData.Assessment.TotalFeeAmount),
-		"NetAssessmentAmount": formatAmount(billsData.Assessment.NetAssessmentAmount),
-		"InitialPayment":      formatNullableAmount(billsData.Assessment.InitialPayment),
-		"TotalPaymentAmount":  formatAmount(billsData.Assessment.TotalPaymentAmount),
-		"RemainingBalance":    formatAmount(billsData.Assessment.RemainingBalance),
+	// 	// For regular amounts (non-nullable)
+	// 	"TotalFeeAmount":      formatAmount(billsData.Assessment.TotalFeeAmount),
+	// 	"NetAssessmentAmount": formatAmount(billsData.Assessment.NetAssessmentAmount),
+	// 	"InitialPayment":      formatNullableAmount(billsData.Assessment.InitialPayment),
+	// 	"TotalPaymentAmount":  formatAmount(billsData.Assessment.TotalPaymentAmount),
+	// 	"RemainingBalance":    formatAmount(billsData.Assessment.RemainingBalance),
 
-		// For potentially nullable amounts
-		"TotalDiscountAmount": formatAmount(billsData.Assessment.TotalDiscountAmount),
-		"FullPmtIfB4Prelim":   formatNullableAmount(billsData.Assessment.FullPmtIfB4Prelim),
-		"PerExamFee":          formatNullableAmount(billsData.Assessment.PerExamFee),
-	}
+	// 	// For potentially nullable amounts
+	// 	"TotalDiscountAmount": formatAmount(billsData.Assessment.TotalDiscountAmount),
+	// 	"FullPmtIfB4Prelim":   formatNullableAmount(billsData.Assessment.FullPmtIfB4Prelim),
+	// 	"PerExamFee":          formatNullableAmount(billsData.Assessment.PerExamFee),
+	// }
+	//
+	assessmentMap := formatAssessmentForView(billsData.Assessment)
 
 	err = ctx.Render("partials/bills", fiber.Map{
-		"Title": "Student Bills",
-		"Bills": assessmentMap,
+		"Title":          "Student Bills",
+		"Bills":          assessmentMap,
+		"FeeBreakdown":   billsData.FeeBreakdown,
+		"Discounts":      billsData.Discounts,
+		"PaymentHistory": billsData.PaymentHistory,
 	})
 	if err != nil {
 		fmt.Printf("Template rendering error: %v\n", err)

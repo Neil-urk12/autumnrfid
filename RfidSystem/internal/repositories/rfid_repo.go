@@ -69,7 +69,7 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 	WHERE student_ID = ?
 	`
 
-	fmt.Printf("Executing query with student ID: %s\n", studentId)
+	log.Printf("Executing query with student ID: %s\n", studentId)
 
 	student := &model.Student{}
 	err := r.dbClient.DB.QueryRow(query, studentId).Scan(
@@ -89,11 +89,11 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 	)
 
 	if err == sql.ErrNoRows {
-		fmt.Printf("No student found with ID: %s\n", studentId)
+		log.Printf("No student found with ID: %s\n", studentId)
 		return nil, nil
 	}
 	if err != nil {
-		fmt.Printf("Error querying student: %v\n", err)
+		log.Printf("Error querying student: %v\n", err)
 		return nil, fmt.Errorf("error querying student: %v", err)
 	}
 
@@ -105,7 +105,7 @@ func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*Bills, error)
 	if err := r.dbClient.DB.Ping(); err != nil {
 		return nil, fmt.Errorf("database connection error: %v", err)
 	}
-	fmt.Printf("Database connection confirmed for student ID: %s\n", studentId)
+	log.Printf("Database connection confirmed for student ID: %s\n", studentId)
 
 	// Get main assessment data
 	assessment, err := r.getAssessment(studentId)
@@ -134,6 +134,8 @@ func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*Bills, error)
 		return nil, fmt.Errorf("error getting payment history: %v", err)
 	}
 
+	log.Printf("Payment history retrieved for student ID: %s", studentId)
+
 	return &Bills{
 		Assessment:     assessment,
 		FeeBreakdown:   fees,
@@ -143,7 +145,7 @@ func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*Bills, error)
 }
 
 func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, error) {
-	fmt.Printf("Getting assessment for student ID: %s\n", studentId)
+	log.Printf("Getting assessment for student ID: %s\n", studentId)
 	query := `
 	SELECT
 		assessment_Number,
@@ -164,13 +166,13 @@ func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, err
 	`
 
 	assessment := &model.Assessment{}
-	fmt.Printf("Executing assessment query with parameters: studentId=%s\n", studentId)
+	log.Printf("Executing assessment query with parameters: studentId=%s\n", studentId)
 	row := r.dbClient.DB.QueryRow(query, studentId)
 	if row == nil {
 		return nil, fmt.Errorf("database returned nil row")
 	}
 
-	fmt.Printf("Scanning assessment row into struct...\n")
+	log.Printf("Scanning assessment row into struct...\n")
 	err := row.Scan(
 		&assessment.ID,
 		&assessment.StudentID,
@@ -186,14 +188,14 @@ func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, err
 	)
 
 	if err == sql.ErrNoRows {
-		fmt.Printf("No assessment found for student ID: %s\n", studentId)
+		log.Printf("No assessment found for student ID: %s\n", studentId)
 		return nil, nil
 	}
 	if err != nil {
-		fmt.Printf("Database error getting assessment: %v\n", err)
+		log.Printf("Database error getting assessment: %v\n", err)
 		return nil, fmt.Errorf("database error: %v", err)
 	}
-	fmt.Printf("Successfully retrieved assessment for student ID: %s\n", studentId)
+	log.Printf("Successfully retrieved assessment for student ID: %s\n", studentId)
 
 	return assessment, nil
 }
@@ -266,6 +268,7 @@ func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]DiscountRecord, err
 }
 
 func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]PaymentRecord, error) {
+	log.Printf("Fetching payment history for assessment ID: %d", assessmentId)
 	query := `
 	SELECT
 		payment_date,
@@ -307,14 +310,17 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]PaymentRecord,
 func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*Grades, error) {
 	student, err := r.GetStudentByRFID(studentId)
 	if err != nil {
+		log.Printf("Error getting student: %v\n", err)
 		return nil, fmt.Errorf("error getting student: %v", err)
 	}
 	if student == nil {
+		log.Printf("Student not found: %s\n", studentId)
 		return nil, fmt.Errorf("student not found")
 	}
 
 	currentTerm, err := r.getCurrentTerm()
 	if err != nil {
+		log.Printf("Error getting current term: %v\n", err)
 		return nil, fmt.Errorf("error getting current term: %v", err)
 	}
 
@@ -332,8 +338,7 @@ func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*Grades, erro
 	WHERE e.student_id = ? AND e.term_id = ?
 	ORDER BY s.subject_code
 	`
-	log.Printf("TermID %d", currentTerm.ID)
-	log.Printf("StudentID %s", studentId)
+
 	rows, err := r.dbClient.DB.Query(query, studentId, currentTerm.ID)
 	if err != nil {
 		return nil, fmt.Errorf("error querying grades: %v", err)
