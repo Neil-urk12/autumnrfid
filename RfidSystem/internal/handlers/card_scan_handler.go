@@ -24,14 +24,14 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 
 	if student == nil {
-		htmxInstruction := fmt.Sprintf(`<div hx-get="/error" hx-trigger="load" hx-swap="innerHTML" hx-target="#student-data-container"></div>`)
+		htmxInstruction := fmt.Sprintf(`<div hx-get="/error" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`)
 		GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
 	}
 
 	fmt.Printf("Student found: %s\n", student.StudentID)
 
-	htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#student-data-container"></div>`, rfid)
+	htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 
 	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 	return ctx.SendString("Processing")
