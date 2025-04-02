@@ -1,26 +1,28 @@
-<div class="container-bills">
+<div class="container-bills tar">
     <div class="left-section">
         <div class="balance-section">
             <div class="section-header">Current Balance</div>
             <div class="section-content">
                 <div class="balance-card">
                     <div class="balance-title">Remaining Balance</div>
-                    <div class="balance-amount">₱13,400.00</div>
+                    <div class="balance-amount">
+                        ₱{{.Bills.RemainingBalance}}
+                    </div>
                 </div>
                 <div class="balance-details">
                     <h4>Payment Summary</h4>
                     <table class="fee-details">
                         <tr>
                             <th>Total Assessment</th>
-                            <td>₱20,000.00</td>
+                            <td>₱{{.Bills.TotalFeeAmount}}</td>
                         </tr>
                         <tr>
                             <th>Total Payments</th>
-                            <td>₱6,600.00</td>
+                            <td>₱{{.Bills.TotalPaymentAmount}}</td>
                         </tr>
                         <tr>
                             <th>Remaining Balance</th>
-                            <td>₱13,400.00</td>
+                            <td>₱{{.Bills.RemainingBalance}}</td>
                         </tr>
                     </table>
                 </div>
@@ -34,44 +36,28 @@
                     <thead>
                         <tr>
                             <th>Date</th>
-
                             <th>Description</th>
                             <th>Amount</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {{ range .PaymentHistory }}
                         <tr>
-                            <td>January 15, 2025</td>
-                            <td>Initial Payment</td>
-                            <td>₱2,750.00</td>
-                            <td><span class="payment-status status-paid">Paid</span></td>
+                            <td>{{ .PaymentDate }}</td>
+                            <td>
+                                {{ if .Description }}{{ .Description }}{{ else
+                                }}Payment{{ end }}
+                            </td>
+                            <td>₱{{ .Amount }}</td>
+                            <td>
+                                <span
+                                    class="payment-status status-{{ lower .Status }}"
+                                    >{{ .Status }}</span
+                                >
+                            </td>
                         </tr>
-                        <tr>
-                            <td>February 17, 2025</td>
-                            <td>Prelim Payment</td>
-                            <td>₱3,850.00</td>
-                            <td><span class="payment-status status-paid">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>March 17, 2025</td>
-                            <td>Midterm Payment</td>
-                            <td>₱3,350.00</td>
-                            <td><span class="payment-status status-pending">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
+                        {{ end }}
                     </tbody>
                 </table>
             </div>
@@ -81,59 +67,61 @@
     <div class="right-section">
         <div class="section-header">Statement of Account</div>
         <div class="section-content">
+            {{/* Group fees by category */}} {{ $tuitionFees := feesByCategory
+            .FeeBreakdown "Tuition" }} {{ $miscFees := feesByCategory
+            .FeeBreakdown "Miscellaneous" }} {{/* Tuition Fees */}}
             <div class="fee-table-container">
                 <table class="fee-details">
                     <tr>
                         <th class="fee-category" colspan="2">Tuition Fees</th>
                     </tr>
+                    {{ range $tuitionFees }}
                     <tr>
-                        <th>Basic Tuition Fee</th>
-                        <td>₱12,000.00</td>
+                        <th>{{ .Name }}</th>
+                        <td>₱{{ .Amount }}</td>
                     </tr>
-                    <tr>
-                        <th>Laboratory Fee</th>
-                        <td>₱3,500.00</td>
-                    </tr>
-
+                    {{ end }}
                 </table>
             </div>
 
+            {{/* Miscellaneous Fees */}}
             <div class="fee-table-container">
                 <table class="fee-details">
                     <tr>
-                        <th class="fee-category" colspan="2">Miscellaneous Fees</th>
+                        <th class="fee-category" colspan="2">
+                            Miscellaneous Fees
+                        </th>
                     </tr>
+                    {{ range $miscFees }}
                     <tr>
-                        <th>Library Fee</th>
-                        <td>₱800.00</td>
+                        <th>{{ .Name }}</th>
+                        <td>₱{{ .Amount }}</td>
                     </tr>
-                    <tr>
-                        <th>Computer Laboratory Fee</th>
-                        <td>₱1,500.00</td>
-                    </tr>
-                    <tr>
-                        <th>Student Activities</th>
-                        <td>₱700.00</td>
-                    </tr>
+                    {{ end }}
                     <tr class="total-row">
                         <th>Total Assessment</th>
-                        <td>₱20,000.00</td>
+                        <td>₱{{.Bills.TotalFeeAmount}}</td>
                     </tr>
+                    {{/* Display Discounts */}} {{ range .Discounts }}
                     <tr>
-                        <th>Old Continuing Discount (10%)</th>
-                        <td>-₱3,000.00</td>
+                        <th>
+                            {{ .Name }}{{ if .IsPercentage }} ({{ .Value }}%){{
+                            end }}
+                        </th>
+                        <td>-₱{{ .AppliedAmount }}</td>
                     </tr>
+                    {{ end }}
                     <tr class="total-row">
                         <th>Total Amount</th>
-                        <td>₱17,000.00</td>
+                        <td>₱{{.Bills.NetAssessmentAmount}}</td>
                     </tr>
                     <tr>
                         <th>Full Payment (paid before exam)</th>
-                        <td>₱16,000.00</td>
+                        <td>₱{{.Bills.FullPmtIfB4Prelim}}</td>
                     </tr>
                     <tr>
                         <th>Per Exam</th>
-                        <td>₱3,850.00</td>
+                        <td>₱{{.Bills.PerExamFee}}</td>
                     </tr>
                 </table>
             </div>
@@ -142,11 +130,11 @@
                 <table class="fee-details">
                     <tr>
                         <th>Initial Payment</th>
-                        <td>₱2,750.00</td>
+                        <td>₱{{.Bills.InitialPayment}}</td>
                     </tr>
                     <tr class="total-row">
                         <th>Remaining Balance</th>
-                        <td>₱13,400.00</td>
+                        <td>₱{{.Bills.RemainingBalance}}</td>
                     </tr>
                 </table>
             </div>

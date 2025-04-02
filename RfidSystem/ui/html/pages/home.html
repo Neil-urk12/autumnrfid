@@ -4,10 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <!-- <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-    <script src="https://unpkg.com/htmx-ext-sse@2.2.2"></script>
+    <script src="https://unpkg.com/htmx-ext-sse@2.2.2"></script> -->
+    <script src="ui/static/htmx.min.js"></script>
+    <script src="ui/static/sse.js.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <title>RFID</title>
     <link rel="stylesheet" href="/ui/static/styles.css" />
@@ -16,20 +18,10 @@
 <body>
 
     <div class="navbar" id="main-navbar" style="display: none;">
-        <button hx-get="/" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
-        <button hx-get="/test-grades" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
+        <button hx-get="/student-partial" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
+        <button hx-get="/grades" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
         <button hx-get="/bills" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
     </div>
-
-    <!-- Error page for 404 not found -->
-    <!-- <div id="error-page" class="error-container hidden">
-        <div class="error-code">404</div>
-        <div class="error-message">Student Not Found</div>
-        <div class="error-details">
-            The student ID you're looking for doesn't exist in our
-            database.
-        </div>
-    </div> -->
 
     </div>
 
@@ -58,10 +50,10 @@
             </div>
 
         </div>
-        <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p>
+
 
     </main>
-
+    <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-item')
@@ -83,6 +75,69 @@
                 console.log('SSE Ping received:', JSON.parse(e.data))
             })
 
+            // Store student ID when received
+            let currentStudentId = '';
+
+            document.body.addEventListener('htmx:afterSwap', function (event) {
+                console.log('Event:', event);
+                console.log('Event Detail:', event.detail);
+                if (!event || !event.detail) {
+                    console.log('Event or event.detail is undefined');
+                    return;
+                }
+
+                const navbar = document.getElementById('main-navbar');
+
+                // Check if we can find the student ID
+                const studentIdElement = document.getElementById('current-student-id');
+                if (studentIdElement && studentIdElement.value) {
+                    const currentStudentId = studentIdElement.value;
+                    console.log('Current student ID:', currentStudentId);
+
+                    // Update RFID Button (uses path parameter)
+                    const rfidButton = navbar.querySelector('button[hx-get^="/student-partial"]');
+                    if (rfidButton) {
+                        rfidButton.setAttribute('hx-get', `/student-partial/${currentStudentId}`);
+                        console.log('Updated RFID button hx-get:', rfidButton.getAttribute('hx-get'));
+                        htmx.process(rfidButton); // Tell HTMX to recognize the change
+                    }
+
+                    // Update Grades Button (uses query parameter)
+                    const gradesButton = navbar.querySelector('button[hx-get^="/grades"]');
+                    if (gradesButton) {
+                        gradesButton.setAttribute('hx-get', `/grades?student-id=${currentStudentId}`);
+                        console.log('Updated Grades button hx-get:', gradesButton.getAttribute('hx-get'));
+                        htmx.process(gradesButton); // Tell HTMX to recognize the change
+                    }
+
+                    // Update Bills Button (uses query parameter)
+                    const billsButton = navbar.querySelector('button[hx-get^="/bills"]');
+                    if (billsButton) {
+                        billsButton.setAttribute('hx-get', `/bills?student-id=${currentStudentId}`);
+                        console.log('Updated Bills button hx-get:', billsButton.getAttribute('hx-get'));
+                        htmx.process(billsButton); // Tell HTMX to recognize the change
+                    }
+                } else {
+                    console.log('Current student ID element not found or has no value in this swap.');
+                    // Optional: Consider resetting button URLs if the student info partial is removed.
+                }
+
+                // Handle navbar visibility
+                if (navbar) {
+                    const requestPath = event.detail.pathInfo ? event.detail.pathInfo.requestPath : null;
+
+                    if (requestPath) {
+                        const showNav = requestPath.startsWith('/student-partial/') ||
+                            requestPath === '/grades' ||
+                            requestPath === '/bills';
+
+                        const hideNav = requestPath === '/error' || requestPath === '/';
+
+                        navbar.style.display = showNav ? 'flex' : (hideNav ? 'none' : navbar.style.display);
+                    }
+                }
+            });
+
             sseSource.addEventListener('connected', function (e) {
                 console.log('SSE Connected:', JSON.parse(e.data))
             })
@@ -90,40 +145,6 @@
             sseSource.onerror = function (e) {
                 console.error('SSE Error:', e)
             }
-
-            // HTMX event listener to control navbar visibility
-            document.body.addEventListener('htmx:afterSwap', function (event) {
-                const navbar = document.getElementById('main-navbar');
-                const target = event.detail.target;
-                const requestPath = event.detail.pathInfo ? event.detail.pathInfo.requestPath : null;
-
-                // Ensure the swap happened in the correct container and we have a navbar element
-                if (target && target.id === 'student-data-container' && navbar && requestPath) {
-
-                    // Determine if the navbar should be shown based on the requested path
-                    const showNav = requestPath.startsWith('/student-partial/') ||
-                        requestPath === '/grades' ||
-                        requestPath === '/bills';
-
-                    // Determine if the navbar should be hidden (error or home page)
-                    const hideNav = requestPath === '/error' || requestPath === '/';
-
-                    if (showNav) {
-                        navbar.style.display = 'flex'; // Or 'block', depending on your CSS
-                    } else if (hideNav) {
-                        navbar.style.display = 'none';
-                    }
-                    // Optional: Handle cases where the path doesn't match known patterns,
-                    // potentially leaving the navbar state unchanged or hiding it by default.
-                    // else {
-                    //     navbar.style.display = 'none'; // Default to hidden if path is unknown
-                    // }
-                } else if (target && target.id === 'student-data-container' && navbar && requestPath === '/') {
-                    // Explicitly hide if the RFID button (hx-get="/") was clicked, resetting to welcome
-                    // This case might be redundant due to the hideNav check above, but kept for clarity.
-                    navbar.style.display = 'none';
-                }
-            });
         })
     </script>
 

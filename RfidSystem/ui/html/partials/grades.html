@@ -1,15 +1,20 @@
-<div class="container-grades">
+<div class="container-grades tar">
     <div class="button-section">
         <div class="button-left">
             <button class="sidebar-btn">
                 <i class="fas fa-bars"></i>
             </button>
-            <button class="semester-btn active">First Semester</button>
+            <button class="semester-btn active">
+                {{if .Term}}{{.Term.Semester}}{{else}}Current Semester{{end}}
+            </button>
             <button class="semester-btn">Second Semester</button>
         </div>
         <div class="semester-info">
-            <span>First Year Grades</span>
-            <span>SY 2023-2024</span>
+            <span
+                >{{if .Student}}{{.Student.FirstName}} {{.Student.LastName}} -
+                {{.Student.Program}}{{end}}
+            </span>
+            <span>{{if .Term}}SY {{.Term.AcademicYear}}{{end}}</span>
         </div>
     </div>
 
@@ -28,6 +33,29 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {{if not .Grades}}
+                    <div class="no-grades-message">
+                        <p>No grades available for the current term.</p>
+                    </div>
+                    {{end}} {{range .Grades}}
+                    <tr>
+                        <td>{{.SubjectCode}}</td>
+                        <td class="subject-name">{{.SubjectName}}</td>
+                        <td>{{.PrelimGrade}}</td>
+                        <td>{{.MidtermGrade}}</td>
+                        <td>{{.PrefinalGrade}}</td>
+                        <td>{{.FinalTermGrade}}</td>
+                        <td class="final-grade">{{.FinalGrade}}</td>
+                    </tr>
+                    {{end}}
+                    <tr class="gwa-row">
+                        <td colspan="6" style="text-align: right">
+                            General Weighted Average (GWA):
+                        </td>
+                        <td style="text-align: center">{{.GWA}}</td>
+                    </tr>
+                </tbody>
+                <!-- <tbody>
                     <tr>
                         <td>CS101</td>
                         <td class="subject-name">Computer Programming 1</td>
@@ -57,7 +85,9 @@
                     </tr>
                     <tr>
                         <td>MATH102</td>
-                        <td class="subject-name">Mathematics in the Modern World</td>
+                        <td class="subject-name">
+                            Mathematics in the Modern World
+                        </td>
                         <td>2.00</td>
                         <td>1.75</td>
                         <td>1.50</td>
@@ -93,7 +123,9 @@
                     </tr>
                     <tr>
                         <td>NSTP101</td>
-                        <td class="subject-name">National Service Training Program 1</td>
+                        <td class="subject-name">
+                            National Service Training Program 1
+                        </td>
                         <td>1.50</td>
                         <td>1.25</td>
                         <td>1.00</td>
@@ -101,17 +133,31 @@
                         <td class="final-grade">1.25</td>
                     </tr>
                     <tr class="gwa-row">
-                        <td colspan="6" style="text-align: right;">General Weighted Average (GWA):</td>
-                        <td style="text-align: center;">1.40</td>
+                        <td colspan="6" style="text-align: right">
+                            General Weighted Average (GWA):
+                        </td>
+                        <td style="text-align: center">1.40</td>
                     </tr>
-                </tbody>
+                </tbody> -->
             </table>
 
             <div class="pagination">
-                <button class="page-btn" onclick="changePage(1)" style="padding: 0 30px;">Previous</button>
-                <button class="page-btn active" style="width: 40px;">1</button>
-                <button class="page-btn" style="width: 40px;">2</button>
-                <button class="page-btn" onclick="changePage(2)" style="padding: 0 30px;">Next</button>
+                <button
+                    class="page-btn"
+                    onclick="changePage(1)"
+                    style="padding: 0 30px"
+                >
+                    Previous
+                </button>
+                <button class="page-btn active" style="width: 40px">1</button>
+                <button class="page-btn" style="width: 40px">2</button>
+                <button
+                    class="page-btn"
+                    onclick="changePage(2)"
+                    style="padding: 0 30px"
+                >
+                    Next
+                </button>
             </div>
         </div>
     </div>
@@ -124,8 +170,15 @@
                 <span class="icon">▼</span>
             </button>
             <div class="semester-container show" data-year="1">
-                <button class="semester-btn-sidebar active" data-semester="first">First Semester</button>
-                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                <button
+                    class="semester-btn-sidebar active"
+                    data-semester="first"
+                >
+                    First Semester
+                </button>
+                <button class="semester-btn-sidebar" data-semester="second">
+                    Second Semester
+                </button>
             </div>
 
             <button class="year-btn" data-year="2">
@@ -133,8 +186,12 @@
                 <span class="icon">▼</span>
             </button>
             <div class="semester-container" data-year="2">
-                <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
-                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                <button class="semester-btn-sidebar" data-semester="first">
+                    First Semester
+                </button>
+                <button class="semester-btn-sidebar" data-semester="second">
+                    Second Semester
+                </button>
             </div>
 
             <button class="year-btn" data-year="3">
@@ -142,8 +199,12 @@
                 <span class="icon">▼</span>
             </button>
             <div class="semester-container" data-year="3">
-                <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
-                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                <button class="semester-btn-sidebar" data-semester="first">
+                    First Semester
+                </button>
+                <button class="semester-btn-sidebar" data-semester="second">
+                    Second Semester
+                </button>
             </div>
 
             <button class="year-btn" data-year="4">
@@ -151,8 +212,12 @@
                 <span class="icon">▼</span>
             </button>
             <div class="semester-container" data-year="4">
-                <button class="semester-btn-sidebar" data-semester="first">First Semester</button>
-                <button class="semester-btn-sidebar" data-semester="second">Second Semester</button>
+                <button class="semester-btn-sidebar" data-semester="first">
+                    First Semester
+                </button>
+                <button class="semester-btn-sidebar" data-semester="second">
+                    Second Semester
+                </button>
             </div>
         </div>
     </div>
