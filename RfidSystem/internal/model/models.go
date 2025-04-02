@@ -140,3 +140,52 @@ type PaymentSchedule struct {
 	ExpectedAmount float64 `json:"expected_amount" db:"expected_amount"`
 	SortOrder      int     `json:"sort_order" db:"sort_order"`
 }
+
+// -------------------------
+// Rfid Repo structs
+type FeeBreakdown struct {
+	Category string
+	Name     string
+	Amount   float64
+}
+
+type PaymentRecord struct {
+	// Date            time.Time
+	PaymentDate     string
+	Description     *string
+	Amount          float64
+	Status          string
+	PaymentMethod   *string
+	ReferenceNumber *string
+}
+
+type DiscountRecord struct {
+	Name             string
+	IsPercentage     bool
+	Value            float64
+	AppliedAmount    float64
+	CalculationBasis *float64
+}
+
+type Bills struct {
+	Assessment     *Assessment
+	FeeBreakdown   []FeeBreakdown
+	Discounts      []DiscountRecord
+	PaymentHistory []PaymentRecord
+}
+
+type GradesRecord struct {
+	SubjectCode    string   `json:"subject_code"`
+	SubjectName    string   `json:"subject_name"`
+	PrelimGrade    *float64 `json:"prelim_grade"`
+	MidtermGrade   *float64 `json:"midterm_grade"`
+	PrefinalGrade  *float64 `json:"prefinal_grade"`
+	FinalGrade     *float64 `json:"final_grade"`
+	FinalTermGrade *float64 `json:"final_term_grade"`
+}
+
+type Grades struct {
+	Student     *Student
+	CurrentTerm *AcademicTerm
+	Grades      []GradesRecord
+}
