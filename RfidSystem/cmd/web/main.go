@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"rfidsystem/internal/config"
 	"rfidsystem/internal/handlers"
+	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
 	"strings"
 	"time"
@@ -52,8 +53,8 @@ func main() {
 
 	// Register template functions
 	viewsEngine.AddFunc("lower", strings.ToLower)
-	viewsEngine.AddFunc("feesByCategory", func(fees []repositories.FeeBreakdown, category string) []repositories.FeeBreakdown {
-		var filtered []repositories.FeeBreakdown
+	viewsEngine.AddFunc("feesByCategory", func(fees []model.FeeBreakdown, category string) []model.FeeBreakdown {
+		var filtered []model.FeeBreakdown
 		for _, fee := range fees {
 			if fee.Category == category {
 				filtered = append(filtered, fee)

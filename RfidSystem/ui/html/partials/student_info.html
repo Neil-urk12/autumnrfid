@@ -1,155 +1,156 @@
 <!-- Student Information -->
-<input type="hidden" id="current-student-id" value="{{if .Student}}{{.Student.StudentID}}{{end}}">
-<div class="profile">
-    <div class="summary-header">Student Information</div>
-    <div class="summary-content">
-        <div class="profile-header">
-            <img src="/ui/static/images/profile-placeholder.png" alt="Profile Picture" />
-            <div class="profile-info">
-                <h3 id="student-name">
-                    {{if .Student}}{{.Student.FirstName}}
-                    {{.Student.LastName}}{{end}}
-                </h3>
-                <h5 id="student-year">
-                    {{if .Student}}{{.YearLevel}}
-                    Year{{end}}
-                </h5>
-                <h5 id="student-program">
-                    {{if
-                    .Student}}{{.Student.Program}}{{end}}
-                </h5>
-            </div>
-        </div>
-        <div class="student-details">
-            <table class="info-table">
-                <tr>
-                    <th colspan="2">
-                        Personal Information
-                    </th>
-                </tr>
-                <tr>
-                    <th>Student Number</th>
-                    <td id="student-id">
-                        {{if
-                        .Student}}{{.Student.StudentID}}{{end}}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Birthday</th>
-                    <td>{{if .Student}}{{.Student.Birthday}}{{end}}</td>
-                </tr>
-                <tr>
-                    <th>Contact Number</th>
-                    <td>{{if .Student}}{{.Student.ContactNumber}}{{end}}</td>
-                </tr>
-                <tr>
-                    <th>Email</th>
-                    <td>{{if .Student}}{{.Student.Email}}{{end}}</td>
-                </tr>
-            </table>
-
-            <table class="info-table" style="margin-top: 15px">
-                <tr>
-                    <th colspan="2">
-                        Academic Information
-                    </th>
-                </tr>
-                <tr>
-                    <th>Program</th>
-                    <td id="student-program-details">
-                        {{if
-                        .Student}}{{.Student.Program}}{{end}}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Year Level</th>
-                    <td id="student-year-details">
+<div class="container-home tar" id="student-info-container">
+    <input type="hidden" id="current-student-id" value="{{if .Student}}{{.Student.StudentID}}{{end}}">
+    <div class="profile">
+        <div class="summary-header">Student Information</div>
+        <div class="summary-content">
+            <div class="profile-header">
+                <img src="/ui/static/images/profile-placeholder.png" alt="Profile Picture" />
+                <div class="profile-info">
+                    <h3 id="student-name">
+                        {{if .Student}}{{.Student.FirstName}}
+                        {{.Student.LastName}}{{end}}
+                    </h3>
+                    <h5 id="student-year">
                         {{if .Student}}{{.YearLevel}}
                         Year{{end}}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Block</th>
-                    <td>{{if .Student}}{{.Student.BlockSection}}{{end}}</td>
-                </tr>
-            </table>
-
-            <table class="info-table" style="margin-top: 15px">
-                <tr>
-                    <th colspan="2">System Access</th>
-                </tr>
-                <tr>
-                    <th>Last Access</th>
-                    <td>{{if .Student}}{{.Student.LastAccessTimestamp}}{{end}}</td>
-                </tr>
-                <tr>
-                    <th>First Access</th>
-                    <td>{{if .Student}}{{.Student.FirstAccessTimestamp}}{{end}}</td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="content">
-    <div class="summary full-width summary-grades">
-        <div class="summary-header">Summary of Grades</div>
-        <div class="summary-content">
-            <table class="grades-table-home">
-                <thead>
+                    </h5>
+                    <h5 id="student-program">
+                        {{if
+                        .Student}}{{.Student.Program}}{{end}}
+                    </h5>
+                </div>
+            </div>
+            <div class="student-details">
+                <table class="info-table">
                     <tr>
-                        <th style="width: 40%;">Academic Year</th>
-                        <th style="width: 30%;">First Semester</th>
-                        <th style="width: 30%;">Second Semester</th>
+                        <th colspan="2">
+                            Personal Information
+                        </th>
                     </tr>
-                </thead>
-                <tbody>
-                    {{range $year := .GradesSummary}}
                     <tr>
-                        <td class="year-header">{{$year.YearName}}</td>
-                        <td>{{$year.FirstSem}}</td>
-                        <td>{{$year.SecondSem}}</td>
+                        <th>Student Number</th>
+                        <td id="student-id">
+                            {{if
+                            .Student}}{{.Student.StudentID}}{{end}}
+                        </td>
                     </tr>
-                    {{end}}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="summary full-width summary-bills">
-        <div class="summary-header">Summary of Bills</div>
-        <div class="summary-content">
-            <div class="bill-summary">
-                {{if .Assessment}}
-                <div class="bill-total">
-                    <div class="bill-label">Total Tuition & Misc. Fees</div>
-                    <div class="bill-amount">P{{printf "%.2f" .Assessment.TotalFeeAmount}}</div>
-                </div>
+                    <tr>
+                        <th>Birthday</th>
+                        <td>{{if .Student}}{{.Student.Birthday}}{{end}}</td>
+                    </tr>
+                    <tr>
+                        <th>Contact Number</th>
+                        <td>{{if .Student}}{{.Student.ContactNumber}}{{end}}</td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>{{if .Student}}{{.Student.Email}}{{end}}</td>
+                    </tr>
+                </table>
 
-                <div class="bill-status">
-                    <div class="status-item">
-                        <div class="bill-label">Initial Payment</div>
-                        <div class="status-amount">P{{if .Assessment.InitialPayment}}{{printf "%.2f"
-                            .Assessment.InitialPayment}} (Paid){{else}}0.00{{end}}</div>
-                    </div>
-                    <div class="status-item">
-                        <div class="bill-label">Remaining Balance</div>
-                        <div class="status-amount">P{{printf "%.2f" .Assessment.RemainingBalance}}</div>
-                    </div>
-                </div>
+                <table class="info-table" style="margin-top: 15px">
+                    <tr>
+                        <th colspan="2">
+                            Academic Information
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Program</th>
+                        <td id="student-program-details">
+                            {{if
+                            .Student}}{{.Student.Program}}{{end}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Year Level</th>
+                        <td id="student-year-details">
+                            {{if .Student}}{{.YearLevel}}
+                            Year{{end}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Block</th>
+                        <td>{{if .Student}}{{.Student.BlockSection}}{{end}}</td>
+                    </tr>
+                </table>
 
-                <div class="bill-label">Payment Per Exam</div>
-                <div class="payment-schedule">
-                    {{range $schedule := .PaymentSchedules}}
-                    <div class="payment-item">
-                        <div class="payment-title">{{$schedule.TermDescription}}</div>
-                        <div class="payment-amount">P{{printf "%.2f" $schedule.ExpectedAmount}}</div>
-                        <div class="payment-date">Due: {{$schedule.DueDate.Format "Jan 02, 2006"}}</div>
-                    </div>
-                    {{end}}
-                </div>
-                {{end}}
+                <table class="info-table" style="margin-top: 15px">
+                    <tr>
+                        <th colspan="2">System Access</th>
+                    </tr>
+                    <tr>
+                        <th>Last Access</th>
+                        <td>{{if .Student}}{{.Student.LastAccessTimestamp}}{{end}}</td>
+                    </tr>
+                    <tr>
+                        <th>First Access</th>
+                        <td>{{if .Student}}{{.Student.FirstAccessTimestamp}}{{end}}</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="content">
+        <div class="summary full-width summary-grades">
+            <div class="summary-header">Summary of Grades</div>
+            <div class="summary-content">
+                <table class="grades-table-home">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Academic Year</th>
+                            <th style="width: 30%;">First Semester</th>
+                            <th style="width: 30%;">Second Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range $year := .GradesSummary}}
+                        <tr>
+                            <td class="year-header">{{$year.YearName}}</td>
+                            <td>{{$year.FirstSem}}</td>
+                            <td>{{$year.SecondSem}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="summary full-width summary-bills">
+            <div class="summary-header">Summary of Bills</div>
+            <div class="summary-content">
+                <div class="bill-summary">
+                    {{if .Assessment}}
+                    <div class="bill-total">
+                        <div class="bill-label">Total Tuition & Misc. Fees</div>
+                        <div class="bill-amount">P{{printf "%.2f" .Assessment.TotalFeeAmount}}</div>
+                    </div>
+
+                    <div class="bill-status">
+                        <div class="status-item">
+                            <div class="bill-label">Initial Payment</div>
+                            <div class="status-amount">P{{if .Assessment.InitialPayment}}{{printf "%.2f"
+                                .Assessment.InitialPayment}} (Paid){{else}}0.00{{end}}</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="bill-label">Remaining Balance</div>
+                            <div class="status-amount">P{{printf "%.2f" .Assessment.RemainingBalance}}</div>
+                        </div>
+                    </div>
+
+                    <div class="bill-label">Payment Per Exam</div>
+                    <div class="payment-schedule">
+                        {{range $schedule := .PaymentSchedules}}
+                        <div class="payment-item">
+                            <div class="payment-title">{{$schedule.TermDescription}}</div>
+                            <div class="payment-amount">P{{printf "%.2f" $schedule.ExpectedAmount}}</div>
+                            <div class="payment-date">Due: {{$schedule.DueDate.Format "Jan 02, 2006"}}</div>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

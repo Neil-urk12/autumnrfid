@@ -25,10 +25,9 @@
 
     </div>
 
-    <main id="main">
+    <main id="main" hx-ext="sse" sse-connect="/stream" sse-swap="studentcallback">
 
-        <div class="container-home" id="student-data-container" hx-ext="sse" sse-connect="/stream"
-            sse-swap="studentcallback" hx-target=".container-home">
+        <div class="container-home" id="student-data-container">
 
             <div id="welcome-section" class="welcome-wrapper">
                 <div class="welcome-content">
@@ -53,7 +52,7 @@
 
 
     </main>
-    <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p>
+    <!-- <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p> -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-item')
@@ -125,7 +124,7 @@
                 // Handle navbar visibility
                 if (navbar) {
                     const requestPath = event.detail.pathInfo ? event.detail.pathInfo.requestPath : null;
-
+                    console.log("Request Path: " + requestPath)
                     if (requestPath) {
                         const showNav = requestPath.startsWith('/student-partial/') ||
                             requestPath === '/grades' ||

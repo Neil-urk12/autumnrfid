@@ -7,53 +7,6 @@ import (
 	"rfidsystem/internal/model"
 )
 
-type FeeBreakdown struct {
-	Category string
-	Name     string
-	Amount   float64
-}
-
-type PaymentRecord struct {
-	// Date            time.Time
-	PaymentDate     string
-	Description     *string
-	Amount          float64
-	Status          string
-	PaymentMethod   *string
-	ReferenceNumber *string
-}
-
-type DiscountRecord struct {
-	Name             string
-	IsPercentage     bool
-	Value            float64
-	AppliedAmount    float64
-	CalculationBasis *float64
-}
-
-type Bills struct {
-	Assessment     *model.Assessment
-	FeeBreakdown   []FeeBreakdown
-	Discounts      []DiscountRecord
-	PaymentHistory []PaymentRecord
-}
-
-type GradesRecord struct {
-	SubjectCode    string   `json:"subject_code"`
-	SubjectName    string   `json:"subject_name"`
-	PrelimGrade    *float64 `json:"prelim_grade"`
-	MidtermGrade   *float64 `json:"midterm_grade"`
-	PrefinalGrade  *float64 `json:"prefinal_grade"`
-	FinalGrade     *float64 `json:"final_grade"`
-	FinalTermGrade *float64 `json:"final_term_grade"`
-}
-
-type Grades struct {
-	Student     *model.Student
-	CurrentTerm *model.AcademicTerm
-	Grades      []GradesRecord
-}
-
 type RFIDRepository struct {
 	dbClient *DatabaseClient
 }
@@ -61,6 +14,16 @@ type RFIDRepository struct {
 func NewRFIDRepository(dbClient *DatabaseClient) *RFIDRepository {
 	return &RFIDRepository{dbClient: dbClient}
 }
+
+// Things to consider soon for readability and maintainability
+// Break this down into sub repos
+// student_repo.go
+// student_bill_repo.go
+// student_access_repo.go
+// - to future me
+
+// Student Related Functions
+// ------------------------------------------------------------------
 
 func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, error) {
 	query := `
@@ -100,7 +63,7 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 	return student, nil
 }
 
-func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*Bills, error) {
+func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*model.Bills, error) {
 	// Test database connection
 	if err := r.dbClient.DB.Ping(); err != nil {
 		return nil, fmt.Errorf("database connection error: %v", err)
@@ -136,13 +99,16 @@ func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*Bills, error)
 
 	log.Printf("Payment history retrieved for student ID: %s", studentId)
 
-	return &Bills{
+	return &model.Bills{
 		Assessment:     assessment,
 		FeeBreakdown:   fees,
 		Discounts:      discounts,
 		PaymentHistory: payments,
 	}, nil
 }
+
+// Bills Related Functions
+// ------------------------------------------------------------------
 
 func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, error) {
 	log.Printf("Getting assessment for student ID: %s\n", studentId)
@@ -200,7 +166,7 @@ func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, err
 	return assessment, nil
 }
 
-func (r *RFIDRepository) getFeeBreakdown(assessmentId int64) ([]FeeBreakdown, error) {
+func (r *RFIDRepository) getFeeBreakdown(assessmentId int64) ([]model.FeeBreakdown, error) {
 	query := `
 	SELECT
 		ft.category,
@@ -218,9 +184,9 @@ func (r *RFIDRepository) getFeeBreakdown(assessmentId int64) ([]FeeBreakdown, er
 	}
 	defer rows.Close()
 
-	var fees []FeeBreakdown
+	var fees []model.FeeBreakdown
 	for rows.Next() {
-		var fee FeeBreakdown
+		var fee model.FeeBreakdown
 		if err := rows.Scan(&fee.Category, &fee.Name, &fee.Amount); err != nil {
 			return nil, err
 		}
@@ -230,7 +196,7 @@ func (r *RFIDRepository) getFeeBreakdown(assessmentId int64) ([]FeeBreakdown, er
 	return fees, nil
 }
 
-func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]DiscountRecord, error) {
+func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]model.DiscountRecord, error) {
 	query := `
 	SELECT
 		dt.name,
@@ -249,9 +215,9 @@ func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]DiscountRecord, err
 	}
 	defer rows.Close()
 
-	var discounts []DiscountRecord
+	var discounts []model.DiscountRecord
 	for rows.Next() {
-		var discount DiscountRecord
+		var discount model.DiscountRecord
 		if err := rows.Scan(
 			&discount.Name,
 			&discount.IsPercentage,
@@ -267,7 +233,7 @@ func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]DiscountRecord, err
 	return discounts, nil
 }
 
-func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]PaymentRecord, error) {
+func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentRecord, error) {
 	log.Printf("Fetching payment history for assessment ID: %d", assessmentId)
 	query := `
 	SELECT
@@ -288,9 +254,9 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]PaymentRecord,
 	}
 	defer rows.Close()
 
-	var payments []PaymentRecord
+	var payments []model.PaymentRecord
 	for rows.Next() {
-		var payment PaymentRecord
+		var payment model.PaymentRecord
 		if err := rows.Scan(
 			&payment.PaymentDate,
 			&payment.Description,
@@ -307,7 +273,10 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]PaymentRecord,
 	return payments, nil
 }
 
-func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*Grades, error) {
+// Grades Related Functions
+// ------------------------------------------------------------------
+
+func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*model.Grades, error) {
 	student, err := r.GetStudentByRFID(studentId)
 	if err != nil {
 		log.Printf("Error getting student: %v\n", err)
@@ -346,9 +315,9 @@ func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*Grades, erro
 
 	defer rows.Close()
 
-	var gradeRecords []GradesRecord
+	var gradeRecords []model.GradesRecord
 	for rows.Next() {
-		var grade GradesRecord
+		var grade model.GradesRecord
 		err := rows.Scan(
 			&grade.SubjectCode,
 			&grade.SubjectName,
@@ -365,7 +334,7 @@ func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*Grades, erro
 	}
 	log.Printf("Grade records: %v", gradeRecords)
 
-	return &Grades{
+	return &model.Grades{
 		Student:     student,
 		CurrentTerm: currentTerm,
 		Grades:      gradeRecords,
