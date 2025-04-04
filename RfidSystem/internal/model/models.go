@@ -4,6 +4,20 @@ type StudentInfo struct {
 	Student *Student
 }
 
+type YearGradeSummary struct {
+	YearName  string  `json:"year_name"`
+	FirstSem  *string `json:"first_sem,omitempty"`
+	SecondSem *string `json:"second_sem,omitempty"`
+}
+
+type StudentInfoViewModel struct {
+	Student          *Student
+	YearLevel        string
+	GradesSummary    []YearGradeSummary
+	Assessment       *Assessment
+	PaymentSchedules []PaymentSchedule
+}
+
 type Department struct {
 	ID   int64  `json:"department_id" db:"department_ID"`
 	Name string `json:"department_name" db:"department_Name"`
@@ -136,9 +150,19 @@ type PaymentSchedule struct {
 	AssessmentNumber int64  `json:"assessment_number" db:"assessment_number"`
 	TermDescription  string `json:"term_description" db:"term_description"`
 	// DueDate          *time.Time `json:"due_date,omitempty" db:"due_date"`
-	DueData        string  `json:"due_date" db:"due_date"`
+	DueDate        string  `json:"due_date" db:"due_date"`
 	ExpectedAmount float64 `json:"expected_amount" db:"expected_amount"`
 	SortOrder      int     `json:"sort_order" db:"sort_order"`
+}
+
+type PaymentScheduleViewModel struct {
+    ID               int64
+    AssessmentNumber int64
+    TermDescription  string
+    DueDate          string
+    ExpectedAmount   float64
+    ExpectedAmountFormatted string
+    SortOrder       int
 }
 
 // -------------------------

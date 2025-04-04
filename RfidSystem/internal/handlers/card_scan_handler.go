@@ -14,7 +14,8 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 
 	rfidRepo := repositories.NewRFIDRepository(h.db)
-	student, err := rfidRepo.GetStudentByRFID(rfid)
+	// student, err := rfidRepo.GetStudentByRFID(rfid)
+	student, err := rfidRepo.GetStudentSummaryData(rfid)
 
 	if err != nil {
 		GetBroadcaster().Broadcast("error", fmt.Sprintf(`{"message": "Database error: %v"}`, err))
@@ -27,25 +28,10 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
 	}
 
-	fmt.Printf("Student found: %s\n", student.StudentID)
+	fmt.Printf("Student found: %s\n", student.Student.StudentID)
 
 	htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 
 	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 	return ctx.SendString("Processing")
-}
-
-func getYearLevelString(year int) string {
-	switch year {
-	case 1:
-		return "First"
-	case 2:
-		return "Second"
-	case 3:
-		return "Third"
-	case 4:
-		return "Fourth"
-	default:
-		return fmt.Sprintf("%dth", year)
-	}
 }

@@ -1,38 +1,40 @@
 <!-- Student Information -->
 <div class="container-home tar" id="student-info-container">
-    <input type="hidden" id="current-student-id" value="{{if .Student}}{{.Student.StudentID}}{{end}}">
+    <input
+        type="hidden"
+        id="current-student-id"
+        value="{{if .Student}}{{.Student.StudentID}}{{end}}"
+    />
     <div class="profile">
         <div class="summary-header">Student Information</div>
         <div class="summary-content">
             <div class="profile-header">
-                <img src="/ui/static/images/profile-placeholder.png" alt="Profile Picture" />
+                <img
+                    src="/ui/static/images/mlemlody.png"
+                    alt="Profile Picture"
+                />
                 <div class="profile-info">
                     <h3 id="student-name">
                         {{if .Student}}{{.Student.FirstName}}
                         {{.Student.LastName}}{{end}}
                     </h3>
                     <h5 id="student-year">
-                        {{if .Student}}{{.YearLevel}}
-                        Year{{end}}
+                        {{if .Student}}{{.YearLevel}} Year{{end}}
                     </h5>
                     <h5 id="student-program">
-                        {{if
-                        .Student}}{{.Student.Program}}{{end}}
+                        {{if .Student}}{{.Student.Program}}{{end}}
                     </h5>
                 </div>
             </div>
             <div class="student-details">
                 <table class="info-table">
                     <tr>
-                        <th colspan="2">
-                            Personal Information
-                        </th>
+                        <th colspan="2">Personal Information</th>
                     </tr>
                     <tr>
                         <th>Student Number</th>
                         <td id="student-id">
-                            {{if
-                            .Student}}{{.Student.StudentID}}{{end}}
+                            {{if .Student}}{{.Student.StudentID}}{{end}}
                         </td>
                     </tr>
                     <tr>
@@ -41,7 +43,9 @@
                     </tr>
                     <tr>
                         <th>Contact Number</th>
-                        <td>{{if .Student}}{{.Student.ContactNumber}}{{end}}</td>
+                        <td>
+                            {{if .Student}}{{.Student.ContactNumber}}{{end}}
+                        </td>
                     </tr>
                     <tr>
                         <th>Email</th>
@@ -51,22 +55,18 @@
 
                 <table class="info-table" style="margin-top: 15px">
                     <tr>
-                        <th colspan="2">
-                            Academic Information
-                        </th>
+                        <th colspan="2">Academic Information</th>
                     </tr>
                     <tr>
                         <th>Program</th>
                         <td id="student-program-details">
-                            {{if
-                            .Student}}{{.Student.Program}}{{end}}
+                            {{if .Student}}{{.Student.Program}}{{end}}
                         </td>
                     </tr>
                     <tr>
                         <th>Year Level</th>
                         <td id="student-year-details">
-                            {{if .Student}}{{.YearLevel}}
-                            Year{{end}}
+                            {{if .Student}}{{.YearLevel}} Year{{end}}
                         </td>
                     </tr>
                     <tr>
@@ -81,11 +81,17 @@
                     </tr>
                     <tr>
                         <th>Last Access</th>
-                        <td>{{if .Student}}{{.Student.LastAccessTimestamp}}{{end}}</td>
+                        <td>
+                            {{if
+                            .Student}}{{.Student.LastAccessTimestamp}}{{end}}
+                        </td>
                     </tr>
                     <tr>
                         <th>First Access</th>
-                        <td>{{if .Student}}{{.Student.FirstAccessTimestamp}}{{end}}</td>
+                        <td>
+                            {{if
+                            .Student}}{{.Student.FirstAccessTimestamp}}{{end}}
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -99,17 +105,29 @@
                 <table class="grades-table-home">
                     <thead>
                         <tr>
-                            <th style="width: 40%;">Academic Year</th>
-                            <th style="width: 30%;">First Semester</th>
-                            <th style="width: 30%;">Second Semester</th>
+                            <th style="width: 40%">Academic Year</th>
+                            <th style="width: 30%">First Semester</th>
+                            <th style="width: 30%">Second Semester</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {{range $year := .GradesSummary}}
+                        {{if .GradesSummary}} {{range $year := .GradesSummary}}
                         <tr>
                             <td class="year-header">{{$year.YearName}}</td>
-                            <td>{{$year.FirstSem}}</td>
-                            <td>{{$year.SecondSem}}</td>
+                            <td>
+                                {{if $year.FirstSem}}{{$year.FirstSem}}
+                                {{else}}-{{end}}
+                            </td>
+                            <td>
+                                {{if
+                                $year.SecondSem}}{{$year.SecondSem}}{{else}}-{{end}}
+                            </td>
+                        </tr>
+                        {{end}} {{else}}
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                No grades available
+                            </td>
                         </tr>
                         {{end}}
                     </tbody>
@@ -123,30 +141,59 @@
                     {{if .Assessment}}
                     <div class="bill-total">
                         <div class="bill-label">Total Tuition & Misc. Fees</div>
-                        <div class="bill-amount">P{{printf "%.2f" .Assessment.TotalFeeAmount}}</div>
+                        <div class="bill-amount">
+                            {{.Assessment.TotalFeeAmount}}
+                        </div>
                     </div>
 
                     <div class="bill-status">
                         <div class="status-item">
                             <div class="bill-label">Initial Payment</div>
-                            <div class="status-amount">P{{if .Assessment.InitialPayment}}{{printf "%.2f"
-                                .Assessment.InitialPayment}} (Paid){{else}}0.00{{end}}</div>
+                            <div class="status-amount">
+                                {{if ne .Assessment.InitialPayment "₱0.00"}}
+                                {{.Assessment.InitialPayment}} (Paid) {{else}}
+                                No payment made {{end}}
+                            </div>
                         </div>
                         <div class="status-item">
                             <div class="bill-label">Remaining Balance</div>
-                            <div class="status-amount">P{{printf "%.2f" .Assessment.RemainingBalance}}</div>
+                            <div class="status-amount">
+                                {{.Assessment.RemainingBalance}}
+                            </div>
                         </div>
                     </div>
-
+                    {{else}}
+                    <div class="bill-total">
+                        <div class="bill-label">Assessment Information</div>
+                        <div class="bill-amount">
+                            No assessment data available
+                        </div>
+                    </div>
+                    {{end}} {{if .PaymentSchedules}}
                     <div class="bill-label">Payment Per Exam</div>
                     <div class="payment-schedule">
                         {{range $schedule := .PaymentSchedules}}
                         <div class="payment-item">
-                            <div class="payment-title">{{$schedule.TermDescription}}</div>
-                            <div class="payment-amount">P{{printf "%.2f" $schedule.ExpectedAmount}}</div>
-                            <div class="payment-date">Due: {{$schedule.DueDate.Format "Jan 02, 2006"}}</div>
+                            <div class="payment-title">
+                                {{$schedule.TermDescription}}
+                            </div>
+                            <div class="payment-amount">
+                                {{$schedule.ExpectedAmountFormatted}}
+                            </div>
+                            <div class="payment-date">
+                                Due: {{$schedule.DueDate}}
+                            </div>
                         </div>
                         {{end}}
+                    </div>
+                    {{else}}
+                    <div class="bill-label">Payment Schedule</div>
+                    <div class="payment-schedule">
+                        <div class="payment-item">
+                            <div class="payment-title">
+                                No payment schedule available
+                            </div>
+                        </div>
                     </div>
                     {{end}}
                 </div>
