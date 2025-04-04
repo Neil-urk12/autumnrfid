@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-import ConfirmationModal from '@/components/ConfirmationModal.vue'
-import Sidebar from "@/components/Sidebar.vue"
+import { defineAsyncComponent } from "vue";
+const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"));
+const ConfirmationModal = defineAsyncComponent(() => import("@/components/ConfirmationModal.vue"));
 
 const isConfirmationModalOpen = ref(false)
 const isAddModalOpen = ref(false)

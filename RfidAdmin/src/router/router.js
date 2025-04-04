@@ -1,10 +1,38 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Manage from "@/views/Manage.vue";
 const routes = [
     {
         path: "/manage",
         name: "Manage",
-        component: Manage,
+        component: () => import("@/views/Manage.vue"),
+    },
+    {
+        path: "/",
+        redirect: "/manage",
+    },
+    {
+        path: "/admin",
+        name: "Admin",
+        component: () => import("@/views/Admin.vue"),
+    },
+    // {
+    //     path: "/login",
+    //     name: "Login",
+    //     component: () => import("@/views/Login.vue"),
+    // },
+    {
+        path: "/courses",
+        name: "Courses",
+        component: () => import("@/views/Courses.vue"),
+    },
+    {
+        path: "/grades",
+        name: "Grades",
+        component: () => import("@/views/Grades.vue"),
+    },
+    {
+        path: "/students",
+        name: "Students",
+        component: () => import("@/views/Students.vue"),
     },
 ]
 

@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue'
-import Sidebar from "@/components/Sidebar.vue";
+import { ref, defineAsyncComponent } from 'vue'
+const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 
 const activeCategory = ref('information')
 const isModalOpen = ref(false)
