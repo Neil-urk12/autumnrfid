@@ -1,5 +1,6 @@
 <script setup>
-import Sidebar from "@/components/Sidebar.vue";
+import { defineAsyncComponent } from "vue";
+const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"));
 </script>
 
 <template>
