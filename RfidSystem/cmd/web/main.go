@@ -110,7 +110,8 @@ func main() {
 	app.Get("/grades", appHandler.HandleGrades)
 	app.Get("/test-grades", appHandler.HandleTestGrades)
 	app.Get("/error", appHandler.HandleError)
-	app.Get("/student-partial/:rfid", appHandler.GetStudentPartial)
+	// app.Get("/student-partial/:rfid", appHandler.GetStudentPartial)
+	app.Get("/student-partial/:rfid", appHandler.HandleStudentInfo)
 
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
