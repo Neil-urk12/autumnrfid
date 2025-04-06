@@ -79,12 +79,17 @@ func (r *RFIDRepository) GetStudentSummaryData(studentId string) (*model.Student
 	log.Printf("Student summary data retrieved for ID: %s\n", studentId)
 
 	if student.YearLevel != nil {
-		log.Printf("Tomasigma")
-	} else {
 		log.Printf("Student Year: %d", *student.YearLevel)
+	} else {
+		log.Printf("Student Year is nil")
 	}
 
-	yearLevel := services.GetYearLevelString(*student.YearLevel)
+	var yearLevel string
+	if student.YearLevel != nil {
+		yearLevel = services.GetYearLevelString(*student.YearLevel)
+	} else {
+		yearLevel = ""
+	}
 
 	if student.YearLevel != nil {
 		yearLevel = services.GetYearLevelString(*student.YearLevel)
