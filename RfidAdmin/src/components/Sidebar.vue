@@ -71,6 +71,14 @@ const goTo = (path) => {
                         <div class="text">Grades</div>
                     </a>
                 </li>
+                <li>
+                    <a @click="goTo('/bills')">
+                        <div class="icon">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="text">Bills</div>
+                    </a>
+                </li>
             </div>
 
             <div class="sidebar-section">
