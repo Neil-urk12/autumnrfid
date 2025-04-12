@@ -1,0 +1,41 @@
+<div id="grades-table-container">
+    <table class="grades-table-grades">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Subject</th>
+                <th>Prelim</th>
+                <th>Midterm</th>
+                <th>Pre-Finals</th>
+                <th>Finals</th>
+                <th>Final Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{if not .Grades}}
+            <tr>
+                <td colspan="7" class="no-grades-message">
+                    <p>No grades available for this semester.</p>
+                </td>
+            </tr>
+            {{end}}
+            {{range .Grades}}
+            <tr>
+                <td>{{.SubjectCode}}</td>
+                <td class="subject-name">{{.SubjectName}}</td>
+                <td>{{.PrelimGrade}}</td>
+                <td>{{.MidtermGrade}}</td>
+                <td>{{.PrefinalGrade}}</td>
+                <td>{{.FinalTermGrade}}</td>
+                <td class="final-grade">{{.FinalGrade}}</td>
+            </tr>
+            {{end}}
+            <tr class="gwa-row">
+                <td colspan="6" style="text-align: right">
+                    General Weighted Average (GWA):
+                </td>
+                <td style="text-align: center">{{.GWA}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
