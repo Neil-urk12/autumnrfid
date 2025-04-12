@@ -1,19 +1,6 @@
-<!doctype html>
-<html lang="en">
+{{template "layouts/base" .}}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-    <script src="https://unpkg.com/htmx-ext-sse@2.2.2"></script> -->
-    <script src="ui/static/htmx.min.js"></script>
-    <script src="ui/static/sse.js.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <title>RFID</title>
-    <link rel="stylesheet" href="/ui/static/styles.css" />
-</head>
+{{define "content"}}
 
 <body>
 
@@ -141,12 +128,29 @@
                 console.log('SSE Connected:', JSON.parse(e.data))
             })
 
+            sseSource.addEventListener('studentcallback', function (e) {
+                console.log('Received studentcallback event:', e.data);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = e.data;
+                document.body.appendChild(tempDiv);
+                htmx.process(tempDiv);
+
+                // Explicitly show navbar
+                const navbar = document.getElementById('main-navbar');
+                if (navbar) {
+                    navbar.style.display = 'flex';
+                }
+
+                // Explicitly hide welcome messages
+                const welcomeSection = document.getElementById('welcome-section');
+                if (welcomeSection) {
+                    welcomeSection.style.display = 'none';
+                }
+            })
+
             sseSource.onerror = function (e) {
                 console.error('SSE Error:', e)
             }
         })
     </script>
-
-</body>
-
-</html>
+    {{end}}
