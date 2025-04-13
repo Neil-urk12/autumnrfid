@@ -1,135 +1,135 @@
 package handlers
 
 import (
-    "fmt"
-    "log"
-    "rfidsystem/internal/model"
-    "rfidsystem/internal/repositories"
+	"fmt"
+	"log"
+	"rfidsystem/internal/model"
+	"rfidsystem/internal/repositories"
 
-    "github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2"
 )
 
 func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
-    studentId := ctx.Query("student-id")
-    if studentId == "" {
-        return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
-    }
+	studentId := ctx.Query("student-id")
+	if studentId == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
+	}
 
-    gradesRepo := repositories.NewRFIDRepository(h.db)
-    
-    // Get current term to determine which semester to show by default
-    currentTerm, err := gradesRepo.GetCurrentTerm()
-    if err != nil {
-        log.Printf("Error getting current term: %v", err)
-        return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
-    }
+	gradesRepo := repositories.NewRFIDRepository(h.db)
 
-    // Get grades data
-    gradesData, err := gradesRepo.GetStudentGradesByRFID(studentId)
-    if err != nil {
-        log.Printf("Error fetching grades for student %s: %v", studentId, err)
-        return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
-    }
-    if gradesData == nil {
-        log.Printf("Student %s not found", studentId)
-        return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
-    }
+	// Get current term to determine which semester to show by default
+	currentTerm, err := gradesRepo.GetCurrentTerm()
+	if err != nil {
+		log.Printf("Error getting current term: %v", err)
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+	}
 
-    // Determine if second semester is available
-    isSecondSemesterAvailable := currentTerm.Semester != "First Semester"
+	// Get grades data
+	gradesData, err := gradesRepo.GetStudentGradesByRFID(studentId)
+	if err != nil {
+		log.Printf("Error fetching grades for student %s: %v", studentId, err)
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+	}
+	if gradesData == nil {
+		log.Printf("Student %s not found", studentId)
+		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
+	}
 
-    // Process grades and calculate GWA
-    preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+	// Determine if second semester is available
+	isSecondSemesterAvailable := currentTerm.Semester != "First Semester"
 
-    return ctx.Render("partials/grades", fiber.Map{
-        "Title":                   "Student Grades",
-        "Student":                 gradesData.Student,
-        "Term":                   gradesData.CurrentTerm,
-        "Grades":                 preparedGrades,
-        "GWA":                    gwaString,
-        "SelectedSemester":       currentTerm.Semester,
-        "IsSecondSemesterAvailable": isSecondSemesterAvailable,
-    })
+	// Process grades and calculate GWA
+	preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+
+	return ctx.Render("partials/grades", fiber.Map{
+		"Title":                     "Student Grades",
+		"Student":                   gradesData.Student,
+		"Term":                      gradesData.CurrentTerm,
+		"Grades":                    preparedGrades,
+		"GWA":                       gwaString,
+		"SelectedSemester":          currentTerm.Semester,
+		"IsSecondSemesterAvailable": isSecondSemesterAvailable,
+	})
 }
 
 // HandleSemesterGrades handles HTMX requests for grades of a specific semester
 func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
-    studentId := ctx.Params("studentId")
-    semester := ctx.Query("semester")
+	studentId := ctx.Params("studentId")
+	semester := ctx.Query("semester")
 
-    if studentId == "" || semester == "" {
-        return ctx.Status(fiber.StatusBadRequest).SendString("Student ID and semester are required")
-    }
+	if studentId == "" || semester == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Student ID and semester are required")
+	}
 
-    gradesRepo := repositories.NewRFIDRepository(h.db)
-    
-    // Get current term to get the academic year and check semester availability
-    currentTerm, err := gradesRepo.GetCurrentTerm()
-    if err != nil {
-        log.Printf("Error getting current term: %v", err)
-        return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
-    }
+	gradesRepo := repositories.NewRFIDRepository(h.db)
 
-    // Get grades for the requested semester
-    gradesData, err := gradesRepo.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, semester)
-    if err != nil {
-        log.Printf("Error fetching grades for student %s semester %s: %v", studentId, semester, err)
-        return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
-    }
+	// Get current term to get the academic year and check semester availability
+	currentTerm, err := gradesRepo.GetCurrentTerm()
+	if err != nil {
+		log.Printf("Error getting current term: %v", err)
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+	}
 
-    // Determine if second semester is available
-    isSecondSemesterAvailable := currentTerm.Semester != "First Semester"
+	// Get grades for the requested semester
+	gradesData, err := gradesRepo.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, semester)
+	if err != nil {
+		log.Printf("Error fetching grades for student %s semester %s: %v", studentId, semester, err)
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+	}
 
-    // Process grades and calculate GWA
-    preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+	// Determine if second semester is available
+	isSecondSemesterAvailable := currentTerm.Semester != "First Semester"
 
-    // Render only the grades table container
-    return ctx.Render("partials/grades-table", fiber.Map{
-        "Student":                 gradesData.Student,
-        "Term":                   gradesData.CurrentTerm,
-        "Grades":                 preparedGrades,
-        "GWA":                    gwaString,
-        "SelectedSemester":       semester,
-        "IsSecondSemesterAvailable": isSecondSemesterAvailable,
-    })
+	// Process grades and calculate GWA
+	preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+
+	// Render only the grades table container
+	return ctx.Render("partials/grades-table", fiber.Map{
+		"Student":                   gradesData.Student,
+		"Term":                      gradesData.CurrentTerm,
+		"Grades":                    preparedGrades,
+		"GWA":                       gwaString,
+		"SelectedSemester":          semester,
+		"IsSecondSemesterAvailable": isSecondSemesterAvailable,
+	})
 }
 
 // prepareGradesAndGWA processes grades and calculates GWA
 func (h *AppHandler) prepareGradesAndGWA(grades []model.GradesRecord) ([]fiber.Map, string) {
-    var preparedGrades []fiber.Map
-    var totalGrade float64
-    var countGrades int
+	var preparedGrades []fiber.Map
+	var totalGrade float64
+	var countGrades int
 
-    // Prepare grades with safe handling of nil values
-    for _, grade := range grades {
-        gradeMap := fiber.Map{
-            "SubjectCode":    grade.SubjectCode,
-            "SubjectName":    grade.SubjectName,
-            "PrelimGrade":    formatGrade(grade.PrelimGrade),
-            "MidtermGrade":   formatGrade(grade.MidtermGrade),
-            "PrefinalGrade":  formatGrade(grade.PrefinalGrade),
-            "FinalTermGrade": formatGrade(grade.FinalTermGrade),
-            "FinalGrade":     formatGrade(grade.FinalGrade),
-        }
-        preparedGrades = append(preparedGrades, gradeMap)
+	// Prepare grades with safe handling of nil values
+	for _, grade := range grades {
+		gradeMap := fiber.Map{
+			"SubjectCode":    grade.SubjectCode,
+			"SubjectName":    grade.SubjectName,
+			"PrelimGrade":    formatGrade(grade.PrelimGrade),
+			"MidtermGrade":   formatGrade(grade.MidtermGrade),
+			"PrefinalGrade":  formatGrade(grade.PrefinalGrade),
+			"FinalTermGrade": formatGrade(grade.FinalTermGrade),
+			"FinalGrade":     formatGrade(grade.FinalGrade),
+		}
+		preparedGrades = append(preparedGrades, gradeMap)
 
-        // Calculate running total for GWA
-        if grade.FinalGrade != nil {
-            totalGrade += *grade.FinalGrade
-            countGrades++
-        }
-    }
+		// Calculate running total for GWA
+		if grade.FinalGrade != nil {
+			totalGrade += *grade.FinalGrade
+			countGrades++
+		}
+	}
 
-    // Calculate GWA
-    var gwaString string
-    if countGrades > 0 {
-        gwa := totalGrade / float64(countGrades)
-        gwaString = fmt.Sprintf("%.2f", gwa)
-    } else {
-        gwaString = "N/A"
-    }
+	// Calculate GWA
+	var gwaString string
+	if countGrades > 0 {
+		gwa := totalGrade / float64(countGrades)
+		gwaString = fmt.Sprintf("%.2f", gwa)
+	} else {
+		gwaString = "N/A"
+	}
 
-    return preparedGrades, gwaString
+	return preparedGrades, gwaString
 }
 
 // formatGrade safely handles nil grade values and formats non-nil grades
