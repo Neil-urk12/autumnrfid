@@ -108,7 +108,7 @@ func main() {
 	// Routes
 	app.Get("/", appHandler.HandleGetIndex)
 	app.Get("/grades", appHandler.HandleGrades)
-	app.Get("/test-grades", appHandler.HandleTestGrades)
+	app.Get("/grades/semester/:studentId", appHandler.HandleSemesterGrades)
 	app.Get("/error", appHandler.HandleError)
 	// app.Get("/student-partial/:rfid", appHandler.GetStudentPartial)
 	app.Get("/student-partial/:rfid", appHandler.HandleStudentInfo)

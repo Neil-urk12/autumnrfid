@@ -139,7 +139,7 @@ func (r *RFIDRepository) getStudentGradesSummary(studentId string) ([]model.Year
 	log.Printf("Getting grades summary for student ID: %s", studentId)
 
 	// Get current term to get the academic year
-	currentTerm, err := r.getCurrentTerm()
+	currentTerm, err := r.GetCurrentTerm()
 	if err != nil {
 		log.Printf("Error getting current term: %v", err)
 		return nil, err
@@ -517,7 +517,18 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentR
 // Grades Related Functions
 // ------------------------------------------------------------------
 
+// GetStudentGradesByRFID retrieves grades for the current term
 func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*model.Grades, error) {
+	currentTerm, err := r.GetCurrentTerm()
+	if err != nil {
+		return nil, fmt.Errorf("error getting current term: %v", err)
+	}
+
+	return r.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, currentTerm.Semester)
+}
+
+// GetStudentGradesByRFIDAndSemester retrieves grades for a specific semester in the given academic year
+func (r *RFIDRepository) GetStudentGradesByRFIDAndSemester(studentId, academicYear, semesterName string) (*model.Grades, error) {
 	student, err := r.GetStudentByRFID(studentId)
 	if err != nil {
 		log.Printf("Error getting student: %v\n", err)
@@ -528,32 +539,43 @@ func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*model.Grades
 		return nil, fmt.Errorf("student not found")
 	}
 
-	currentTerm, err := r.getCurrentTerm()
+	// Get term ID for the specified academic year and semester
+	var termId int64
+	termQuery := `
+    SELECT term_id
+    FROM AcademicTerms
+    WHERE academic_year = ? AND semester = ?
+    LIMIT 1`
+
+	err = r.dbClient.DB.QueryRow(termQuery, academicYear, semesterName).Scan(&termId)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("no term found for academic year %s and semester %s", academicYear, semesterName)
+	}
 	if err != nil {
-		log.Printf("Error getting current term: %v\n", err)
-		return nil, fmt.Errorf("error getting current term: %v", err)
+		return nil, fmt.Errorf("error finding term: %v", err)
 	}
 
 	query := `
-	SELECT
-		e.subject_Code,
-		s.subject_name,
-		e.prelim_grade,
-		e.midterm_grade,
-		e.prefinal_grade,
-		e.final_term_grade,
-		e.final_grade
-	FROM Enrollments e
-	JOIN Subjects s ON e.subject_Code = s.subject_Code
-	WHERE e.student_id = ? AND e.term_id = ?
-	ORDER BY s.subject_code
-	`
+    SELECT
+        e.subject_Code,
+        s.subject_name,
+        e.prelim_grade,
+        e.midterm_grade,
+        e.prefinal_grade,
+        e.final_term_grade,
+        e.final_grade
+    FROM Enrollments e
+    JOIN Subjects s ON e.subject_Code = s.subject_Code
+    JOIN AcademicTerms at ON e.term_id = at.term_id
+    WHERE e.student_id = ?
+        AND at.academic_year = ?
+        AND at.semester = ?
+    ORDER BY s.subject_code`
 
-	rows, err := r.dbClient.DB.Query(query, studentId, currentTerm.ID)
+	rows, err := r.dbClient.DB.Query(query, studentId, academicYear, semesterName)
 	if err != nil {
 		return nil, fmt.Errorf("error querying grades: %v", err)
 	}
-
 	defer rows.Close()
 
 	var gradeRecords []model.GradesRecord
@@ -573,16 +595,21 @@ func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*model.Grades
 		}
 		gradeRecords = append(gradeRecords, grade)
 	}
-	log.Printf("Grade records: %v", gradeRecords)
+
+	term := &model.AcademicTerm{
+		ID:           termId,
+		AcademicYear: academicYear,
+		Semester:     semesterName,
+	}
 
 	return &model.Grades{
 		Student:     student,
-		CurrentTerm: currentTerm,
+		CurrentTerm: term,
 		Grades:      gradeRecords,
 	}, nil
 }
 
-func (r *RFIDRepository) getCurrentTerm() (*model.AcademicTerm, error) {
+func (r *RFIDRepository) GetCurrentTerm() (*model.AcademicTerm, error) {
 	query := `
 	SELECT
 		term_id,
