@@ -56,6 +56,7 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 		log.Printf("No student found with ID: %s\n", studentId)
 		return nil, nil
 	}
+
 	if err != nil {
 		log.Printf("Error querying student: %v\n", err)
 		return nil, fmt.Errorf("error querying student: %v", err)
