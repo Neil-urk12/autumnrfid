@@ -3,16 +3,40 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"time"
 	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+var gradesCache = NewLRUCache(5, time.Hour)
+var semesterGradesCache = NewLRUCache(5, time.Hour)
+
+
 func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 	studentId := ctx.Query("student-id")
 	if studentId == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
+	}
+	// Try cache first
+	if cached, found := gradesCache.Get(studentId); found {
+		gradesData, ok := cached.(*model.Grades)
+		if ok && gradesData != nil {
+			log.Printf("[CACHE HIT] Grades for %s", studentId)
+			currentTerm := gradesData.CurrentTerm
+			isSecondSemesterAvailable := currentTerm.Semester != "First Semester"
+			preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+			return ctx.Render("partials/grades", fiber.Map{
+				"Title":                     "Student Grades",
+				"Student":                   gradesData.Student,
+				"Term":                      gradesData.CurrentTerm,
+				"Grades":                    preparedGrades,
+				"GWA":                       gwaString,
+				"SelectedSemester":          currentTerm.Semester,
+				"IsSecondSemesterAvailable": isSecondSemesterAvailable,
+			})
+		}
 	}
 
 	gradesRepo := repositories.NewRFIDRepository(h.db)
@@ -34,6 +58,8 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 		log.Printf("Student %s not found", studentId)
 		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 	}
+	// Store in cache
+	gradesCache.Set(studentId, gradesData)
 
 	// Determine if second semester is available
 	isSecondSemesterAvailable := currentTerm.Semester != "First Semester"
@@ -56,9 +82,26 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 	studentId := ctx.Params("studentId")
 	semester := ctx.Query("semester")
-
 	if studentId == "" || semester == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student ID and semester are required")
+	}
+	cacheKey := studentId + ":" + semester
+	if cached, found := semesterGradesCache.Get(cacheKey); found {
+		gradesData, ok := cached.(*model.Grades)
+		if ok && gradesData != nil {
+			log.Printf("[CACHE HIT] Semester grades for %s %s", studentId, semester)
+			currentTerm := gradesData.CurrentTerm
+			isSecondSemesterAvailable := currentTerm.Semester != "First Semester"
+			preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+			return ctx.Render("partials/grades-table", fiber.Map{
+				"Student":                   gradesData.Student,
+				"Term":                      gradesData.CurrentTerm,
+				"Grades":                    preparedGrades,
+				"GWA":                       gwaString,
+				"SelectedSemester":          semester,
+				"IsSecondSemesterAvailable": isSecondSemesterAvailable,
+			})
+		}
 	}
 
 	gradesRepo := repositories.NewRFIDRepository(h.db)
@@ -76,6 +119,8 @@ func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 		log.Printf("Error fetching grades for student %s semester %s: %v", studentId, semester, err)
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
+	// Store in cache
+	semesterGradesCache.Set(cacheKey, gradesData)
 
 	// Determine if second semester is available
 	isSecondSemesterAvailable := currentTerm.Semester != "First Semester"

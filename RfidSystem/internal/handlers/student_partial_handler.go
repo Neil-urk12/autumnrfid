@@ -4,9 +4,12 @@ import (
 	"log"
 	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+var studentInfoCache = NewLRUCache(5, time.Hour)
 
 func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	studentId := ctx.Params("rfid")
@@ -16,6 +19,21 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	}
 
 	log.Printf("Retrieving data")
+	// Try cache first
+	if cached, found := studentInfoCache.Get(studentId); found {
+		studentInfo, ok := cached.(*model.StudentInfoViewModel)
+		if ok && studentInfo != nil && studentInfo.Student != nil {
+			log.Printf("[CACHE HIT] Student info retrieved successfully for %s", studentId)
+			return ctx.Render("partials/student_info", fiber.Map{
+				"Student":          studentInfo.Student,
+				"YearLevel":        studentInfo.YearLevel,
+				"GradesSummary":    studentInfo.GradesSummary,
+				"Assessment":       formatAssessmentForView(studentInfo.Assessment),
+				"PaymentSchedules": studentInfo.PaymentSchedules, // Already formatted in cache
+			})
+		}
+	}
+
 	rfidRepo := repositories.NewRFIDRepository(h.db)
 	studentInfo, err := rfidRepo.GetStudentSummaryData(studentId)
 	if err != nil {
@@ -27,6 +45,8 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 	}
 	log.Printf("Student info retrieved successfully")
+	// Store in cache
+	studentInfoCache.Set(studentId, studentInfo)
 
 	// Log grades summary for debugging
 	if studentInfo.GradesSummary != nil {

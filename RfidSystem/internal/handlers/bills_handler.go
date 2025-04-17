@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"time"
 	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+var billsCache = NewLRUCache(5, time.Hour)
+
 
 func formatAmount(amount float64) string {
 	return fmt.Sprintf("%.2f", amount)
@@ -39,9 +43,23 @@ func formatAssessmentForView(assessment *model.Assessment) model.AssessmentViewM
 
 func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 	studentId := ctx.Query("student-id")
-
 	if studentId == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
+	}
+	// Try cache first
+	if cached, found := billsCache.Get(studentId); found {
+		billsData, ok := cached.(*model.Bills)
+		if ok && billsData != nil {
+			log.Printf("[CACHE HIT] Bills for %s", studentId)
+			assessmentMap := formatAssessmentForView(billsData.Assessment)
+			return ctx.Render("partials/bills", fiber.Map{
+				"Title":          "Student Bills",
+				"Bills":          assessmentMap,
+				"FeeBreakdown":   billsData.FeeBreakdown,
+				"Discounts":      billsData.Discounts,
+				"PaymentHistory": billsData.PaymentHistory,
+			})
+		}
 	}
 
 	match, err := regexp.MatchString(`^ACLC-\d{4}-\d{3}$`, studentId)
@@ -68,6 +86,8 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 		log.Printf("No bills data found for student ID: %s\n", studentId)
 		return ctx.Status(fiber.StatusNotFound).SendString("No bills data found for this student")
 	}
+	// Store in cache
+	billsCache.Set(studentId, billsData)
 
 	log.Printf("Successfully retrieved bills data for student ID: %s\n", studentId)
 
