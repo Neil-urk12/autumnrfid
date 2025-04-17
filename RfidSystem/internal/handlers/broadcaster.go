@@ -65,11 +65,13 @@ func (b *Broadcaster) run() {
 	for {
 		select {
 		case <-b.done:
+			// cleanup on shutdown with lock
+			b.mutex.Lock()
 			for client := range b.clients {
 				close(client.messages)
 				delete(b.clients, client)
 			}
-			b.Close()
+			b.mutex.Unlock()
 			return
 
 		case client := <-b.register:
@@ -96,13 +98,12 @@ func (b *Broadcaster) run() {
 				case client.messages <- message:
 					log.Printf("Message sent successfully\n")
 				default:
-					// Client buffer full, consider unregistering
-					go func(c *Client) {
-						b.unregister <- c
-					}(client)
+					// client buffer full: unregister inline
+					b.unregister <- client
 				}
 			}
 			b.mutex.RUnlock()
+			log.Printf("[SSE] broadcast event=%s to %d clients", message.Event, len(b.clients))
 
 		case <-ticker.C:
 			// Periodic check for inactive clients and garbage collection

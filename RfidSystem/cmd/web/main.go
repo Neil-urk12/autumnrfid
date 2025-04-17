@@ -66,7 +66,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views:                 viewsEngine,
 		DisableStartupMessage: false,
-		IdleTimeout:           time.Second * 60,
+		IdleTimeout:           time.Hour * 24,
 		ReadTimeout:           time.Second * 60,
 		WriteTimeout:          time.Second * 60,
 		ColorScheme: fiber.Colors{
@@ -85,7 +85,7 @@ func main() {
 	// Configure middleware with enhanced CORS settings for SSE
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "http://localhost:8080", // Specify exact origins instead of wildcard
-		AllowHeaders:     "Origin, Content-Type, Accept",
+		AllowHeaders:     "Origin, Content-Type, Accept, Cache-Control",
 		AllowCredentials: true, // Keep credentials enabled for cookies/auth
 		ExposeHeaders:    "Content-Type, Content-Length, Content-Disposition",
 	}))
