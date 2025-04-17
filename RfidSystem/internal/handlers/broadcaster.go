@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -65,18 +65,20 @@ func (b *Broadcaster) run() {
 	for {
 		select {
 		case <-b.done:
+			// cleanup on shutdown with lock
+			b.mutex.Lock()
 			for client := range b.clients {
 				close(client.messages)
 				delete(b.clients, client)
 			}
-			b.Close()
+			b.mutex.Unlock()
 			return
 
 		case client := <-b.register:
 			b.mutex.Lock()
 			b.clients[client] = true
 			b.mutex.Unlock()
-			fmt.Printf("Client registered, total clients: %d\n", len(b.clients))
+			log.Printf("Client registered, total clients: %d\n", len(b.clients))
 
 		case client := <-b.unregister:
 			b.mutex.Lock()
@@ -85,7 +87,7 @@ func (b *Broadcaster) run() {
 				close(client.messages)
 			}
 			b.mutex.Unlock()
-			fmt.Printf("Client unregistered, remaining clients: %d\n", len(b.clients))
+			log.Printf("Client unregistered, remaining clients: %d\n", len(b.clients))
 
 		case message := <-b.broadcast:
 			// Send to all clients concurrently
@@ -94,20 +96,19 @@ func (b *Broadcaster) run() {
 				// Non-blocking send, skip clients with full buffers
 				select {
 				case client.messages <- message:
-					fmt.Printf("Message sent successfully\n")
+					log.Printf("Message sent successfully\n")
 				default:
-					// Client buffer full, consider unregistering
-					go func(c *Client) {
-						b.unregister <- c
-					}(client)
+					// client buffer full: unregister inline
+					b.unregister <- client
 				}
 			}
 			b.mutex.RUnlock()
+			log.Printf("[SSE] broadcast event=%s to %d clients", message.Event, len(b.clients))
 
 		case <-ticker.C:
 			// Periodic check for inactive clients and garbage collection
 			// Clean up for leaked resources I think
-			fmt.Printf("Active SSE clients: %d\n", len(b.clients))
+			log.Printf("Active SSE clients: %d\n", len(b.clients))
 		}
 	}
 }
@@ -119,12 +120,12 @@ func (b *Broadcaster) Broadcast(event string, data string) {
 
 	message := Message{Event: event, Data: data}
 
-	fmt.Printf("[SSE DEBUG] Raw message being sent:\n%s\n\n", message)
+	log.Printf("[SSE DEBUG] Raw message being sent:\n%s\n\n", message)
 
 	select {
 	case b.broadcast <- message:
-		fmt.Printf("[SSE DEBUG] Message sent successfully\n\n")
+		log.Printf("[SSE DEBUG] Message sent successfully\n\n")
 	default:
-		fmt.Println("Warning: SSE message buffer full, dropping message")
+		log.Println("Warning: SSE message buffer full, dropping message")
 	}
 }

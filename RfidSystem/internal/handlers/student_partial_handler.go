@@ -44,7 +44,13 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	log.Printf("Assessment data: %+v", studentInfo.Assessment)
 
 	// Format the assessment data
-	formattedAssessment := formatAssessmentForView(studentInfo.Assessment)
+	var formattedAssessment model.AssessmentViewModel
+	if studentInfo.Assessment != nil {
+		formattedAssessment = formatAssessmentForView(studentInfo.Assessment)
+	} else {
+		log.Printf("No assessment data to format, setting formattedAssessment to zero value")
+		formattedAssessment = model.AssessmentViewModel{}
+	}
 	log.Printf("Formatted assessment: %+v", formattedAssessment)
 
 	// Format payment schedules

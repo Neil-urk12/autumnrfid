@@ -1241,3 +1241,70 @@ th {
     color: #666;
     font-style: italic;
 }
+/* Idle Timeout Modal Styles */
+.idle-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+    display: flex; /* Use flex to center content */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top */
+    /* display: none; /* Initially hidden - will be controlled by JS */
+}
+
+.idle-modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 90%; /* Responsive width */
+}
+
+.idle-modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.idle-modal-content p {
+    margin-bottom: 25px;
+    color: #555;
+}
+
+.idle-modal-buttons {
+    display: flex;
+    justify-content: space-around; /* Or space-between */
+    gap: 15px; /* Add some gap between buttons */
+}
+
+.idle-modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+#idle-confirm-btn {
+    background-color: #28a745; /* Green */
+    color: white;
+}
+#idle-confirm-btn:hover {
+    background-color: #218838; /* Darker green */
+}
+
+#idle-return-btn {
+    background-color: #dc3545; /* Red */
+    color: white;
+}
+#idle-return-btn:hover {
+    background-color: #c82333; /* Darker red */
+}
+/* End Idle Timeout Modal Styles */

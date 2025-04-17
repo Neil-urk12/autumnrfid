@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"rfidsystem/internal/repositories"
 
 	"github.com/gofiber/fiber/v2"
@@ -28,7 +29,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
 	}
 
-	fmt.Printf("Student found: %s\n", student.Student.StudentID)
+	log.Printf("Student found: %s\n", student.Student.StudentID)
 
 	htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 

@@ -66,7 +66,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views:                 viewsEngine,
 		DisableStartupMessage: false,
-		IdleTimeout:           time.Second * 60,
+		IdleTimeout:           time.Hour * 24,
 		ReadTimeout:           time.Second * 60,
 		WriteTimeout:          time.Second * 60,
 		ColorScheme: fiber.Colors{
@@ -85,7 +85,7 @@ func main() {
 	// Configure middleware with enhanced CORS settings for SSE
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "http://localhost:8080", // Specify exact origins instead of wildcard
-		AllowHeaders:     "Origin, Content-Type, Accept",
+		AllowHeaders:     "Origin, Content-Type, Accept, Cache-Control",
 		AllowCredentials: true, // Keep credentials enabled for cookies/auth
 		ExposeHeaders:    "Content-Type, Content-Length, Content-Disposition",
 	}))
@@ -108,11 +108,11 @@ func main() {
 	// Routes
 	app.Get("/", appHandler.HandleGetIndex)
 	app.Get("/grades", appHandler.HandleGrades)
-	app.Get("/test-grades", appHandler.HandleTestGrades)
+	app.Get("/grades/semester/:studentId", appHandler.HandleSemesterGrades)
 	app.Get("/error", appHandler.HandleError)
 	// app.Get("/student-partial/:rfid", appHandler.GetStudentPartial)
 	app.Get("/student-partial/:rfid", appHandler.HandleStudentInfo)
-
+	app.Get("/students/v1", appHandler.RetrieveStudentsHandler)
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
 

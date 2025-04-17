@@ -3,6 +3,7 @@ package handlers
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,7 +49,7 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 		for {
 			select {
 			case <-client.done:
-				fmt.Println("SSE connection closing (done channel triggered)")
+				log.Println("SSE connection closing (done channel triggered)")
 				return
 			case <-ticker.C:
 				pingMsg := formatSSEMessage("ping", fmt.Sprintf(`{"time": "%s"}`, time.Now().Format(time.RFC3339)))
@@ -56,12 +57,13 @@ func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 					return
 				}
 				if err := w.Flush(); err != nil {
+					log.Printf("Failed to flush ping message: %v", err)
 					return
 				}
-				fmt.Println("Ping message sent successfully")
+				log.Println("Ping message sent successfully")
 			case msg, ok := <-client.messages:
 				if !ok {
-					fmt.Println("SSE connection closing (channel closed)")
+					log.Println("SSE connection closing (channel closed)")
 					return
 				}
 
