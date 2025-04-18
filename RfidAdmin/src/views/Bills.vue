@@ -2,16 +2,18 @@
 import { ref, computed, defineAsyncComponent } from 'vue'
 const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
+const UnsavedChangesModal = defineAsyncComponent(() => import("@/components/UnsavedChangesModal.vue"))
 
+// MOCK 
 const studentBills = ref([
     {
         id: '2023-0001',
         name: 'John Cez',
-        course: 'Computer Science',
+        course: 'BSCS',
         yearLevel: '3rd Year',
-        basicTuition: 25000.00,
-        laboratoryFee: 5000.00,
-        studentActivities: 2000.00,
+        tuitionFee: 25000.00,
+        miscellaneousFee: 5000.00,
+        InitialPayment: 2000.00,
         discount: 2500.00,
         totalFees: 29500.00,
         examFees: {
@@ -26,11 +28,11 @@ const studentBills = ref([
     {
         id: '2023-0002',
         name: 'Maria Santos',
-        course: 'Business Administration',
+        course: 'BSBA', 
         yearLevel: '2nd Year',
-        basicTuition: 22000.00,
-        laboratoryFee: 2000.00,
-        studentActivities: 1500.00,
+        tuitionFee: 22000.00,
+        miscellaneousFee: 2000.00,
+        InitialPayment: 1500.00,
         discount: 0.00,
         totalFees: 25500.00,
         examFees: {
@@ -45,11 +47,11 @@ const studentBills = ref([
     {
         id: '2023-0003',
         name: 'Carlos Reyes',
-        course: 'Information Technology',
+        course: 'BSIT',
         yearLevel: '1st Year',
-        basicTuition: 20000.00,
-        laboratoryFee: 4000.00,
-        studentActivities: 1800.00,
+        tuitionFee: 20000.00,
+        miscellaneousFee: 4000.00,
+        InitialPayment: 1800.00,
         discount: 1000.00,
         totalFees: 24800.00,
         examFees: {
@@ -63,24 +65,14 @@ const studentBills = ref([
     }
 ])
 
-const searchQuery = ref('')
-const activeFilters = ref([])
-const showStudentModal = ref(false)
-const showAddStudentModal = ref(false)
-const showEditFeeStructureModal = ref(false)
-const activeTab = ref('info')
-const showPaymentForm = ref(false)
-const showEditModal = ref(false)
-const showViewModal = ref(false)
-
 const currentStudent = ref({
     id: '',
     name: '',
     course: '',
     yearLevel: '',
-    basicTuition: 0,
-    laboratoryFee: 0,
-    studentActivities: 0,
+    tuitionFee: 0,
+    miscellaneousFee: 0,
+    InitialPayment: 0,
     discount: 0,
     totalFees: 0,
     examFees: {
@@ -93,14 +85,16 @@ const currentStudent = ref({
     remainingBalance: 0
 })
 
+const originalStudentData = ref(null)
+
 const viewStudent = ref({
     id: '',
     name: '',
     course: '',
     yearLevel: '',
-    basicTuition: 0,
-    laboratoryFee: 0,
-    studentActivities: 0,
+    tuitionFee: 0,
+    miscellaneousFee: 0,
+    InitialPayment: 0,
     discount: 0,
     totalFees: 0,
     examFees: {
@@ -130,47 +124,60 @@ const newStudent = ref({
     id: '',
     name: '',
     course: '',
-    yearLevel: '',
-    feePreset: 'default',
-    basicTuition: 0,
-    laboratoryFee: 0,
-    studentActivities: 0,
+    yearLevel: '1st Year',
+    feePreset: 'BSCS', 
+    tuitionFee: 0,
+    miscellaneousFee: 0,
+    InitialPayment: 0,
     discount: 0,
     discountType: 'none'
 })
 
+
 const feeStructures = ref({
-    default: {
+    BSCS: {
         tuition: {
-            registration: 5000,
-            subject: 15000
+            basicTuition: 18000,
+            laboratory:2500
         },
         misc: {
-            laboratory: 3000,
-            library: 1000,
-            computer: 2000,
-            athletic: 1000
-        }
-    },
-    computer: {
-        tuition: {
-            registration: 6000,
-            subject: 19000
-        },
-        misc: {
-            laboratory: 5000,
+            development: 1000,
             library: 1500,
             computer: 3500,
             athletic: 1000
         }
     },
-    business: {
+    BSIT: {
         tuition: {
-            registration: 5500,
-            subject: 16500
+            basicTuition: 19000,
+            laboratory: 3000
         },
         misc: {
-            laboratory: 2000,
+            development: 1000,
+            library: 1500,
+            computer: 3000,
+            athletic: 1000
+        }
+    },
+    BSBA: {
+        tuition: {
+            basicTuition: 20000,
+            laboratory: 3000
+        },
+        misc: {
+            development: 2000,
+            library: 1200,
+            computer: 1800,
+            athletic: 1000
+        }
+    },
+    BSA: {
+        tuition: {
+            basicTuition: 18500,
+            laboratory: 2000
+        },
+        misc: {
+            development: 2200,
             library: 1200,
             computer: 1800,
             athletic: 1000
@@ -178,86 +185,211 @@ const feeStructures = ref({
     }
 })
 
-const editFeePreset = ref('default')
+const editFeePreset = ref('BSCS')
+//
 
-const handleSearch = (query) => {
-  searchQuery.value = query || ''
-}
+// STATE
+const searchQuery = ref('')
+const activeFilters = ref([])
+const showStudentModal = ref(false)
+const showAddStudentModal = ref(false)
+const showEditFeeStructureModal = ref(false)
+const activeTab = ref('info')
+const showPaymentForm = ref(false)
+const showEditModal = ref(false)
+const showViewModal = ref(false)
+const isUnsavedChangesModalOpen = ref(false)
+const modalToClose = ref(null)
 
-const handleFilterChange = (filters) => {
-  activeFilters.value = filters || []
-}
-const filteredStudents = computed(() => {
-  return studentBills.value.filter(student => {
-    const matchesSearch = !searchQuery.value || 
-      student.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      student.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      student.course.toLowerCase().includes(searchQuery.value.toLowerCase())
 
-    const matchesFilters = !activeFilters.value.length ||
-      activeFilters.value.some(filter => 
-        student.yearLevel.includes(filter) ||
-        student.course.includes(filter))
-
-    return matchesSearch && matchesFilters
-  })
-})
-
-const openStudentModal = (studentId) => {
-    const student = studentBills.value.find(s => s.id === studentId)
-    if (!student) return
-
-    currentStudent.value = JSON.parse(JSON.stringify(student))
-    showStudentModal.value = true
-    activeTab.value = 'info'
-    showPaymentForm.value = false
-    showEditModal.value = false
-}
-
-const closeStudentModal = () => {
-    showStudentModal.value = false
-    currentStudent.value = {
-        id: '',
-        name: '',
-        course: '',
-        yearLevel: '',
-        basicTuition: 0,
-        laboratoryFee: 0,
-        studentActivities: 0,
-        discount: 0,
-        totalFees: 0,
-        examFees: {
-            prelim: 0,
-            midterm: 0,
-            prefinal: 0,
-            final: 0
-        },
-        payments: [],
-        remainingBalance: 0
+// CHECKS WHETHER THERE ARE UNSAVED CHANGES IN THE MODAL
+const hasUnsavedChanges = computed(() => {
+    if (showAddStudentModal.value) {
+        
+        // CHECKS ANY MODIFICAIION FROM THE NEW STUDEN (ADD STUDENT MODAL - AMBOT NGANO MO APPEAR GIHAPON ANG MODAL BISAG WAY CHANGES BASIN ING ANA RA SIYA KAY MOCK DATA PA T^T)
+        return Object.values(newStudent.value).some(value => {
+            if (typeof value === 'string') {
+                return value.trim() !== ''
+            }
+            return value !== 0 && value !== 'none' && value !== 'BSCS' && value !== '1st Year'
+        })
+    } else if (showStudentModal.value) {
+        // CHECKS ANY MODIFICAIION FROM THE CURRENT STUDENT (EDIT STUDENT MODAL)
+        if (!originalStudentData.value) return false
+        return Object.keys(currentStudent.value).some(key => {
+            if (key === 'payments') return false 
+            return JSON.stringify(currentStudent.value[key]) !== JSON.stringify(originalStudentData.value[key])
+        })
     }
+    return false
+})
+//
+
+// HANDLES THE CONFIRMATION OF UNSAVED CHANGES
+const handleUnsavedChanges = (confirm) => {
+    if (confirm) {
+        if (modalToClose.value === 'add') {
+            showAddStudentModal.value = false
+            newStudent.value = {
+                id: '',
+                name: '',
+                course: 'BSCS',
+                yearLevel: '1st Year',
+                feePreset: 'BSCS',
+                tuitionFee: 0,
+                miscellaneousFee: 0,
+                InitialPayment: 0,
+                discount: 0,
+                discountType: 'none'
+            }
+        } else if (modalToClose.value === 'edit') {
+            showStudentModal.value = false
+            currentStudent.value = {
+                id: '',
+                name: '',
+                course: '',
+                yearLevel: '',
+                tuitionFee: 0,
+                miscellaneousFee: 0,
+                InitialPayment: 0,
+                discount: 0,
+                totalFees: 0,
+                examFees: {
+                    prelim: 0,
+                    midterm: 0,
+                    prefinal: 0,
+                    final: 0
+                },
+                payments: [],
+                remainingBalance: 0
+            }
+            originalStudentData.value = null
+        }
+    }
+    isUnsavedChangesModalOpen.value = false
+    modalToClose.value = null
+}
+//
+
+// GETS THE FEE STRUCTURE FOR A SPECIFIC PRESET
+const getFeeStructure = (preset) => {
+    return feeStructures.value[preset] || feeStructures.value['BSCS']
+}
+//
+
+// LOADS THE FEE STRUCTURE FOR A SPECIFIC PRESET
+const loadFeeStructure = (preset) => {
+    editFeePreset.value = preset
+    newStudent.value.feePreset = preset
+    applyCoursePreset(preset)
+}
+//
+
+// SAVES THE CURRENT FEE STRUCTURE AND UPDATES STUDENT FEES
+const saveFeeStructure = () => {
+    if (newStudent.value.feePreset === editFeePreset.value) {
+        const baseFees = getFeeStructure(editFeePreset.value)
+        const totalTuition = baseFees.tuition.basicTuition + baseFees.tuition.laboratory
+        const totalMisc = baseFees.misc.development + baseFees.misc.library +
+            baseFees.misc.computer + baseFees.misc.athletic
+
+        newStudent.value.tuitionFee = totalTuition
+        newStudent.value.miscellaneousFee = totalMisc
+        newStudent.value.InitialPayment = 2750 
+
+        if (newStudent.value.yearLevel) {
+            const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
+            applyYearPreset(year)
+        }
+    }
+
+    showEditFeeStructureModal.value = false
+}
+//
+
+// HANDLES THE SEARCH QUERY UPDATE
+const handleSearch = (query) => {
+    searchQuery.value = query || ''
 }
 
+// HANDLES THE FILTER CHANGE
+const handleFilterChange = (filters) => {
+    activeFilters.value = filters || []
+}
+//
+
+// HANDLES THE COURSE CHANGE AND UPDATES FEE STRUCTURE
+const handleCourseChange = () => {
+    loadFeeStructure(newStudent.value.course)
+}
+
+// HANDLES THE YEAR LEVEL CHANGE AND UPDATES FEES
+const handleYearChange = () => {
+    const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
+    applyYearPreset(year)
+}
+
+// FILTERS STUDENTS BASED ON SEARCH QUERY AND ACTIVE FILTERS
+const filteredStudents = computed(() => {
+    return studentBills.value.filter(student => {
+        const matchesSearch = !searchQuery.value ||
+            student.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            student.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            student.course.toLowerCase().includes(searchQuery.value.toLowerCase())
+
+        const matchesFilters = !activeFilters.value.length ||
+            activeFilters.value.some(filter =>
+                student.yearLevel.includes(filter) ||
+                student.course.includes(filter))
+
+        return matchesSearch && matchesFilters
+    })
+})
+//
+
+// OPENS THE ADD STUDENT MODAL WITH DEFAULT VALUES
 const openAddStudentModal = () => {
     newStudent.value = {
         id: '',
         name: '',
-        course: '',
-        yearLevel: '',
-        feePreset: 'default',
-        basicTuition: 0,
-        laboratoryFee: 0,
-        studentActivities: 0,
+        course: 'BSCS', 
+        yearLevel: '1st Year',
+        feePreset: 'BSCS',
+        tuitionFee: 0,
+        miscellaneousFee: 0,
+        InitialPayment: 0,
         discount: 0,
         discountType: 'none'
     }
-    applyCoursePreset('default')
+    applyCoursePreset('BSCS') 
+    applyYearPreset('1st')
     showAddStudentModal.value = true
 }
 
+// CLOSES THE ADD STUDENT MODAL WITH UNSAVED CHANGES CHECK
 const closeAddStudentModal = () => {
-    showAddStudentModal.value = false
+    if (hasUnsavedChanges.value && !modalToClose.value) {
+        modalToClose.value = 'add'
+        isUnsavedChangesModalOpen.value = true
+    } else {
+        showAddStudentModal.value = false
+        newStudent.value = {
+            id: '',
+            name: '',
+            course: 'BSCS',
+            yearLevel: '1st Year',
+            feePreset: 'BSCS',
+            tuitionFee: 0,
+            miscellaneousFee: 0,
+            InitialPayment: 0,
+            discount: 0,
+            discountType: 'none'
+        }
+        modalToClose.value = null
+    }
 }
 
+// SAVES A NEW STUDENT TO THE STUDENT TABLE
 const saveNewStudent = () => {
     if (!newStudent.value.id || !newStudent.value.name ||
         !newStudent.value.course || !newStudent.value.yearLevel) {
@@ -270,21 +402,21 @@ const saveNewStudent = () => {
         return
     }
 
-    const totalFees = newStudent.value.basicTuition +
-        newStudent.value.laboratoryFee +
-        newStudent.value.studentActivities -
+    const totalFees = newStudent.value.tuitionFee +
+        newStudent.value.miscellaneousFee +
+        newStudent.value.InitialPayment -
         newStudent.value.discount
 
-    const examFee = newStudent.value.basicTuition * 0.2
+    const examFee = newStudent.value.tuitionFee * 0.2
 
     const student = {
         id: newStudent.value.id,
         name: newStudent.value.name,
         course: newStudent.value.course,
         yearLevel: newStudent.value.yearLevel,
-        basicTuition: newStudent.value.basicTuition,
-        laboratoryFee: newStudent.value.laboratoryFee,
-        studentActivities: newStudent.value.studentActivities,
+        tuitionFee: newStudent.value.tuitionFee,
+        miscellaneousFee: newStudent.value.miscellaneousFee,
+        InitialPayment: newStudent.value.InitialPayment,
         discount: newStudent.value.discount,
         totalFees,
         examFees: {
@@ -300,7 +432,91 @@ const saveNewStudent = () => {
     studentBills.value.push(student)
     closeAddStudentModal()
 }
+//
 
+// OPENS THE VIEW MODAL FOR A SPECIFIC STUDENT
+const openViewModal = (studentId) => {
+    const student = studentBills.value.find(s => s.id === studentId)
+    if (!student) return
+
+    let feePreset = student.course 
+
+    viewStudent.value = JSON.parse(JSON.stringify(student))
+    viewStudent.value.feePreset = feePreset
+    showViewModal.value = true
+}
+
+// CLOSES THE VIEW MODAL AND RESETS VIEW STUDENT DATA
+const closeViewModal = () => {
+    showViewModal.value = false
+    viewStudent.value = {
+        id: '',
+        name: '',
+        course: '',
+        yearLevel: '',
+        tuitionFee: 0,
+        miscellaneousFee: 0,
+        InitialPayment: 0,
+        discount: 0,
+        totalFees: 0,
+        examFees: {
+            prelim: 0,
+            midterm: 0,
+            prefinal: 0,
+            final: 0
+        },
+        payments: [],
+        remainingBalance: 0
+    }
+}
+//
+
+// OPENS THE STUDENT MODAL FOR EDITING
+const openStudentModal = (studentId) => {
+    const student = studentBills.value.find(s => s.id === studentId)
+    if (!student) return
+
+    // ORIGINAL DATA
+    originalStudentData.value = JSON.parse(JSON.stringify(student))
+    currentStudent.value = JSON.parse(JSON.stringify(student))
+    showStudentModal.value = true
+    activeTab.value = 'info'
+    showPaymentForm.value = false
+    showEditModal.value = false
+}
+
+// CLOSES THE STUDENT MODAL WITH UNSAVED CHANGES CHECK
+const closeStudentModal = () => {
+    if (hasUnsavedChanges.value && !modalToClose.value) {
+        modalToClose.value = 'edit'
+        isUnsavedChangesModalOpen.value = true
+    } else {
+        showStudentModal.value = false
+        currentStudent.value = {
+            id: '',
+            name: '',
+            course: '',
+            yearLevel: '',
+            tuitionFee: 0,
+            miscellaneousFee: 0,
+            InitialPayment: 0,
+            discount: 0,
+            totalFees: 0,
+            examFees: {
+                prelim: 0,
+                midterm: 0,
+                prefinal: 0,
+                final: 0
+            },
+            payments: [],
+            remainingBalance: 0
+        }
+        originalStudentData.value = null
+        modalToClose.value = null
+    }
+}
+
+// INITIATES THE EDIT MODE FOR A STUDENT
 const editStudent = (studentId) => {
     const student = studentBills.value.find(s => s.id === studentId)
     if (!student) return
@@ -317,95 +533,88 @@ const editStudent = (studentId) => {
     showEditModal.value = true
 }
 
-const closeEditModal = () => {
-    showEditModal.value = false
-    currentStudent.value = {
-        id: '',
-        name: '',
-        course: '',
-        yearLevel: '',
-        basicTuition: 0,
-        laboratoryFee: 0,
-        studentActivities: 0,
-        discount: 0,
-        totalFees: 0,
-        examFees: {
-            prelim: 0,
-            midterm: 0,
-            prefinal: 0,
-            final: 0
-        },
-        payments: [],
-        remainingBalance: 0
-    }
+// SAVES THE CHANGES MADE TO A STUDENT'S BILLING INFORMATION
+const saveStudentChanges = () => {
+    const index = studentBills.value.findIndex(s => s.id === currentStudent.value.id)
+    if (index === -1) return
+
+    // sSAVES THE STUDENT DATA
+    studentBills.value[index] = JSON.parse(JSON.stringify(currentStudent.value))
+
+    // CLEARS THE ORIGINAL DATA AFTER SAVING
+    originalStudentData.value = null
+    showStudentModal.value = false
 }
+//
 
+// APPLIES THE COURSE PRESET AND UPDATES FEES
 const applyCoursePreset = (preset) => {
-    let tuition = 0
-    let miscFee = 0
-    let activities = 0
-
-    switch (preset) {
-        case 'computer':
-            tuition = 25000
-            miscFee = 5000
-            activities = 2000
-            break
-        case 'business':
-            tuition = 22000
-            miscFee = 2000
-            activities = 1500
-            break
-        default:
-            tuition = 20000
-            miscFee = 3000
-            activities = 1800
-    }
+    const baseFees = getFeeStructure(preset)
+    
+    // CALCULATE THE TOTAL TUITION AND MISC FEE
+    const totalTuition = baseFees.tuition.basicTuition + baseFees.tuition.laboratory
+    const totalMisc = baseFees.misc.development + baseFees.misc.library +
+        baseFees.misc.computer + baseFees.misc.athletic
 
     newStudent.value.feePreset = preset
-    newStudent.value.basicTuition = tuition
-    newStudent.value.laboratoryFee = miscFee
-    newStudent.value.studentActivities = activities
+    newStudent.value.course = preset
+    newStudent.value.tuitionFee = totalTuition
+    newStudent.value.miscellaneousFee = totalMisc
+    newStudent.value.InitialPayment = 2750
+
+    if (newStudent.value.yearLevel) {
+        const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
+        applyYearPreset(year)
+    }
+
     newStudent.value.discount = 0
+    newStudent.value.discountType = 'none'
 }
 
+// APPLIES THE YEAR LEVEL PRESET AND UPDATES FEES
 const applyYearPreset = (year) => {
-    let tuition = newStudent.value.basicTuition || 0
-    let miscFee = newStudent.value.laboratoryFee || 0
+    const baseFees = getFeeStructure(newStudent.value.feePreset)
+    const totalTuition = baseFees.tuition.basicTuition + baseFees.tuition.laboratory
+    const totalMisc = baseFees.misc.development + baseFees.misc.library +
+        baseFees.misc.computer + baseFees.misc.athletic
 
+    // ATUOMATICALLY MULTIPLIES THE FEES BASED ON YEAR LEVEL
     switch (year) {
         case '1st':
-            tuition = tuition * 1.0
-            miscFee = miscFee * 1.0
+            newStudent.value.tuitionFee = Math.round(totalTuition)
+            newStudent.value.miscellaneousFee = Math.round(totalMisc)
+            newStudent.value.InitialPayment = 2750 
             newStudent.value.yearLevel = '1st Year'
             break
         case '2nd':
-            tuition = tuition * 1.05
-            miscFee = miscFee * 1.1
+            newStudent.value.tuitionFee = Math.round(totalTuition * 1.05)
+            newStudent.value.miscellaneousFee = Math.round(totalMisc * 1.1)
+            newStudent.value.InitialPayment = 2750 
             newStudent.value.yearLevel = '2nd Year'
             break
         case '3rd':
-            tuition = tuition * 1.1
-            miscFee = miscFee * 1.2
+            newStudent.value.tuitionFee = Math.round(totalTuition * 1.1)
+            newStudent.value.miscellaneousFee = Math.round(totalMisc * 1.2)
+            newStudent.value.InitialPayment = 2750 // Fixed initial payment value
             newStudent.value.yearLevel = '3rd Year'
             break
         case '4th':
-            tuition = tuition * 1.15
-            miscFee = miscFee * 1.3
+            newStudent.value.tuitionFee = Math.round(totalTuition * 1.15)
+            newStudent.value.miscellaneousFee = Math.round(totalMisc * 1.3)
+            newStudent.value.InitialPayment = 2750 // Fixed initial payment value
             newStudent.value.yearLevel = '4th Year'
             break
     }
 
-    newStudent.value.basicTuition = Math.round(tuition)
-    newStudent.value.laboratoryFee = Math.round(miscFee)
     newStudent.value.discountType = 'none'
     newStudent.value.discount = 0
 }
 
+// APPLIES THE SELECTED DISCOUNT TYPE AND UPDATES FEES
 const applyDiscountType = () => {
-    const totalBeforeDiscount = newStudent.value.basicTuition +
-        newStudent.value.laboratoryFee +
-        newStudent.value.studentActivities
+    const totalBeforeDiscount = newStudent.value.tuitionFee +
+        newStudent.value.miscellaneousFee +
+        newStudent.value.InitialPayment
 
     switch (newStudent.value.discountType) {
         case 'honor':
@@ -426,85 +635,7 @@ const applyDiscountType = () => {
     }
 }
 
-const loadFeeStructure = (preset) => {
-    editFeePreset.value = preset
-}
-
-const saveFeeStructure = () => {
-    if (newStudent.value.feePreset === editFeePreset.value) {
-        const tuition = feeStructures.value[editFeePreset.value].tuition.registration +
-            feeStructures.value[editFeePreset.value].tuition.subject
-
-        const miscFee = feeStructures.value[editFeePreset.value].misc.laboratory +
-            feeStructures.value[editFeePreset.value].misc.library +
-            feeStructures.value[editFeePreset.value].misc.computer +
-            feeStructures.value[editFeePreset.value].misc.athletic
-
-        newStudent.value.basicTuition = tuition
-        newStudent.value.laboratoryFee = miscFee
-    }
-
-    showEditFeeStructureModal.value = false
-}
-
-const startEditingPayment = (payment) => {
-    currentStudent.value.payments.forEach(p => {
-        if (p.id !== payment.id) {
-            p.isEditing = false;
-        }
-    });
-
-    payment.isEditing = true;
-    payment.editAmount = payment.amount;
-}
-
-const cancelEditingPayment = (payment) => {
-    payment.isEditing = false;
-    delete payment.editAmount;
-}
-
-const saveEditedPayment = (payment) => {
-    if (!payment.editAmount || isNaN(payment.editAmount)) {
-        alert('Please enter a valid amount');
-        return;
-    }
-
-    const newAmount = parseFloat(payment.editAmount);
-    if (newAmount <= 0) {
-        alert('Amount must be greater than zero');
-        return;
-    }
-
-    const amountDifference = payment.amount - newAmount;
-
-    const studentIndex = studentBills.value.findIndex(s => s.id === currentStudent.value.id);
-    if (studentIndex === -1) return;
-
-    const paymentIndex = studentBills.value[studentIndex].payments.findIndex(p => p.id === payment.id);
-    if (paymentIndex === -1) return;
-
-    studentBills.value[studentIndex].payments[paymentIndex].amount = newAmount;
-
-    studentBills.value[studentIndex].remainingBalance += amountDifference;
-    if (studentBills.value[studentIndex].remainingBalance < 0) {
-        studentBills.value[studentIndex].remainingBalance = 0;
-    }
-
-    currentStudent.value.payments[paymentIndex].amount = newAmount;
-    currentStudent.value.remainingBalance = studentBills.value[studentIndex].remainingBalance;
-
-    payment.isEditing = false;
-    delete payment.editAmount;
-}
-
-const saveStudentChanges = () => {
-    const index = studentBills.value.findIndex(s => s.id === currentStudent.value.id);
-    if (index === -1) return;
-
-    studentBills.value[index] = JSON.parse(JSON.stringify(currentStudent.value));
-    closeEditModal();
-}
-
+// UPDATES THE PAYMENT AMOUNT BASED ON PAYMENT TYPE
 const updatePaymentAmount = () => {
     if (newPayment.value.type === "Full Payment") {
         newPayment.value.amount = currentStudent.value.remainingBalance
@@ -515,6 +646,7 @@ const updatePaymentAmount = () => {
     }
 }
 
+// SUBMITS A NEW PAYMENT FOR THE CURRENT STUDENT
 const submitPayment = () => {
     if (!currentStudent.value.id) return
 
@@ -568,48 +700,59 @@ const submitPayment = () => {
     showPaymentForm.value = false
 }
 
-const openViewModal = (studentId) => {
-    const student = studentBills.value.find(s => s.id === studentId)
-    if (!student) return
+// INITIATES EDITING MODE FOR A PAYMENT
+const startEditingPayment = (payment) => {
+    currentStudent.value.payments.forEach(p => {
+        if (p.id !== payment.id) {
+            p.isEditing = false;
+        }
+    });
 
-    let feePreset = 'default'
-    if (student.course && (student.course.includes('Computer') || student.course.includes('Information'))) {
-        feePreset = 'computer'
-    } else if (student.course && student.course.includes('Business')) {
-        feePreset = 'business'
+    payment.isEditing = true;
+    payment.editAmount = payment.amount;
+}
+
+// CANCELS THE PAYMENT EDITING MODE
+const cancelEditingPayment = (payment) => {
+    payment.isEditing = false;
+    delete payment.editAmount;
+}
+
+// SAVES THE EDITED PAYMENT AMOUNT
+const saveEditedPayment = (payment) => {
+    if (!payment.editAmount || isNaN(payment.editAmount)) {
+        alert('Please enter a valid amount');
+        return;
     }
 
-    viewStudent.value = JSON.parse(JSON.stringify(student))
-    viewStudent.value.feePreset = feePreset
-    showViewModal.value = true
-}
-
-const closeViewModal = () => {
-    showViewModal.value = false
-    viewStudent.value = {
-        id: '',
-        name: '',
-        course: '',
-        yearLevel: '',
-        basicTuition: 0,
-        laboratoryFee: 0,
-        studentActivities: 0,
-        discount: 0,
-        totalFees: 0,
-        examFees: {
-            prelim: 0,
-            midterm: 0,
-            prefinal: 0,
-            final: 0
-        },
-        payments: [],
-        remainingBalance: 0
+    const newAmount = parseFloat(payment.editAmount);
+    if (newAmount <= 0) {
+        alert('Amount must be greater than zero');
+        return;
     }
-}
 
-const getFeeStructure = (preset) => {
-    return feeStructures.value[preset] || feeStructures.value['default']
+    const amountDifference = payment.amount - newAmount;
+
+    const studentIndex = studentBills.value.findIndex(s => s.id === currentStudent.value.id);
+    if (studentIndex === -1) return;
+
+    const paymentIndex = studentBills.value[studentIndex].payments.findIndex(p => p.id === payment.id);
+    if (paymentIndex === -1) return;
+
+    studentBills.value[studentIndex].payments[paymentIndex].amount = newAmount;
+
+    studentBills.value[studentIndex].remainingBalance += amountDifference;
+    if (studentBills.value[studentIndex].remainingBalance < 0) {
+        studentBills.value[studentIndex].remainingBalance = 0;
+    }
+
+    currentStudent.value.payments[paymentIndex].amount = newAmount;
+    currentStudent.value.remainingBalance = studentBills.value[studentIndex].remainingBalance;
+
+    payment.isEditing = false;
+    delete payment.editAmount;
 }
+//
 </script>
 
 
@@ -625,13 +768,11 @@ const getFeeStructure = (preset) => {
                     <p>Manage and monitor student payments and balances</p>
                 </div>
 
+                <!-- SEARCH BAR SECTION -->
                 <div class="students-controls">
                     <div class="search-filters">
-                        <Searchbar 
-                            v-model="searchQuery"
-                            @update:search-query="handleSearch"
-                            @filter-change="handleFilterChange"
-                        />
+                        <Searchbar v-model="searchQuery" @update:search-query="handleSearch"
+                            @filter-change="handleFilterChange" />
                         <div class="filter-buttons">
                             <button class="add-student-btn" @click="openAddStudentModal">
                                 <i class="fa-solid fa-plus"></i> Add New Student Bill
@@ -640,6 +781,7 @@ const getFeeStructure = (preset) => {
                     </div>
                 </div>
 
+                <!-- STUDENT'S TABLE -->
                 <div class="students-table">
                     <table>
                         <thead>
@@ -677,8 +819,8 @@ const getFeeStructure = (preset) => {
             </div>
 
             <!-- ADD NEW STUDENT BILL MODAL -->
-            <div class="modal" :class="{ active: showAddStudentModal }">
-                <div class="modal-content">
+            <div class="modal" :class="{ active: showAddStudentModal }" @click="closeAddStudentModal">
+                <div class="modal-content" @click.stop>
                     <div class="modal-header">
                         <h2>Add New Student Bill</h2>
                         <button class="close-modal" @click="closeAddStudentModal">&times;</button>
@@ -688,25 +830,25 @@ const getFeeStructure = (preset) => {
                         <div class="student-info-grid">
                             <div class="info-group">
                                 <label>Student ID</label>
-                                <input type="text" v-model="newStudent.id" placeholder="e.g. 2023-0001">
+                                <input type="text" v-model="newStudent.id" placeholder="Enter Student ID">
                             </div>
                             <div class="info-group">
                                 <label>Name</label>
-                                <input type="text" v-model="newStudent.name" placeholder="Full name">
+                                <input type="text" v-model="newStudent.name" placeholder="Enter Student Name">
                             </div>
                             <div class="info-group">
                                 <label>Course</label>
-                                <select v-model="newStudent.course">
+                                <select v-model="newStudent.course" @change="handleCourseChange">
                                     <option value="">Select course</option>
-                                    <option value="Computer Science">Computer Science</option>
-                                    <option value="Information Technology">Information Technology</option>
-                                    <option value="Business Administration">Business Administration</option>
-                                    <option value="Accountancy">Accountancy</option>
+                                    <option value="BSCS">BSCS</option>
+                                    <option value="BSIT">BSIT</option>
+                                    <option value="BSBA">BSBA</option>
+                                    <option value="BSA">BSA</option>
                                 </select>
                             </div>
                             <div class="info-group">
                                 <label>Year Level</label>
-                                <select v-model="newStudent.yearLevel">
+                                <select v-model="newStudent.yearLevel" @change="handleYearChange">
                                     <option value="">Select year level</option>
                                     <option value="1st Year">1st Year</option>
                                     <option value="2nd Year">2nd Year</option>
@@ -717,20 +859,29 @@ const getFeeStructure = (preset) => {
                         </div>
 
                         <div class="course-selector">
-                            <div class="course-option" :class="{ active: newStudent.feePreset === 'default' }"
-                                @click="applyCoursePreset('default')">
-                                Default Fees
+                            <div class="course-option" 
+                                :class="{ active: editFeePreset === 'BSCS' }"
+                                @click="loadFeeStructure('BSCS')">
+                                BSCS
                             </div>
-                            <div class="course-option" :class="{ active: newStudent.feePreset === 'computer' }"
-                                @click="applyCoursePreset('computer')">
-                                Computer Courses
+                            <div class="course-option" 
+                                :class="{ active: editFeePreset === 'BSIT' }"
+                                @click="loadFeeStructure('BSIT')">
+                                BSIT
                             </div>
-                            <div class="course-option" :class="{ active: newStudent.feePreset === 'business' }"
-                                @click="applyCoursePreset('business')">
-                                Business Courses
+                            <div class="course-option" 
+                                :class="{ active: editFeePreset === 'BSBA' }"
+                                @click="loadFeeStructure('BSBA')">
+                                BSBA
+                            </div>
+                            <div class="course-option" 
+                                :class="{ active: editFeePreset === 'BSA' }"
+                                @click="loadFeeStructure('BSA')">
+                                BSA
                             </div>
                         </div>
 
+                        <!-- MODAL FOR CHANGING THE FEE STRUCTURE FOR EVERY COURSE -->
                         <div class="fee-presets">
                             <div class="fee-presets-header">
                                 <h4>Fee Details</h4>
@@ -742,15 +893,15 @@ const getFeeStructure = (preset) => {
                             <div class="student-info-grid">
                                 <div class="info-group">
                                     <label>Tuition Fee</label>
-                                    <input type="number" v-model="newStudent.basicTuition">
+                                    <input type="number" v-model="newStudent.tuitionFee">
                                 </div>
                                 <div class="info-group">
                                     <label>Miscellaneous Fee</label>
-                                    <input type="number" v-model="newStudent.laboratoryFee">
+                                    <input type="number" v-model="newStudent.miscellaneousFee">
                                 </div>
                                 <div class="info-group">
                                     <label>Initial Payment</label>
-                                    <input type="number" v-model="newStudent.studentActivities">
+                                    <input type="number" v-model="newStudent.InitialPayment">
                                 </div>
                                 <div class="info-group">
                                     <label>Discount</label>
@@ -770,16 +921,28 @@ const getFeeStructure = (preset) => {
                             </div>
 
                             <div class="preset-buttons">
-                                <button type="button" class="preset-btn" @click.prevent="applyYearPreset('1st')">
+                                <button type="button" 
+                                    class="preset-btn" 
+                                    :class="{ active: newStudent.yearLevel === '1st Year' }"
+                                    @click.prevent="applyYearPreset('1st')">
                                     1st Year
                                 </button>
-                                <button type="button" class="preset-btn" @click.prevent="applyYearPreset('2nd')">
+                                <button type="button" 
+                                    class="preset-btn" 
+                                    :class="{ active: newStudent.yearLevel === '2nd Year' }"
+                                    @click.prevent="applyYearPreset('2nd')">
                                     2nd Year
                                 </button>
-                                <button type="button" class="preset-btn" @click.prevent="applyYearPreset('3rd')">
+                                <button type="button" 
+                                    class="preset-btn" 
+                                    :class="{ active: newStudent.yearLevel === '3rd Year' }"
+                                    @click.prevent="applyYearPreset('3rd')">
                                     3rd Year
                                 </button>
-                                <button type="button" class="preset-btn" @click.prevent="applyYearPreset('4th')">
+                                <button type="button" 
+                                    class="preset-btn" 
+                                    :class="{ active: newStudent.yearLevel === '4th Year' }"
+                                    @click.prevent="applyYearPreset('4th')">
                                     4th Year
                                 </button>
                             </div>
@@ -790,23 +953,23 @@ const getFeeStructure = (preset) => {
                             <div class="exam-fees-grid">
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Prelim Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.basicTuition * 0.2).toLocaleString()
-                                        }}</span>
+                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
+                                    }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Midterm Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.basicTuition * 0.2).toLocaleString()
-                                        }}</span>
+                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
+                                    }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Pre-final Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.basicTuition * 0.2).toLocaleString()
-                                        }}</span>
+                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
+                                    }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Final Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.basicTuition * 0.2).toLocaleString()
-                                        }}</span>
+                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
@@ -814,8 +977,8 @@ const getFeeStructure = (preset) => {
                         <div class="summary-cards">
                             <div class="summary-card">
                                 <h4>Total Tuition</h4>
-                                <p>₱{{ (newStudent.basicTuition + newStudent.laboratoryFee +
-                                    newStudent.studentActivities - newStudent.discount).toLocaleString() }}</p>
+                                <p>₱{{ (newStudent.tuitionFee + newStudent.miscellaneousFee +
+                                    newStudent.InitialPayment - newStudent.discount).toLocaleString() }}</p>
                             </div>
                             <div class="summary-card">
                                 <h4>Total Paid</h4>
@@ -823,8 +986,8 @@ const getFeeStructure = (preset) => {
                             </div>
                             <div class="summary-card highlight">
                                 <h4>Remaining Balance</h4>
-                                <p>₱{{ (newStudent.basicTuition + newStudent.laboratoryFee +
-                                    newStudent.studentActivities - newStudent.discount).toLocaleString() }}</p>
+                                <p>₱{{ (newStudent.tuitionFee + newStudent.miscellaneousFee +
+                                    newStudent.InitialPayment - newStudent.discount).toLocaleString() }}</p>
                             </div>
                         </div>
                     </form>
@@ -845,17 +1008,21 @@ const getFeeStructure = (preset) => {
                     </div>
                     <div class="modal-body">
                         <div class="course-selector">
-                            <div class="course-option" :class="{ active: editFeePreset === 'default' }"
-                                @click="loadFeeStructure('default')">
-                                Default Course
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSCS' }"
+                                @click="loadFeeStructure('BSCS')">
+                                BSCS
                             </div>
-                            <div class="course-option" :class="{ active: editFeePreset === 'computer' }"
-                                @click="loadFeeStructure('computer')">
-                                Computer Courses
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSIT' }"
+                                @click="loadFeeStructure('BSIT')">
+                                BSIT
                             </div>
-                            <div class="course-option" :class="{ active: editFeePreset === 'business' }"
-                                @click="loadFeeStructure('business')">
-                                Business Courses
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSBA' }"
+                                @click="loadFeeStructure('BSBA')">
+                                BSBA
+                            </div>
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSA' }"
+                                @click="loadFeeStructure('BSA')">
+                                BSA
                             </div>
                         </div>
 
@@ -865,11 +1032,11 @@ const getFeeStructure = (preset) => {
                             <div class="student-info-grid">
                                 <div class="info-group">
                                     <label>Basic Tuition Fee</label>
-                                    <input type="number" v-model="feeStructures[editFeePreset].tuition.registration">
+                                    <input type="number" v-model="feeStructures[editFeePreset].tuition.basicTuition">
                                 </div>
                                 <div class="info-group">
                                     <label>Laboratory Fee</label>
-                                    <input type="number" v-model="feeStructures[editFeePreset].tuition.subject">
+                                    <input type="number" v-model="feeStructures[editFeePreset].tuition.laboratory">
                                 </div>
                             </div>
 
@@ -877,7 +1044,7 @@ const getFeeStructure = (preset) => {
                             <div class="student-info-grid">
                                 <div class="info-group">
                                     <label>Development Fee</label>
-                                    <input type="number" v-model="feeStructures[editFeePreset].misc.laboratory">
+                                    <input type="number" v-model="feeStructures[editFeePreset].misc.development">
                                 </div>
                                 <div class="info-group">
                                     <label>Library Fee</label>
@@ -902,13 +1069,12 @@ const getFeeStructure = (preset) => {
             </div>
 
             <!-- EDIT STUDENT'S BILL MODAL -->
-            <div class="modal" :class="{ active: showStudentModal }">
-                <div class="modal-content">
+            <div class="modal" :class="{ active: showStudentModal }" @click="closeStudentModal">
+                <div class="modal-content" @click.stop>
                     <div class="modal-header">
                         <h2>Edit Billing Details</h2>
                         <button class="close-modal" @click="closeStudentModal">&times;</button>
                     </div>
-
 
                     <form class="student-form">
                         <div class="student-info-grid">
@@ -921,30 +1087,30 @@ const getFeeStructure = (preset) => {
                                 <input type="text" v-model="currentStudent.yearLevel" readonly disabled>
                             </div>
                             <div class="info-group">
-                                <label>Basic Tuition</label>
-                                <input type="number" v-model="currentStudent.basicTuition">
+                                <label>Tuition Fee</label>
+                                <input type="number" v-model="currentStudent.tuitionFee">
                             </div>
                             <div class="info-group">
-                                <label>Laboratory Fee</label>
-                                <input type="number" v-model="currentStudent.laboratoryFee">
+                                <label>Miscellaneous Fee</label>
+                                <input type="number" v-model="currentStudent.miscellaneousFee">
                             </div>
                             <div class="info-group">
                                 <label>Initial Payment</label>
-                                <input type="number" v-model="currentStudent.studentActivities">
+                                <input type="number" v-model="currentStudent.InitialPayment">
                             </div>
                             <div class="info-group">
                                 <label>Discount</label>
                                 <select v-model="currentStudent.discount" @change="applyDiscount">
                                     <template v-if="currentStudent.yearLevel === '1st Year'">
                                         <option :value="0">No Discount</option>
-                                        <option :value="currentStudent.basicTuition * 0.15">Honor Student (15%)</option>
-                                        <option :value="currentStudent.basicTuition * 0.30">High Honor (30%)</option>
-                                        <option :value="currentStudent.basicTuition * 0.50">Highest Honor (50%)</option>
-                                        <option :value="currentStudent.basicTuition * 0.10">Freshman (10%)</option>
+                                        <option :value="currentStudent.tuitionFee * 0.15">Honor Student (15%)</option>
+                                        <option :value="currentStudent.tuitionFee * 0.30">High Honor (30%)</option>
+                                        <option :value="currentStudent.tuitionFee * 0.50">Highest Honor (50%)</option>
+                                        <option :value="currentStudent.tuitionFee * 0.10">Freshman (10%)</option>
                                     </template>
                                     <template v-else>
                                         <option :value="0">No Discount</option>
-                                        <option :value="currentStudent.basicTuition * 0.10">Continuing Student (10%)
+                                        <option :value="currentStudent.tuitionFee * 0.10">Continuing Student (10%)
                                         </option>
                                     </template>
                                 </select>
@@ -980,12 +1146,16 @@ const getFeeStructure = (preset) => {
                         <div class="payment-actions">
                             <h3 class="labels">Payments</h3>
                             <div>
-                                <button class="action-button" @click="showPaymentForm = true" v-if="!showPaymentForm">
-                                    <i class="fas fa-plus"></i> Add Payment
-                                </button>
+                                <button class="action-button" @click="showPaymentForm = true" v-if="!showPaymentForm"
+                                    :disabled="currentStudent.remainingBalance <= 0"
+                                    :class="{ 'disabled': currentStudent.remainingBalance <= 0 }">
+                                    <i class="fas fa-plus"></i>
+                                    {{ currentStudent.remainingBalance <= 0 ? 'No Balance Remaining' : 'Add Payment' }}
+                                        </button>
                             </div>
                         </div>
 
+                        <!-- ADD STUDENT'S PAYMENT OR BILLS -->
                         <div class="payment-form" :class="{ active: showPaymentForm }">
                             <div class="payment-form-grid">
                                 <div class="info-group">
@@ -1022,7 +1192,8 @@ const getFeeStructure = (preset) => {
                                 </button>
                             </div>
                         </div>
- 
+
+                        <!-- THIS TABLE WILL APPEAR IF THERE'S A PAYMENT TRANSACTION THAT HAS BEEN DONE -->
                         <table class="payment-table"
                             v-if="currentStudent.payments && currentStudent.payments.length > 0">
                             <thead>
@@ -1087,8 +1258,6 @@ const getFeeStructure = (preset) => {
                         </div>
                     </form>
 
-
-
                     <div class="form-actions">
                         <button class="submit-btn" @click="saveStudentChanges">Save Changes</button>
                         <button class="cancel-btn" @click="closeStudentModal">Close</button>
@@ -1096,14 +1265,14 @@ const getFeeStructure = (preset) => {
                 </div>
             </div>
 
+
             <!-- VIEW STUDENT'S BILL MODAL -->
-            <div class="modal" :class="{ active: showViewModal }">
-                <div class="modal-content">
+            <div class="modal" :class="{ active: showViewModal }" @click="closeViewModal">
+                <div class="modal-content" @click.stop>
                     <div class="modal-header">
                         <h2>Student Billing Information</h2>
                         <button class="close-modal" @click="closeViewModal">&times;</button>
                     </div>
-
 
                     <div class="student-form">
                         <div class="student-info-grid">
@@ -1131,16 +1300,16 @@ const getFeeStructure = (preset) => {
                             </div>
                             <div class="student-info-grid">
                                 <div class="info-group">
-                                    <label>Basic Tuition</label>
-                                    <span>₱{{ viewStudent.basicTuition?.toLocaleString() }}</span>
+                                    <label>Tuition Fee</label>
+                                    <span>₱{{ viewStudent.tuitionFee?.toLocaleString() }}</span>
                                 </div>
                                 <div class="info-group">
-                                    <label>Laboratory Fee</label>
-                                    <span>₱{{ viewStudent.laboratoryFee?.toLocaleString() }}</span>
+                                    <label>Miscellaneous Fee</label>
+                                    <span>₱{{ viewStudent.miscellaneousFee?.toLocaleString() }}</span>
                                 </div>
                                 <div class="info-group">
-                                    <label>Student Activities</label>
-                                    <span>₱{{ viewStudent.studentActivities?.toLocaleString() }}</span>
+                                    <label>Initial Payment</label>
+                                    <span>₱{{ viewStudent.InitialPayment?.toLocaleString() }}</span>
                                 </div>
                                 <div class="info-group">
                                     <label>Discount</label>
@@ -1156,12 +1325,12 @@ const getFeeStructure = (preset) => {
                                     <div class="fee-item">
                                         <span class="fee-label">Basic Tuition Fee</span>
                                         <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').tuition.registration.toLocaleString() }}</span>
+                                            'default').tuition.basicTuition.toLocaleString() }}</span>
                                     </div>
                                     <div class="fee-item">
                                         <span class="fee-label">Laboratory Fee</span>
                                         <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').tuition.subject.toLocaleString() }}</span>
+                                            'default').tuition.laboratory.toLocaleString() }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1172,7 +1341,7 @@ const getFeeStructure = (preset) => {
                                     <div class="fee-item">
                                         <span class="fee-label">Development Fee</span>
                                         <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').misc.laboratory.toLocaleString() }}</span>
+                                            'default').misc.development.toLocaleString() }}</span>
                                     </div>
                                     <div class="fee-item">
                                         <span class="fee-label">Library Fee</span>
@@ -1199,22 +1368,22 @@ const getFeeStructure = (preset) => {
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Prelim Exam</span>
                                     <span class="exam-fee-value">₱{{ viewStudent.examFees?.prelim.toLocaleString()
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Midterm Exam</span>
                                     <span class="exam-fee-value">₱{{ viewStudent.examFees?.midterm.toLocaleString()
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Pre-final Exam</span>
                                     <span class="exam-fee-value">₱{{ viewStudent.examFees?.prefinal.toLocaleString()
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Final Exam</span>
                                     <span class="exam-fee-value">₱{{ viewStudent.examFees?.final.toLocaleString()
-                                        }}</span>
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
@@ -1234,6 +1403,7 @@ const getFeeStructure = (preset) => {
                             </div>
                         </div>
 
+                        <!-- THIS PAYMENT HISTORY TABLE WILL APPEAR IF THERE IS AN EXISTING PAYMENT TRANSACTION -->
                         <div v-if="viewStudent.payments && viewStudent.payments.length > 0">
                             <h3 class="labels history">Payment History</h3>
                             <table class="payment-table">
@@ -1260,6 +1430,12 @@ const getFeeStructure = (preset) => {
                     </div>
                 </div>
             </div>
+            <UnsavedChangesModal 
+          :is-open="isUnsavedChangesModalOpen"
+          @close="handleUnsavedChanges(false)"
+          @confirm="handleUnsavedChanges(true)"
+        />
         </section>
+   
     </main>
 </template>

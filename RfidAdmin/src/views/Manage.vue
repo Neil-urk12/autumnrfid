@@ -3,43 +3,7 @@ import { ref, defineAsyncComponent, computed } from 'vue'
 const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 
-const activeCategory = ref('information')
-const isModalOpen = ref(false)
-const selectedStudentId = ref(null)
-
-const searchQuery = ref('')
-const activeFilters = ref([])
-
-const switchCategory = (category) => {
-  activeCategory.value = category
-}
-
-const openModal = (studentId) => {
-  selectedStudentId.value = studentId
-  isModalOpen.value = true
-}
-
-const closeModal = () => {
-  isModalOpen.value = false
-  selectedStudentId.value = null
-}
-
-const handleSearch = (query) => {
-  searchQuery.value = query
-}
-
-const handleFilterChange = (filters) => {
-  activeFilters.value = filters
-}
-
-const handleFilterClick = (filter) => {
-  if (activeFilters.value.includes(filter)) {
-    activeFilters.value = activeFilters.value.filter(f => f !== filter)
-  } else {
-    activeFilters.value.push(filter)
-  }
-}
-
+// MOCK
 const students = ref([
   {
     id: '2023-0001',
@@ -73,6 +37,54 @@ const students = ref([
   }
 ])
 
+
+const activeCategory = ref('information')
+const isModalOpen = ref(false)
+const selectedStudentId = ref(null)
+const searchQuery = ref('')
+const activeFilters = ref([])
+
+// SWITCHES THE ACTIVE CATEGORY TAB IN THE MODAL
+const switchCategory = (category) => {
+  activeCategory.value = category
+}
+
+// OPENS THE STUDENT DETAILS MODAL AND SETS THE SELECTED STUDENT ID
+const openModal = (studentId) => {
+  selectedStudentId.value = studentId
+  isModalOpen.value = true
+}
+
+// CLOSES THE MODAL AND RESETS THE SELECTED STUDENT ID
+const closeModal = () => {
+  isModalOpen.value = false
+  selectedStudentId.value = null
+}
+
+// UPDATES THE SEARCH QUERY VALUE
+const handleSearch = (query) => {
+  searchQuery.value = query
+}
+
+// UPDATES THE ACTIVE FILTERS ARRAY
+const handleFilterChange = (filters) => {
+  activeFilters.value = filters
+}
+
+// HANDLES THE FILTER BUTTON CLICKS AND UPDATES THE ACTIVE FILTERS
+const handleFilterClick = (filter) => {
+  if (activeFilters.value.includes(filter)) {
+    activeFilters.value = []
+  } else {
+    activeFilters.value = activeFilters.value.filter(f => 
+      !['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(f)
+    )
+    activeFilters.value.push(filter)
+  }
+}
+
+
+// HANDLES SEARCH AND FILTER
 const filteredStudents = computed(() => {
   return students.value.filter(student => {
     const matchesSearch = searchQuery.value === '' ||
@@ -80,13 +92,25 @@ const filteredStudents = computed(() => {
       student.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       student.course.toLowerCase().includes(searchQuery.value.toLowerCase())
 
-    const matchesFilters = activeFilters.value.length === 0 ||
-      activeFilters.value.some(filter =>
+    const statusFilter = activeFilters.value.find(filter => 
+      ['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(filter)
+    )
+    
+    const matchesStatus = !statusFilter || 
+      statusFilter === 'All Students' || 
+      student.status === statusFilter
+
+    const otherFilters = activeFilters.value.filter(filter => 
+      !['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(filter)
+    )
+    
+    const matchesOtherFilters = otherFilters.length === 0 ||
+      otherFilters.some(filter =>
         student.yearLevel.includes(filter) ||
         student.course.includes(filter)
       )
 
-    return matchesSearch && matchesFilters
+    return matchesSearch && matchesStatus && matchesOtherFilters
   })
 })
 </script>
@@ -104,16 +128,15 @@ const filteredStudents = computed(() => {
           <p>Manage and monitor student information</p>
         </div>
 
+        <!-- SEARCH BAR SECTION -->
         <div class="students-controls">
           <div class="search-filters">
-     
               <Searchbar 
                 v-model="searchQuery"
                 @update:search-query="handleSearch"
                 @filter-change="handleFilterChange"
               />
           
-
             <div class="filter-buttons">
               <button v-for="status in ['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary']"
                 :key="status" 
@@ -125,7 +148,8 @@ const filteredStudents = computed(() => {
             </div>
           </div>
         </div>
-
+    
+        <!-- STUDENT'S TABLE -->
         <div class="students-table">
           <table>
             <thead>
@@ -160,6 +184,7 @@ const filteredStudents = computed(() => {
         </div>
       </div>
 
+      <!-- VIEW STUDENT DETAILS MODAL -->
       <div class="modal" :class="{ active: isModalOpen }" @click="closeModal">
         <div class="modal-content" @click.stop>
           <div class="modal-header">
@@ -174,6 +199,7 @@ const filteredStudents = computed(() => {
             </button>
           </div>
 
+          <!-- STUDENT DETAILS -->
           <div class="category-content" :class="{ active: activeCategory === 'information' }" id="information-content">
             <div class="student-info-grid">
               <template v-if="selectedStudentId">
@@ -186,12 +212,13 @@ const filteredStudents = computed(() => {
             </div>
           </div>
 
+          <!-- STUDENT GRADES -->
           <div class="category-content" :class="{ active: activeCategory === 'grades' }" id="grades-content">
             <div class="grades-summary">
               <table class="grades-table">
                 <thead>
                   <tr>
-                    <th>Subject</th>
+                    <th class="subject-col">Subject</th>
                     <th>Prelim</th>
                     <th>Midterm</th>
                     <th>Prefinals</th>
@@ -201,53 +228,66 @@ const filteredStudents = computed(() => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Computer Fundamentals</td>
-                    <td>1</td>
-                    <td>1.25</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
+                    <td class="subject-col">Computer Fundamentals</td>
+                    <td class="grade-col">1.00</td>
+                    <td class="grade-col">1.25</td>
+                    <td class="grade-col">1.00</td>
+                    <td class="grade-col">1.00</td>
+                    <td class="grade-col">1.00</td>
                   </tr>
                   <tr>
-                    <td>Information Management</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
+                    <td class="subject-col">Information Management</td>
+                    <td class="grade-col">1.00</td>
+                    <td class="grade-col">1.00</td>
+                    <td class="grade-col">1.00</td>
+                    <td class="grade-col">1.00</td>
+                    <td class="grade-col">1.00</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
+          <!-- STUDENT BILLS -->
           <div class="category-content" :class="{ active: activeCategory === 'bills' }" id="bills-content">
             <div class="bills-summary">
-              <div class="total-balance">
-                <h3>Total Balance</h3>
-                <span class="amount">₱25,000.00</span>
+              <div class="balance-grid">
+                <div class="balance-item">
+                  <h3>Total Tuition</h3>
+                  <span class="amount">₱27,380.00</span>
+                </div>
+                <div class="balance-item">
+                  <h3>Total Paid</h3>
+                  <span class="amount paid">₱22,500.00</span>
+                </div>
+                <div class="balance-item">
+                  <h3>Remaining Balance</h3>
+                  <span class="amount remaining">₱4,880.00</span>
+                </div>
               </div>
-              <table class="bills-table">
-                <thead>
-                  <tr>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Tuition Fee</td>
-                    <td>2024-01-15</td>
-                    <td>₱22,500.00</td>
-                  </tr>
-                  <tr>
-                    <td>Prelim Exam</td>
-                    <td>2024-01-15</td>
-                    <td>₱4,880.00</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="bills-table-container">
+                <table class="bills-table">
+                  <thead>
+                    <tr>
+                      <th class="desc-col">Description</th>
+                      <th class="date-col">Date</th>
+                      <th class="amount-col">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="desc-col">Tuition Fee</td>
+                      <td class="date-col">2024-01-15</td>
+                      <td class="amount-col">₱22,500.00</td>
+                    </tr>
+                    <tr>
+                      <td class="desc-col">Prelim Exam</td>
+                      <td class="date-col">2024-01-15</td>
+                      <td class="amount-col">₱4,880.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

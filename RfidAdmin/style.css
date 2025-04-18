@@ -580,7 +580,16 @@ section {
     font-weight: normal;
 }
 
+.info-group input.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
 
+.error-message {
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
 
 .action-buttons {
     display: flex;
@@ -663,8 +672,7 @@ section {
 }
 
 .subjects-section {
-    margin-top: 25px;
-    padding-top: 20px;
+    padding: 20px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -682,7 +690,6 @@ section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
 }
 
 .add-subject-btn {
@@ -705,7 +712,7 @@ section {
     flex-direction: column;
     gap: 15px;
     margin-top: 20px;
-    max-height: 150px;
+    max-height: 200px;
     overflow-y: auto;
     padding-right: 15px;
 
@@ -757,6 +764,7 @@ section {
     box-shadow: 0 0 0 2px var(--border-glow);
 }
 
+
 .subjects-list::-webkit-scrollbar {
     width: 8px;
 }
@@ -786,7 +794,6 @@ section {
     max-height: 300px;
     overflow-y: auto;
     padding-right: 15px;
-    margin-top: 15px;
 }
 
 .delete-subject-item {
@@ -1056,16 +1063,9 @@ section {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 0;
 }
 
-.delete-subject-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    border-radius: 4px;
-}
 
 .buttonss {
     padding: 8px 16px;
@@ -1222,7 +1222,12 @@ section {
 }
 
 .payment-form .info-group input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1); /* Makes the calendar icon white */
+    filter: invert(1);
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
     cursor: pointer;
 }
 
@@ -1498,6 +1503,40 @@ section {
     font-weight: 600;
     color: var(--text-primary);
 }
+
+.action-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--background-tertiary);
+    color: var(--text-secondary);
+}
+
+.action-button:disabled {
+    pointer-events: none;
+}
+
+.preset-btn {
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.preset-btn:hover {
+    background: var(--hover-color);
+    color: var(--text-primary);
+}
+
+.preset-btn.active {
+    background: var(--accent);
+    color: var(--text-primary);
+    border-color: var(--accent);
+}
+
 /* END OF BILLS SECTION */
 
 @media (max-width: 768px) {
@@ -1525,3 +1564,496 @@ section {
     }
 
 }
+
+
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: var(--sidebar-gradient);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.grades-table th,
+.grades-table td {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.grades-table th {
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.grades-table td {
+    color: var(--text-secondary);
+}
+
+.grades-table .subject-col {
+    text-align: left;
+    min-width: 200px;
+}
+
+.grades-table .grade-col {
+    width: 80px;
+}
+
+
+
+.balance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 0;
+}
+
+.balance-item {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+
+
+.balance-item h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+.balance-item .amount {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: block;
+    margin-top: 0.5rem;
+}
+
+
+
+.bills-table-container {
+    margin-top: 1.5rem;
+    background: var(--sidebar-gradient);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.bills-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.bills-table th,
+.bills-table td {
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bills-table th {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+}
+
+.bills-table th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+.bills-table th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+.bills-table td {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.bills-table tr:last-child td:first-child {
+    border-bottom-left-radius: 0.5rem;
+}
+
+.bills-table tr:last-child td:last-child {
+    border-bottom-right-radius: 0.5rem;
+}
+
+.bills-table tr:hover td {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.bills-table .desc-col {
+    width: 50%;
+}
+
+.bills-table .date-col {
+    width: 25%;
+}
+
+.bills-table .amount-col {
+    width: 25%;
+    font-weight: 600;
+}
+
+.status-passed {
+    background: var(--success);
+    color: var(--text-light);
+}
+
+.status-failed {
+    background: var(--danger);
+    color: var(--text-light);
+}
+
+.status-incomplete {
+    background: var(--warning);
+    color: var(--text-dark);
+}
+
+.grade-input {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.grade-input label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.grade-input input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease;
+}
+
+.grade-input input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.grade-input input.error {
+    border-color: var(--danger);
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    background-color: var(--danger);
+    color: white;
+    font-size: 0.9rem;
+    z-index: 1001;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease;
+    max-width: 400px;
+    min-height: auto;
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.modal-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.grade-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.period-grade,
+.total-grade {
+    display: inline-block;
+}
+
+.delete-subjects-list {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.delete-subjects-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.delete-subjects-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.delete-subjects-list::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+.delete-subjects-list::-webkit-scrollbar-thumb:hover {
+    background: var(--hover-color);
+}
+
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+
+
+.subject-info {
+    flex: 1;
+}
+
+.subject-name {
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: block;
+    color: var(--text-primary);
+}
+
+.modal-content {
+    background: var(--sidebar-gradient);
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 800px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* START OF DELETE CONFIRMATION MODAL  */
+.confirmation-input input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    font-size: 0.9em;
+    margin-top: 1rem;
+  }
+  
+  .confirmation-input input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--border-glow);
+  }
+  
+  .confirmation-input input.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+  
+  .status-selection {
+    margin-top: 1rem;
+  }
+  
+  .status-selection label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .status-selection select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    font-size: 0.9em;
+  }
+  
+  .status-selection select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--border-glow);
+  }
+  /* END */
+
+  .filter-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .block-message {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+  
+  .filter-button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  
+  .filter-button.active {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  
+  .filter-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  .filter-button.active:hover {
+    background-color: var(--accent);
+  }
+  
+  .filter-buttons-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  
+  .category-label {
+    font-weight: 600;
+    color: #4b5563;
+    font-size: 0.875rem;
+  }
+  
+  .filter-category {
+    margin-bottom: 1rem;
+  }
+  
+  .block-message {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+  
+  .toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .toast-icon {
+    font-size: 1.2rem;
+  }
+  
+  .toast-message {
+    flex: 1;
+  }
+  
+  .error {
+    background-color: var(--danger);
+  }
+  
+  .success {
+    background-color: var(--success);
+  }
+  
+  .warning {
+    background-color: var(--warning);
+    color: var(--text-dark);
+  }
+  
+  .toast-enter-active,
+  .toast-leave-active {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .toast-enter-from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  
+  .toast-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+/* GABALIK BALIK UBANG CODE DIRI KAY GA SCOPED KOG EDIT NYA AKO RA GIPASTE DIRI, AKO RA NI AYUHON UNYA AHHHHH */
