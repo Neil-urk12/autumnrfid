@@ -1,271 +1,406 @@
-<script setup>
-import { ref } from 'vue'
-import { defineAsyncComponent } from "vue";
-const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"));
-const ConfirmationModal = defineAsyncComponent(() => import("@/components/ConfirmationModal.vue"));
+<script setup lang="ts">
+import { ref, computed, defineAsyncComponent } from 'vue'
+import type { Course, ConfirmationData, CourseForm } from '@/typescript/models'
+import mockData from '@/mock/models.json'
 
-const isConfirmationModalOpen = ref(false)
-const isAddModalOpen = ref(false)
-const isEditModalOpen = ref(false)
-const filterContainerActive = ref(false)
+const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
+const ConfirmationModal = defineAsyncComponent(() => import("@/components/ConfirmationModal.vue"))
+const UnsavedChangesModal = defineAsyncComponent(() => import("@/components/UnsavedChangesModal.vue"))
+const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 
-const confirmationData = ref({
+const courses = ref<Course[]>(mockData.courseList)
+const courseForm = ref<CourseForm>({
+  ecode: '',
+  subjectCode: '',
+  courseName: '',
+  units: '',
+  originalEcode: ''
+})
+
+// STATE 
+const searchQuery = ref<string>('')
+const activeFilters = ref<string[]>([])
+const isConfirmationModalOpen = ref<boolean>(false)
+const isAddModalOpen = ref<boolean>(false)
+const isEditModalOpen = ref<boolean>(false)
+const isUnsavedChangesModalOpen = ref<boolean>(false)
+const modalToClose = ref<'add' | 'edit' | null>(null)
+const addEcodeError = ref<string>('')
+const editEcodeError = ref<string>('')
+
+
+// CONFIRMATION MODAL DATA
+const confirmationData = ref<ConfirmationData>({
   title: '',
   itemName: '',
   itemInfo: null
 })
 
-const courseForm = ref({
-  ecode: '',
-  subjectCode: '',
-  courseName: '',
-  units: ''
+// HANDLES THE SEARCH QUERY UPDATE
+const handleSearch = (query: string) => {
+  searchQuery.value = query
+}
+
+// HANDLES THE FILTER CHANGES
+const handleFilterChange = (filters: string[]) => {
+  activeFilters.value = filters
+}
+
+// FILTERS THE COURSES BASED ON SEARCH QUERY AND ACTIVE FILTERS
+const filteredCourses = computed(() => {
+  return courses.value.filter(course => {
+    const matchesSearch = searchQuery.value === '' ||
+      course.ecode.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      course.subjectCode.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      course.courseName.toLowerCase().includes(searchQuery.value.toLowerCase())
+
+    const matchesFilters = activeFilters.value.length === 0 ||
+      activeFilters.value.some(filter =>
+        course.units.toString().includes(filter)
+      )
+
+    return matchesSearch && matchesFilters
+  })
 })
 
-const courses = ref([
-  {
-    ecode: 'CS101',
-    subjectCode: 'COMP1001',
-    courseName: 'Introduction to Programming',
-    units: 3
-  },
-  {
-    ecode: 'CS102',
-    subjectCode: 'COMP1002',
-    courseName: 'Data Structures and Algorithms',
-    units: 4
-  }
-])
-
-const showDeleteConfirmation = (title, itemName, itemInfo = null) => {
+// SHOWS THE DELETE CONFIRMATION MODAL
+const showDeleteConfirmation = (title: string, itemName: string, itemInfo: Course) => {
   confirmationData.value = { title, itemName, itemInfo }
   isConfirmationModalOpen.value = true
 }
 
-const handleConfirmDelete = (itemInfo) => {
-  console.log('Deleting:', itemInfo)
+// HANDLES THE COURSE DELETION AFTER CONFIRMATION
+const handleConfirmDelete = (itemInfo: Course) => {
+  const index = courses.value.findIndex(course => course.ecode === itemInfo.ecode)
+  if (index !== -1) {
+    courses.value.splice(index, 1)
+  }
+  isConfirmationModalOpen.value = false
 }
 
-const toggleFilterContainer = () => {
-  filterContainerActive.value = !filterContainerActive.value
-}
 
+// OPENS THE ADD COURSE MODAL WITH EMPTY FORM
 const openAddCourseModal = () => {
   courseForm.value = {
     ecode: '',
     subjectCode: '',
     courseName: '',
-    units: ''
+    units: '',
+    originalEcode: ''
   }
   isAddModalOpen.value = true
 }
 
+// CLOSES THE ADD COURSE MODAL WITH UNSAVED CHANGES CHECK
 const closeAddCourseModal = () => {
-  isAddModalOpen.value = false
+  if (hasUnsavedChanges.value) {
+    modalToClose.value = 'add'
+    isUnsavedChangesModalOpen.value = true
+  } else {
+    isEditModalOpen.value = false
+    editEcodeError.value = ''
+  }
 }
 
-const openEditCourse = (ecode) => {
+// OPENS THE EDIT COURSE MODAL WITH EXISTING COURSE DATA
+const openEditCourse = (ecode: string) => {
   const course = courses.value.find(c => c.ecode === ecode)
   if (course) {
-    courseForm.value = { ...course }
+    courseForm.value = {
+      ...course,
+      units: course.units.toString(),
+      originalEcode: course.ecode
+    }
     isEditModalOpen.value = true
   }
 }
 
+// CLOSES THE EDIT COURSE MODAL WITH UNSAVED CHANGES CHECK
 const closeEditCourseModal = () => {
-  isEditModalOpen.value = false
-}
-
-const handleAddCourseSubmit = (e) => {
-  e.preventDefault()
-  courses.value.push({ ...courseForm.value })
-  closeAddCourseModal()
-}
-
-const handleEditCourseSubmit = (e) => {
-  e.preventDefault()
-  const index = courses.value.findIndex(c => c.ecode === courseForm.value.ecode)
-  if (index !== -1) {
-    courses.value[index] = { ...courseForm.value }
+  if (hasUnsavedChanges.value) {
+    modalToClose.value = 'edit'
+    isUnsavedChangesModalOpen.value = true
+  } else {
+    isEditModalOpen.value = false
+    editEcodeError.value = ''
   }
-  closeEditCourseModal()
+}
+
+// TRANSFORMS THE COURSE NAME TO CAPITALIZE THE FIRST LETTER OF EACH WORD, EXCEPT FOR CERTAIN EXCEPTIONS
+const formatCourseName = (name: string) => {
+  const exceptions = ['of', 'to', 'and']
+  return name
+    .trim()
+    .toLowerCase()
+    .split(' ')
+    .map((word, index) => {
+      if (exceptions.includes(word)) {
+        return word
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    })
+    .join(' ')
+}
+
+// HANDLES THE ADD COURSE FORM SUBMISSION
+const handleAddCourseSubmit = (e: Event) => {
+  const courseData: Course = {
+    ecode: courseForm.value.ecode.toUpperCase(),
+    subjectCode: courseForm.value.subjectCode.toUpperCase(),
+    courseName: formatCourseName(courseForm.value.courseName),
+    units: parseInt(courseForm.value.units)
+  }
+
+  if (!validateNewEcode(courseData.ecode)) {
+    return
+  }
+
+  courses.value.push(courseData)
+  isAddModalOpen.value = false
+}
+
+// HANDLES THE EDIT COURSE FORM SUBMISSION
+const handleEditCourseSubmit = (e: Event) => {
+  const courseData: Course = {
+    ecode: courseForm.value.ecode.toUpperCase(),
+    subjectCode: courseForm.value.subjectCode.toUpperCase(),
+    courseName: formatCourseName(courseForm.value.courseName),
+    units: parseInt(courseForm.value.units)
+  }
+
+  const index = courses.value.findIndex(course =>
+    course.ecode === courseForm.value.originalEcode
+  )
+
+  if (index !== -1) {
+    if (!validateEditEcode(courseData.ecode, courseForm.value.originalEcode || '')) {
+      return
+    }
+
+    courses.value[index] = courseData
+    isEditModalOpen.value = false
+    editEcodeError.value = ''
+  }
+}
+
+// VALIDATES THE ECODE FOR NEW COURSE ADDITION
+const validateNewEcode = (ecode: string) => {
+  addEcodeError.value = ''
+
+  const exists = courses.value.some(course =>
+    course.ecode.toUpperCase() === ecode.toUpperCase()
+  )
+
+  if (exists) {
+    addEcodeError.value = 'Course ECODE already exists'
+    setTimeout(() => {
+      addEcodeError.value = ''
+    }, 3000)
+    return false
+  }
+
+  return true
+}
+
+// VALIDATES THE ECODE FOR COURSE EDITING
+const validateEditEcode = (ecode: string, originalEcode: string) => {
+  editEcodeError.value = ''
+
+  const exists = courses.value.some(course =>
+    course.ecode.toUpperCase() === ecode.toUpperCase() &&
+    course.ecode.toUpperCase() !== originalEcode.toUpperCase()
+  )
+
+  if (exists) {
+    editEcodeError.value = 'Course already exists'
+    setTimeout(() => {
+      editEcodeError.value = ''
+    }, 3000)
+    return false
+  }
+
+  return true
+}
+
+// CHECKS FOR UNSAVED CHANGES IN THE FORM
+const hasUnsavedChanges = computed(() => {
+  if (isAddModalOpen.value) {
+    return Object.values(courseForm.value).some(value => value !== '')
+  } else if (isEditModalOpen.value) {
+    const originalCourse = courses.value.find(c => c.ecode === courseForm.value.originalEcode)
+    if (!originalCourse) return false
+
+    return Object.keys(courseForm.value).some(key =>
+      key !== 'originalEcode' && courseForm.value[key as keyof CourseForm] !== originalCourse[key as keyof Course]
+    )
+  }
+  return false
+})
+
+// HANDLES THE UNSAVED CHANGES MODAL ACTIONS
+const handleUnsavedChanges = (confirm: boolean) => {
+  if (confirm) {
+    if (modalToClose.value === 'add') {
+      isAddModalOpen.value = false
+      courseForm.value = {
+        ecode: '',
+        subjectCode: '',
+        courseName: '',
+        units: '',
+        originalEcode: ''
+      }
+    } else if (modalToClose.value === 'edit') {
+      isEditModalOpen.value = false
+      editEcodeError.value = ''
+    }
+  }
+  isUnsavedChangesModalOpen.value = false
+  modalToClose.value = null
 }
 </script>
 
 <template>
-  <div class="sidebar">
-    <Sidebar />
-  </div>
+  <main>
+    <div class="sidebar">
+      <Sidebar />
+    </div>
 
-  <section>
-    <div style="width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 20px;">
-      <div class="welcome-header" style="padding-bottom: 0;">
-        <h1>Course Management</h1>
-        <p>View and manage course information</p>
-      </div>
+    <section>
+      <div class="container">
+        <div class="welcome-header" style="padding-bottom: 0;">
+          <h1>Course Management</h1>
+          <p>View and manage course information</p>
+        </div>
 
-      <div class="students-controls" style="margin-top: 5px;">
-        <div class="search-filters">
-          <div class="search-bar">
-            <i class="fa-solid fa-search"></i>
-            <input type="text" placeholder="Search students...">
-            <button class="filter-toggle-btn" @click="toggleFilterContainer">
-              <i class="fa-solid fa-filter"></i>
-              Filter
-            </button>
-
-            <div class="filter-tooltip" :class="{ active: filterContainerActive }">
-              <div class="filter-category">
-                <span class="category-label">Year Level</span>
-                <div class="filter-buttons-row">
-                  <button class="filter-btn">1st</button>
-                  <button class="filter-btn">2nd</button>
-                  <button class="filter-btn">3rd</button>
-                  <button class="filter-btn">4th</button>
-                </div>
-              </div>
-
-              <div class="filter-category">
-                <span class="category-label">Semester</span>
-                <div class="filter-buttons-row">
-                  <button class="filter-btn">1st Sem</button>
-                  <button class="filter-btn">2nd Sem</button>
-                </div>
-              </div>
-
-              <div class="filter-category">
-                <span class="category-label">Course</span>
-                <div class="filter-buttons-row">
-                  <button class="filter-btn">BSIT</button>
-                  <button class="filter-btn">BSCS</button>
-                  <button class="filter-btn">BSIS</button>
-                </div>
-              </div>
-
-              <div class="filter-category">
-                <span class="category-label">Block</span>
-                <div class="filter-buttons-row">
-                  <button class="filter-btn">A</button>
-                  <button class="filter-btn">B</button>
-                  <button class="filter-btn">C</button>
-                </div>
-              </div>
+        <!-- SEARCH BAR SECTION -->
+        <div class="students-controls">
+          <div class="search-filters">
+            <Searchbar v-model="searchQuery" @update:search-query="handleSearch" @filter-change="handleFilterChange" />
+            <div class="filter-buttons">
+              <button type="button" class="add-student-btn" @click.stop="openAddCourseModal" aria-label="Add New Course">
+                <i class="fa-solid fa-plus"></i> Add New Course
+              </button>
             </div>
           </div>
-          <button class="add-student-btn" @click="openAddCourseModal">
-            <i class="fa-solid fa-plus"></i> Add New Course
-          </button>
+        </div>
+
+        <!-- COURSE TABLE -->
+        <div class="students-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Course ECODE</th>
+                <th>Subject Code</th>
+                <th>Course Name</th>
+                <th>Units</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="course in filteredCourses" :key="course.ecode">
+                <td>{{ course.ecode }}</td>
+                <td>{{ course.subjectCode }}</td>
+                <td>{{ course.courseName }}</td>
+                <td>{{ course.units }}</td>
+                <td class="action-buttons">
+                  <button type="button" class="action-btn edit-btn" @click.stop="openEditCourse(course.ecode)" aria-label="Edit Course">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button type="button" class="action-btn delete-btn" @click.stop="showDeleteConfirmation(
+                    'Delete Course',
+                    course.courseName,
+                    course
+                  )" aria-label="Delete Course">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="students-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Course ECODE</th>
-              <th>Subject Code</th>
-              <th>Course Name</th>
-              <th>Units</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="course in courses" :key="course.ecode">
-              <td>{{ course.ecode }}</td>
-              <td>{{ course.subjectCode }}</td>
-              <td>{{ course.courseName }}</td>
-              <td>{{ course.units }}</td>
-              <td class="action-buttons">
-                <button class="action-btn edit-btn" @click="openEditCourse(course.ecode)">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                <button class="action-btn delete-btn" @click="showDeleteConfirmation(
-                  'Delete Course',
-                  `${course.courseName}`,
-                  course
-                )">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="modal" :class="{ active: isAddModalOpen }" @click="closeAddCourseModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>Add New Course</h2>
-          <button class="close-modal" @click="closeAddCourseModal">&times;</button>
+      <!-- ADD NEW COURSE MODAL -->
+      <div class="modal" :class="{ active: isAddModalOpen }" @click.self="closeAddCourseModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Add New Course</h2>
+            <button class="close-modal" @click="closeAddCourseModal">&times;</button>
+          </div>
+          <form @submit.prevent="handleAddCourseSubmit" class="student-form">
+            <div class="course-info-grid">
+              <div class="info-group">
+                <label>Course ECODE</label>
+                <input type="text" v-model.trim="courseForm.ecode" :class="{ 'error': addEcodeError }"
+                  placeholder="Enter Course ECODE" required>
+                <span class="error-message" v-if="addEcodeError">{{ addEcodeError }}</span>
+              </div>
+              <div class="info-group">
+                <label>Subject Code</label>
+                <input type="text" v-model.trim="courseForm.subjectCode" placeholder="Enter Course Subject Code" required>
+              </div>
+              <div class="info-group full-width">
+                <label>Course Name</label>
+                <input type="text" v-model.trim="courseForm.courseName" placeholder="Enter Course Name" required>
+              </div>
+              <div class="info-group">
+                <label>Units</label>
+                <input type="number" min="1" max="6" v-model.number="courseForm.units" placeholder="Enter Course Units"
+                  required>
+              </div>
+            </div>
+            <div class="form-actions">
+             <button type="button" class="cancel-btn" @click.stop="closeAddCourseModal">Cancel</button>
+              <button type="submit" class="submit-btn">Add Course</button>
+            </div>
+          </form>
         </div>
-        <form @submit="handleAddCourseSubmit" class="student-form">
-          <div class="course-info-grid">
-            <div class="info-group">
-              <label>Course ECODE</label>
-              <input type="text" v-model="courseForm.ecode" required>
-            </div>
-            <div class="info-group">
-              <label>Subject Code</label>
-              <input type="text" v-model="courseForm.subjectCode" required>
-            </div>
-            <div class="info-group full-width">
-              <label>Course Name</label>
-              <input type="text" v-model="courseForm.courseName" required>
-            </div>
-            <div class="info-group">
-              <label>Units</label>
-              <input type="number" min="1" max="6" v-model="courseForm.units" required>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="cancel-btn" @click="closeAddCourseModal">Cancel</button>
-            <button type="submit" class="submit-btn">Add Course</button>
-          </div>
-        </form>
       </div>
-    </div>
 
-    <div class="modal" :class="{ active: isEditModalOpen }" @click="closeEditCourseModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>Edit Course</h2>
-          <button class="close-modal" @click="closeEditCourseModal">&times;</button>
+      <!-- EDIT COURSE MODAL -->
+      <div class="modal" :class="{ active: isEditModalOpen }" @click.self="closeEditCourseModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Edit Course</h2>
+            <button class="close-modal" @click="closeEditCourseModal">&times;</button>
+          </div>
+          <form @submit.prevent="handleEditCourseSubmit" class="student-form">
+            <div class="course-info-grid">
+              <div class="info-group">
+                <label>Course ECODE</label>
+                <input type="text" v-model.trim="courseForm.ecode" :class="{ 'error': editEcodeError }" required>
+                <span class="error-message" v-if="editEcodeError">{{ editEcodeError }}</span>
+              </div>
+              <div class="info-group">
+                <label>Subject Code</label>
+                <input type="text" v-model.trim="courseForm.subjectCode" required>
+              </div>
+              <div class="info-group full-width">
+                <label>Course Name</label>
+                <input type="text" v-model.trim="courseForm.courseName" required>
+              </div>
+              <div class="info-group">
+                <label>Units</label>
+                <input type="number" min="1" max="6" v-model.number="courseForm.units" required>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" @click.stop="closeEditCourseModal">Cancel</button>
+              <button type="submit" class="submit-btn">Save Changes</button>
+            </div>
+          </form>
         </div>
-        <form @submit="handleEditCourseSubmit" class="student-form">
-          <div class="course-info-grid">
-            <div class="info-group">
-              <label>Course ECODE</label>
-              <input type="text" v-model="courseForm.ecode" required>
-            </div>
-            <div class="info-group">
-              <label>Subject Code</label>
-              <input type="text" v-model="courseForm.subjectCode" required>
-            </div>
-            <div class="info-group full-width">
-              <label>Course Name</label>
-              <input type="text" v-model="courseForm.courseName" required>
-            </div>
-            <div class="info-group">
-              <label>Units</label>
-              <input type="number" min="1" max="6" v-model="courseForm.units" required>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="cancel-btn" @click="closeEditCourseModal">Cancel</button>
-            <button type="submit" class="submit-btn">Save Changes</button>
-          </div>
-        </form>
       </div>
-    </div>
 
-    <ConfirmationModal 
-      :is-open="isConfirmationModalOpen"
-      :title="confirmationData.title"
-      :item-name="confirmationData.itemName"
-      :item-info="confirmationData.itemInfo"
-      @close="isConfirmationModalOpen = false"
-      @confirm="handleConfirmDelete"
-    />
-  </section>
+      <!-- DELETE CONFIRMATION MODAL -->
+      <ConfirmationModal :is-open="isConfirmationModalOpen" :title="confirmationData.title"
+        :item-name="confirmationData.itemName" :item-info="confirmationData.itemInfo"
+        placeholder-text="Enter Course ECODE to Confirm Deletion" @close="isConfirmationModalOpen = false"
+        @confirm="handleConfirmDelete" />
+
+      <!-- UNSAVED CHANGES MODAL -->
+      <UnsavedChangesModal :is-open="isUnsavedChangesModalOpen" @close="handleUnsavedChanges(false)"
+        @confirm="handleUnsavedChanges(true)" />
+    </section>
+  </main>
 </template>

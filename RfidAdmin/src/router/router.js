@@ -34,11 +34,16 @@ const routes = [
         name: "Students",
         component: () => import("@/views/Students.vue"),
     },
+    {
+        path: "/bills",
+        name: "Bills",
+        component: () => import("@/views/Bills.vue"),
+    },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
-    routes,
+    routes
 });
 
 export default router
