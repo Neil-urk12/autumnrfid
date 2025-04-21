@@ -20,7 +20,7 @@ const handleContinue = () => {
 <template>
   <div class="modal" :class="{ active: isOpen }">
     <div class="modal-content confirmation-content" @click.stop>
-      <div class="confirmation-icon warning">
+      <div class="confirmation-icon">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
       <div class="confirmation-message">

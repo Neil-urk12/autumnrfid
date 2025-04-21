@@ -47,6 +47,11 @@ const handleConfirm = () => {
   const itemId = props.itemInfo?.id || props.itemInfo?.ecode || props.itemInfo?.name
   if (!itemId) return
 
+  if (props.showStatusSelection && !selectedStatus.value) {
+    errorMessage.value = 'Please select a status'
+    return
+  }
+
   if (confirmationId.value.toLowerCase() === itemId.toLowerCase()) {
     emit('confirm', { ...props.itemInfo, newStatus: selectedStatus.value })
     confirmationId.value = ''

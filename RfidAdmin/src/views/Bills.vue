@@ -1,110 +1,93 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, defineAsyncComponent } from 'vue'
+import { Student, Payment, FeeStructure } from '@/typescript/models'
+import mockData from '@/mock/models.json'
+
 const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 const UnsavedChangesModal = defineAsyncComponent(() => import("@/components/UnsavedChangesModal.vue"))
 
-// MOCK 
-const studentBills = ref([
-    {
-        id: '2023-0001',
-        name: 'John Cez',
-        course: 'BSCS',
-        yearLevel: '3rd Year',
-        tuitionFee: 25000.00,
-        miscellaneousFee: 5000.00,
-        InitialPayment: 2000.00,
-        discount: 2500.00,
-        totalFees: 29500.00,
-        examFees: {
-            prelim: 3000.00,
-            midterm: 3000.00,
-            prefinal: 3000.00,
-            final: 3000.00
-        },
-        payments: [],
-        remainingBalance: 29500.00
-    },
-    {
-        id: '2023-0002',
-        name: 'Maria Santos',
-        course: 'BSBA', 
-        yearLevel: '2nd Year',
-        tuitionFee: 22000.00,
-        miscellaneousFee: 2000.00,
-        InitialPayment: 1500.00,
-        discount: 0.00,
-        totalFees: 25500.00,
-        examFees: {
-            prelim: 2000.00,
-            midterm: 2000.00,
-            prefinal: 2000.00,
-            final: 2000.00
-        },
-        payments: [],
-        remainingBalance: 25500.00
-    },
-    {
-        id: '2023-0003',
-        name: 'Carlos Reyes',
-        course: 'BSIT',
-        yearLevel: '1st Year',
-        tuitionFee: 20000.00,
-        miscellaneousFee: 4000.00,
-        InitialPayment: 1800.00,
-        discount: 1000.00,
-        totalFees: 24800.00,
-        examFees: {
-            prelim: 2500.00,
-            midterm: 2500.00,
-            prefinal: 2500.00,
-            final: 2500.00
-        },
-        payments: [],
-        remainingBalance: 24800.00
-    }
-])
+const students = ref<Student[]>(mockData.students)
+const feeStructures = ref<Record<string, FeeStructure>>(mockData.feeStructures)
 
-const currentStudent = ref({
+const currentStudent = ref<Student>({
     id: '',
-    name: '',
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    suffix: '',
+    birthday: '',
     course: '',
+    block: '',
     yearLevel: '',
-    tuitionFee: 0,
-    miscellaneousFee: 0,
-    InitialPayment: 0,
-    discount: 0,
-    totalFees: 0,
-    examFees: {
-        prelim: 0,
-        midterm: 0,
-        prefinal: 0,
-        final: 0
+    status: '',
+    email: '',
+    phone: '',
+    grades: {
+        prelim: {},
+        midterm: {},
+        prefinals: {},
+        finals: {},
+        gwa: '',
+        remarks: ''
     },
-    payments: [],
-    remainingBalance: 0
+    billing: {
+        totalTuition: 0,
+        totalPaid: 0,
+        remainingBalance: 0,
+        tuitionFee: 0,
+        miscellaneousFee: 0,
+        initialPayment: 0,
+        discount: 0,
+        examFees: {
+            prelim: 0,
+            midterm: 0,
+            prefinal: 0,
+            final: 0
+        },
+        payments: []
+    }
 })
 
-const originalStudentData = ref(null)
+const originalStudentData = ref<Student | null>(null)
 
-const viewStudent = ref({
+const viewStudent = ref<Student>({
     id: '',
-    name: '',
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    suffix: '',
+    birthday: '',
     course: '',
+    block: '',
     yearLevel: '',
-    tuitionFee: 0,
-    miscellaneousFee: 0,
-    InitialPayment: 0,
-    discount: 0,
-    totalFees: 0,
-    examFees: {
-        prelim: 0,
-        midterm: 0,
-        prefinal: 0,
-        final: 0
+    status: '',
+    email: '',
+    phone: '',
+    grades: {
+        prelim: {},
+        midterm: {},
+        prefinals: {},
+        finals: {},
+        gwa: '',
+        remarks: ''
     },
-    payments: [],
-    remainingBalance: 0
+    billing: {
+        totalTuition: 0,
+        totalPaid: 0,
+        remainingBalance: 0,
+        tuitionFee: 0,
+        miscellaneousFee: 0,
+        initialPayment: 0,
+        discount: 0,
+        examFees: {
+            prelim: 0,
+            midterm: 0,
+            prefinal: 0,
+            final: 0
+        },
+        payments: []
+    }
 })
 
 const editStudentData = ref({
@@ -114,111 +97,93 @@ const editStudentData = ref({
     yearLevel: ''
 })
 
-const newPayment = ref({
-    type: 'Initial Payment',
-    amount: '',
-    date: ''
+const newPayment = ref<Payment>({
+    description: '',
+    date: '',
+    amount: 0
 })
 
-const newStudent = ref({
+const newStudent = ref<Student>({
     id: '',
-    name: '',
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    suffix: '',
+    birthday: '',
     course: '',
+    block: '',
     yearLevel: '1st Year',
-    feePreset: 'BSCS', 
-    tuitionFee: 0,
-    miscellaneousFee: 0,
-    InitialPayment: 0,
-    discount: 0,
-    discountType: 'none'
-})
-
-
-const feeStructures = ref({
-    BSCS: {
-        tuition: {
-            basicTuition: 18000,
-            laboratory:2500
-        },
-        misc: {
-            development: 1000,
-            library: 1500,
-            computer: 3500,
-            athletic: 1000
-        }
+    status: 'New',
+    email: '',
+    phone: '',
+    feePreset: 'BSCS',
+    discountType: 'none',
+    grades: {
+        prelim: {},
+        midterm: {},
+        prefinals: {},
+        finals: {},
+        gwa: '',
+        remarks: ''
     },
-    BSIT: {
-        tuition: {
-            basicTuition: 19000,
-            laboratory: 3000
+    billing: {
+        totalTuition: 0,
+        totalPaid: 0,
+        remainingBalance: 0,
+        tuitionFee: 0,
+        miscellaneousFee: 0,
+        initialPayment: 0,
+        discount: 0,
+        examFees: {
+            prelim: 0,
+            midterm: 0,
+            prefinal: 0,
+            final: 0
         },
-        misc: {
-            development: 1000,
-            library: 1500,
-            computer: 3000,
-            athletic: 1000
-        }
-    },
-    BSBA: {
-        tuition: {
-            basicTuition: 20000,
-            laboratory: 3000
-        },
-        misc: {
-            development: 2000,
-            library: 1200,
-            computer: 1800,
-            athletic: 1000
-        }
-    },
-    BSA: {
-        tuition: {
-            basicTuition: 18500,
-            laboratory: 2000
-        },
-        misc: {
-            development: 2200,
-            library: 1200,
-            computer: 1800,
-            athletic: 1000
-        }
+        payments: []
     }
 })
 
-const editFeePreset = ref('BSCS')
-//
-
 // STATE
-const searchQuery = ref('')
-const activeFilters = ref([])
-const showStudentModal = ref(false)
-const showAddStudentModal = ref(false)
-const showEditFeeStructureModal = ref(false)
-const activeTab = ref('info')
-const showPaymentForm = ref(false)
-const showEditModal = ref(false)
-const showViewModal = ref(false)
-const isUnsavedChangesModalOpen = ref(false)
-const modalToClose = ref(null)
-
+const searchQuery = ref<string>('')
+const activeFilters = ref<string[]>([])
+const showStudentModal = ref<boolean>(false)
+const showAddStudentModal = ref<boolean>(false)
+const showEditFeeStructureModal = ref<boolean>(false)
+const activeTab = ref<string>('info')
+const showPaymentForm = ref<boolean>(false)
+const showEditModal = ref<boolean>(false)
+const showViewModal = ref<boolean>(false)
+const isUnsavedChangesModalOpen = ref<boolean>(false)
+const modalToClose = ref<string | null>(null)
+const editFeePreset = ref<string>('BSCS')
+const studentName = ref<string>('')
+const matchingStudents = ref<Student[]>([])
+const showStudentDropdown = ref<boolean>(false)
+const studentIdInput = ref<string>('')
 
 // CHECKS WHETHER THERE ARE UNSAVED CHANGES IN THE MODAL
 const hasUnsavedChanges = computed(() => {
     if (showAddStudentModal.value) {
-        
-        // CHECKS ANY MODIFICAIION FROM THE NEW STUDEN (ADD STUDENT MODAL - AMBOT NGANO MO APPEAR GIHAPON ANG MODAL BISAG WAY CHANGES BASIN ING ANA RA SIYA KAY MOCK DATA PA T^T)
-        return Object.values(newStudent.value).some(value => {
-            if (typeof value === 'string') {
-                return value.trim() !== ''
-            }
-            return value !== 0 && value !== 'none' && value !== 'BSCS' && value !== '1st Year'
-        })
+        const hasEnteredStudentId = studentIdInput.value.trim() !== '';
+        const hasEnteredName = studentName.value.trim() !== '';
+
+        if (!hasEnteredStudentId && !hasEnteredName) {
+            return false;
+        }
+        return hasEnteredStudentId ||
+            hasEnteredName ||
+            newStudent.value.billing.tuitionFee > 0 ||
+            newStudent.value.billing.miscellaneousFee > 0 ||
+            newStudent.value.billing.initialPayment > 0;
     } else if (showStudentModal.value) {
         // CHECKS ANY MODIFICAIION FROM THE CURRENT STUDENT (EDIT STUDENT MODAL)
         if (!originalStudentData.value) return false
         return Object.keys(currentStudent.value).some(key => {
-            if (key === 'payments') return false 
-            return JSON.stringify(currentStudent.value[key]) !== JSON.stringify(originalStudentData.value[key])
+            if (key === 'payments') return false
+            const currentValue = currentStudent.value[key as keyof Student];
+            const originalValue = originalStudentData.value ? originalStudentData.value[key as keyof Student] : null;
+            return JSON.stringify(currentValue) !== JSON.stringify(originalValue);
         })
     }
     return false
@@ -226,42 +191,93 @@ const hasUnsavedChanges = computed(() => {
 //
 
 // HANDLES THE CONFIRMATION OF UNSAVED CHANGES
-const handleUnsavedChanges = (confirm) => {
+const handleUnsavedChanges = (confirm: boolean) => {
     if (confirm) {
         if (modalToClose.value === 'add') {
             showAddStudentModal.value = false
             newStudent.value = {
                 id: '',
-                name: '',
+                firstName: '',
+                lastName: '',
+                middleName: '',
+                suffix: '',
+                birthday: '',
                 course: 'BSCS',
+                block: '',
                 yearLevel: '1st Year',
+                status: 'New',
+                email: '',
+                phone: '',
                 feePreset: 'BSCS',
-                tuitionFee: 0,
-                miscellaneousFee: 0,
-                InitialPayment: 0,
-                discount: 0,
-                discountType: 'none'
+                discountType: 'none',
+                grades: {
+                    prelim: {},
+                    midterm: {},
+                    prefinals: {},
+                    finals: {},
+                    gwa: '',
+                    remarks: ''
+                },
+                billing: {
+                    totalTuition: 0,
+                    totalPaid: 0,
+                    remainingBalance: 0,
+                    tuitionFee: 0,
+                    miscellaneousFee: 0,
+                    initialPayment: 0,
+                    discount: 0,
+                    examFees: {
+                        prelim: 0,
+                        midterm: 0,
+                        prefinal: 0,
+                        final: 0
+                    },
+                    payments: []
+                }
             }
+            studentName.value = ''
+            studentIdInput.value = ''
+            matchingStudents.value = []
+            showStudentDropdown.value = false
         } else if (modalToClose.value === 'edit') {
             showStudentModal.value = false
             currentStudent.value = {
                 id: '',
-                name: '',
+                firstName: '',
+                lastName: '',
+                middleName: '',
+                suffix: '',
+                birthday: '',
                 course: '',
+                block: '',
                 yearLevel: '',
-                tuitionFee: 0,
-                miscellaneousFee: 0,
-                InitialPayment: 0,
-                discount: 0,
-                totalFees: 0,
-                examFees: {
-                    prelim: 0,
-                    midterm: 0,
-                    prefinal: 0,
-                    final: 0
+                status: '',
+                email: '',
+                phone: '',
+                grades: {
+                    prelim: {},
+                    midterm: {},
+                    prefinals: {},
+                    finals: {},
+                    gwa: '',
+                    remarks: ''
                 },
-                payments: [],
-                remainingBalance: 0
+                billing: {
+                    totalTuition: 0,
+                    totalPaid: 0,
+                    remainingBalance: 0,
+                    tuitionFee: 0,
+                    miscellaneousFee: 0,
+                    initialPayment: 0,
+                    discount: 0,
+                    examFees: {
+                        prelim: 0,
+                        midterm: 0,
+                        prefinal: 0,
+                        final: 0
+                    },
+                    payments: []
+                }
             }
             originalStudentData.value = null
         }
@@ -272,35 +288,32 @@ const handleUnsavedChanges = (confirm) => {
 //
 
 // GETS THE FEE STRUCTURE FOR A SPECIFIC PRESET
-const getFeeStructure = (preset) => {
+const getFeeStructure = (preset: string): FeeStructure => {
     return feeStructures.value[preset] || feeStructures.value['BSCS']
 }
 //
 
 // LOADS THE FEE STRUCTURE FOR A SPECIFIC PRESET
-const loadFeeStructure = (preset) => {
+const loadFeeStructure = (preset: string) => {
     editFeePreset.value = preset
     newStudent.value.feePreset = preset
     applyCoursePreset(preset)
 }
-//
 
 // SAVES THE CURRENT FEE STRUCTURE AND UPDATES STUDENT FEES
 const saveFeeStructure = () => {
-    if (newStudent.value.feePreset === editFeePreset.value) {
-        const baseFees = getFeeStructure(editFeePreset.value)
-        const totalTuition = baseFees.tuition.basicTuition + baseFees.tuition.laboratory
-        const totalMisc = baseFees.misc.development + baseFees.misc.library +
-            baseFees.misc.computer + baseFees.misc.athletic
+    const baseFees = getFeeStructure(editFeePreset.value)
+    const totalTuition = baseFees.tuition.basicTuition + baseFees.tuition.laboratory
+    const totalMisc = baseFees.misc.development + baseFees.misc.library +
+        baseFees.misc.computer + baseFees.misc.athletic
 
-        newStudent.value.tuitionFee = totalTuition
-        newStudent.value.miscellaneousFee = totalMisc
-        newStudent.value.InitialPayment = 2750 
+    newStudent.value.billing.tuitionFee = totalTuition
+    newStudent.value.billing.miscellaneousFee = totalMisc
+    newStudent.value.billing.initialPayment = 2750
 
-        if (newStudent.value.yearLevel) {
-            const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
-            applyYearPreset(year)
-        }
+    if (newStudent.value.yearLevel) {
+        const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
+        applyYearPreset(year)
     }
 
     showEditFeeStructureModal.value = false
@@ -308,33 +321,28 @@ const saveFeeStructure = () => {
 //
 
 // HANDLES THE SEARCH QUERY UPDATE
-const handleSearch = (query) => {
+const handleSearch = (query: string) => {
     searchQuery.value = query || ''
 }
 
 // HANDLES THE FILTER CHANGE
-const handleFilterChange = (filters) => {
+const handleFilterChange = (filters: string[]) => {
     activeFilters.value = filters || []
 }
 //
 
-// HANDLES THE COURSE CHANGE AND UPDATES FEE STRUCTURE
-const handleCourseChange = () => {
-    loadFeeStructure(newStudent.value.course)
-}
-
-// HANDLES THE YEAR LEVEL CHANGE AND UPDATES FEES
-const handleYearChange = () => {
-    const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
-    applyYearPreset(year)
-}
-
 // FILTERS STUDENTS BASED ON SEARCH QUERY AND ACTIVE FILTERS
 const filteredStudents = computed(() => {
-    return studentBills.value.filter(student => {
+    return students.value.filter(student => {
+        if (!student.billing ||
+            student.billing.totalTuition === 0 ||
+            student.billing.totalTuition === null) {
+            return false
+        }
+
         const matchesSearch = !searchQuery.value ||
             student.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            student.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
             student.course.toLowerCase().includes(searchQuery.value.toLowerCase())
 
         const matchesFilters = !activeFilters.value.length ||
@@ -351,18 +359,54 @@ const filteredStudents = computed(() => {
 const openAddStudentModal = () => {
     newStudent.value = {
         id: '',
-        name: '',
-        course: 'BSCS', 
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        birthday: '',
+        course: 'BSCS',
+        block: '',
         yearLevel: '1st Year',
+        status: 'New',
+        email: '',
+        phone: '',
         feePreset: 'BSCS',
-        tuitionFee: 0,
-        miscellaneousFee: 0,
-        InitialPayment: 0,
-        discount: 0,
-        discountType: 'none'
+        discountType: 'none',
+        grades: {
+            prelim: {},
+            midterm: {},
+            prefinals: {},
+            finals: {},
+            gwa: '',
+            remarks: ''
+        },
+        billing: {
+            totalTuition: 0,
+            totalPaid: 0,
+            remainingBalance: 0,
+            tuitionFee: 0,
+            miscellaneousFee: 0,
+            initialPayment: 0,
+            discount: 0,
+            examFees: {
+                prelim: 0,
+                midterm: 0,
+                prefinal: 0,
+                final: 0
+            },
+            payments: []
+        }
     }
-    applyCoursePreset('BSCS') 
+
+    // RESET THE STUDENT NAME AND ID INPUT
+    studentName.value = ''
+    studentIdInput.value = ''
+    matchingStudents.value = []
+    showStudentDropdown.value = false
+
+    applyCoursePreset('BSCS')
     applyYearPreset('1st')
+
     showAddStudentModal.value = true
 }
 
@@ -373,76 +417,134 @@ const closeAddStudentModal = () => {
         isUnsavedChangesModalOpen.value = true
     } else {
         showAddStudentModal.value = false
-        newStudent.value = {
-            id: '',
-            name: '',
-            course: 'BSCS',
-            yearLevel: '1st Year',
-            feePreset: 'BSCS',
+        resetNewStudentForm();
+    }
+}
+
+const resetNewStudentForm = () => {
+    newStudent.value = {
+        id: '',
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        birthday: '',
+        course: 'BSCS',
+        block: '',
+        yearLevel: '1st Year',
+        status: 'New',
+        email: '',
+        phone: '',
+        feePreset: 'BSCS',
+        discountType: 'none',
+        grades: {
+            prelim: {},
+            midterm: {},
+            prefinals: {},
+            finals: {},
+            gwa: '',
+            remarks: ''
+        },
+        billing: {
+            totalTuition: 0,
+            totalPaid: 0,
+            remainingBalance: 0,
             tuitionFee: 0,
             miscellaneousFee: 0,
-            InitialPayment: 0,
+            initialPayment: 0,
             discount: 0,
-            discountType: 'none'
+            examFees: {
+                prelim: 0,
+                midterm: 0,
+                prefinal: 0,
+                final: 0
+            },
+            payments: []
         }
-        modalToClose.value = null
     }
+    studentName.value = ''
+    studentIdInput.value = ''
+    matchingStudents.value = []
+    showStudentDropdown.value = false
+    modalToClose.value = null
 }
 
 // SAVES A NEW STUDENT TO THE STUDENT TABLE
 const saveNewStudent = () => {
-    if (!newStudent.value.id || !newStudent.value.name ||
-        !newStudent.value.course || !newStudent.value.yearLevel) {
+    if (!newStudent.value.id || !studentName.value || !newStudent.value.course || !newStudent.value.yearLevel) {
         alert('Please fill in all required fields')
         return
     }
 
-    if (studentBills.value.some(s => s.id === newStudent.value.id)) {
-        alert('Student ID already exists')
+    // CHECK IF STUDENT IS EXISTING (HAS BILLING)
+    const existingStudentInTable = students.value.find(s =>
+        s.id === newStudent.value.id &&
+        s.billing &&
+        (s.billing.totalTuition !== 0 &&
+            s.billing.totalTuition !== null)
+    )
+
+    if (existingStudentInTable) {
+        alert('Student ID already exists in the billing records')
         return
     }
 
-    const totalFees = newStudent.value.tuitionFee +
-        newStudent.value.miscellaneousFee +
-        newStudent.value.InitialPayment -
-        newStudent.value.discount
+    // MO AUTOMATIC NALANG UG FILL SA NAME INPUT IF MAKASELECT NAG STUDENT ID
+    // const nameParts = studentName.value.trim().split(' ')
+    // if (nameParts.length < 2) {
+    //     alert('Please enter both first and last name')
+    //     return
+    // }
 
-    const examFee = newStudent.value.tuitionFee * 0.2
+    // const lastName = nameParts.pop() || '';
+    // const firstName = nameParts.join(' ');
 
-    const student = {
-        id: newStudent.value.id,
-        name: newStudent.value.name,
-        course: newStudent.value.course,
-        yearLevel: newStudent.value.yearLevel,
-        tuitionFee: newStudent.value.tuitionFee,
-        miscellaneousFee: newStudent.value.miscellaneousFee,
-        InitialPayment: newStudent.value.InitialPayment,
-        discount: newStudent.value.discount,
-        totalFees,
-        examFees: {
-            prelim: examFee,
-            midterm: examFee,
-            prefinal: examFee,
-            final: examFee
-        },
-        payments: [],
-        remainingBalance: totalFees
+    // newStudent.value.lastName = lastName;
+    // newStudent.value.firstName = firstName;
+
+    // COMPUTATION
+    const totalTuition = newStudent.value.billing.tuitionFee + newStudent.value.billing.miscellaneousFee - newStudent.value.billing.discount
+    const remainingBalance = totalTuition - newStudent.value.billing.initialPayment
+    newStudent.value.billing.examFees = {
+        prelim: newStudent.value.billing.tuitionFee * 0.2,
+        midterm: newStudent.value.billing.tuitionFee * 0.2,
+        prefinal: newStudent.value.billing.tuitionFee * 0.2,
+        final: newStudent.value.billing.tuitionFee * 0.2
     }
 
-    studentBills.value.push(student)
-    closeAddStudentModal()
+    newStudent.value.billing.totalTuition = totalTuition
+    newStudent.value.billing.totalPaid = newStudent.value.billing.initialPayment
+    newStudent.value.billing.remainingBalance = remainingBalance
+
+    // AUTOMATICALLY ADDS INITIAL PAYMENT AFTER SAVING THE STUDENT
+    if (newStudent.value.billing.initialPayment > 0) {
+        newStudent.value.billing.payments.push({
+            description: 'Initial Payment',
+            date: new Date().toISOString().split('T')[0],
+            amount: newStudent.value.billing.initialPayment
+        })
+    }
+
+    // CHECKS IF STUDENT EXISTED (WITHOUT BILL)
+    const existingStudentIndex = students.value.findIndex(s => s.id === newStudent.value.id)
+
+    if (existingStudentIndex !== -1) {
+        students.value[existingStudentIndex].billing = JSON.parse(JSON.stringify(newStudent.value.billing))
+    } else {
+        students.value.push(JSON.parse(JSON.stringify(newStudent.value)))
+    }
+
+    showAddStudentModal.value = false
+    resetNewStudentForm()
 }
 //
 
 // OPENS THE VIEW MODAL FOR A SPECIFIC STUDENT
-const openViewModal = (studentId) => {
-    const student = studentBills.value.find(s => s.id === studentId)
+const openViewModal = (studentId: string) => {
+    const student = students.value.find(s => s.id === studentId)
     if (!student) return
 
-    let feePreset = student.course 
-
     viewStudent.value = JSON.parse(JSON.stringify(student))
-    viewStudent.value.feePreset = feePreset
     showViewModal.value = true
 }
 
@@ -451,34 +553,62 @@ const closeViewModal = () => {
     showViewModal.value = false
     viewStudent.value = {
         id: '',
-        name: '',
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        birthday: '',
         course: '',
+        block: '',
         yearLevel: '',
-        tuitionFee: 0,
-        miscellaneousFee: 0,
-        InitialPayment: 0,
-        discount: 0,
-        totalFees: 0,
-        examFees: {
-            prelim: 0,
-            midterm: 0,
-            prefinal: 0,
-            final: 0
+        status: '',
+        email: '',
+        phone: '',
+        grades: {
+            prelim: {},
+            midterm: {},
+            prefinals: {},
+            finals: {},
+            gwa: '',
+            remarks: ''
         },
-        payments: [],
-        remainingBalance: 0
+        billing: {
+            totalTuition: 0,
+            totalPaid: 0,
+            remainingBalance: 0,
+            tuitionFee: 0,
+            miscellaneousFee: 0,
+            initialPayment: 0,
+            discount: 0,
+            examFees: {
+                prelim: 0,
+                midterm: 0,
+                prefinal: 0,
+                final: 0
+            },
+            payments: []
+        }
     }
 }
 //
 
 // OPENS THE STUDENT MODAL FOR EDITING
-const openStudentModal = (studentId) => {
-    const student = studentBills.value.find(s => s.id === studentId)
+const openStudentModal = (studentId: string) => {
+    const student = students.value.find(s => s.id === studentId)
     if (!student) return
 
-    // ORIGINAL DATA
     originalStudentData.value = JSON.parse(JSON.stringify(student))
     currentStudent.value = JSON.parse(JSON.stringify(student))
+
+    if (!currentStudent.value.billing.examFees) {
+        currentStudent.value.billing.examFees = {
+            prelim: currentStudent.value.billing.tuitionFee * 0.2,
+            midterm: currentStudent.value.billing.tuitionFee * 0.2,
+            prefinal: currentStudent.value.billing.tuitionFee * 0.2,
+            final: currentStudent.value.billing.tuitionFee * 0.2
+        }
+    }
+
     showStudentModal.value = true
     activeTab.value = 'info'
     showPaymentForm.value = false
@@ -494,22 +624,41 @@ const closeStudentModal = () => {
         showStudentModal.value = false
         currentStudent.value = {
             id: '',
-            name: '',
+            firstName: '',
+            lastName: '',
+            middleName: '',
+            suffix: '',
+            birthday: '',
             course: '',
+            block: '',
             yearLevel: '',
-            tuitionFee: 0,
-            miscellaneousFee: 0,
-            InitialPayment: 0,
-            discount: 0,
-            totalFees: 0,
-            examFees: {
-                prelim: 0,
-                midterm: 0,
-                prefinal: 0,
-                final: 0
+            status: '',
+            email: '',
+            phone: '',
+            grades: {
+                prelim: {},
+                midterm: {},
+                prefinals: {},
+                finals: {},
+                gwa: '',
+                remarks: ''
             },
-            payments: [],
-            remainingBalance: 0
+            billing: {
+                totalTuition: 0,
+                totalPaid: 0,
+                remainingBalance: 0,
+                tuitionFee: 0,
+                miscellaneousFee: 0,
+                initialPayment: 0,
+                discount: 0,
+                examFees: {
+                    prelim: 0,
+                    midterm: 0,
+                    prefinal: 0,
+                    final: 0
+                },
+                payments: []
+            }
         }
         originalStudentData.value = null
         modalToClose.value = null
@@ -517,15 +666,15 @@ const closeStudentModal = () => {
 }
 
 // INITIATES THE EDIT MODE FOR A STUDENT
-const editStudent = (studentId) => {
-    const student = studentBills.value.find(s => s.id === studentId)
+const editStudent = (studentId: string) => {
+    const student = students.value.find(s => s.id === studentId)
     if (!student) return
 
     openStudentModal(studentId)
 
     editStudentData.value = {
         id: student.id,
-        name: student.name,
+        name: `${student.firstName} ${student.lastName}`,
         course: student.course,
         yearLevel: student.yearLevel
     }
@@ -535,22 +684,38 @@ const editStudent = (studentId) => {
 
 // SAVES THE CHANGES MADE TO A STUDENT'S BILLING INFORMATION
 const saveStudentChanges = () => {
-    const index = studentBills.value.findIndex(s => s.id === currentStudent.value.id)
+    const index = students.value.findIndex(s => s.id === currentStudent.value.id)
     if (index === -1) return
 
-    // sSAVES THE STUDENT DATA
-    studentBills.value[index] = JSON.parse(JSON.stringify(currentStudent.value))
+    currentStudent.value.billing.totalTuition =
+        currentStudent.value.billing.tuitionFee +
+        currentStudent.value.billing.miscellaneousFee -
+        currentStudent.value.billing.discount
 
-    // CLEARS THE ORIGINAL DATA AFTER SAVING
+    currentStudent.value.billing.totalPaid =
+        currentStudent.value.billing.payments.reduce((sum, payment) => sum + payment.amount, 0)
+
+    currentStudent.value.billing.remainingBalance =
+        currentStudent.value.billing.totalTuition - currentStudent.value.billing.totalPaid
+
+    currentStudent.value.billing.examFees = {
+        prelim: currentStudent.value.billing.tuitionFee * 0.2,
+        midterm: currentStudent.value.billing.tuitionFee * 0.2,
+        prefinal: currentStudent.value.billing.tuitionFee * 0.2,
+        final: currentStudent.value.billing.tuitionFee * 0.2
+    }
+
+    students.value[index] = JSON.parse(JSON.stringify(currentStudent.value))
+
     originalStudentData.value = null
     showStudentModal.value = false
 }
 //
 
 // APPLIES THE COURSE PRESET AND UPDATES FEES
-const applyCoursePreset = (preset) => {
+const applyCoursePreset = (preset: string) => {
     const baseFees = getFeeStructure(preset)
-    
+
     // CALCULATE THE TOTAL TUITION AND MISC FEE
     const totalTuition = baseFees.tuition.basicTuition + baseFees.tuition.laboratory
     const totalMisc = baseFees.misc.development + baseFees.misc.library +
@@ -558,91 +723,91 @@ const applyCoursePreset = (preset) => {
 
     newStudent.value.feePreset = preset
     newStudent.value.course = preset
-    newStudent.value.tuitionFee = totalTuition
-    newStudent.value.miscellaneousFee = totalMisc
-    newStudent.value.InitialPayment = 2750
+    newStudent.value.billing.tuitionFee = totalTuition
+    newStudent.value.billing.miscellaneousFee = totalMisc
+    newStudent.value.billing.initialPayment = 2750
 
     if (newStudent.value.yearLevel) {
         const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
         applyYearPreset(year)
     }
 
-    newStudent.value.discount = 0
+    newStudent.value.billing.discount = 0
     newStudent.value.discountType = 'none'
 }
 
 // APPLIES THE YEAR LEVEL PRESET AND UPDATES FEES
-const applyYearPreset = (year) => {
-    const baseFees = getFeeStructure(newStudent.value.feePreset)
+const applyYearPreset = (year: string) => {
+    const feePreset = newStudent.value.feePreset || 'BSCS'
+    const baseFees = getFeeStructure(feePreset)
     const totalTuition = baseFees.tuition.basicTuition + baseFees.tuition.laboratory
     const totalMisc = baseFees.misc.development + baseFees.misc.library +
         baseFees.misc.computer + baseFees.misc.athletic
 
-    // ATUOMATICALLY MULTIPLIES THE FEES BASED ON YEAR LEVEL
     switch (year) {
         case '1st':
-            newStudent.value.tuitionFee = Math.round(totalTuition)
-            newStudent.value.miscellaneousFee = Math.round(totalMisc)
-            newStudent.value.InitialPayment = 2750 
+            newStudent.value.billing.tuitionFee = Math.round(totalTuition)
+            newStudent.value.billing.miscellaneousFee = Math.round(totalMisc)
+            newStudent.value.billing.initialPayment = 2750
             newStudent.value.yearLevel = '1st Year'
             break
         case '2nd':
-            newStudent.value.tuitionFee = Math.round(totalTuition * 1.05)
-            newStudent.value.miscellaneousFee = Math.round(totalMisc * 1.1)
-            newStudent.value.InitialPayment = 2750 
+            newStudent.value.billing.tuitionFee = Math.round(totalTuition * 1.05)
+            newStudent.value.billing.miscellaneousFee = Math.round(totalMisc * 1.1)
+            newStudent.value.billing.initialPayment = 2750
             newStudent.value.yearLevel = '2nd Year'
             break
         case '3rd':
-            newStudent.value.tuitionFee = Math.round(totalTuition * 1.1)
-            newStudent.value.miscellaneousFee = Math.round(totalMisc * 1.2)
-            newStudent.value.InitialPayment = 2750 // Fixed initial payment value
+            newStudent.value.billing.tuitionFee = Math.round(totalTuition * 1.1)
+            newStudent.value.billing.miscellaneousFee = Math.round(totalMisc * 1.2)
+            newStudent.value.billing.initialPayment = 2750
             newStudent.value.yearLevel = '3rd Year'
             break
         case '4th':
-            newStudent.value.tuitionFee = Math.round(totalTuition * 1.15)
-            newStudent.value.miscellaneousFee = Math.round(totalMisc * 1.3)
-            newStudent.value.InitialPayment = 2750 // Fixed initial payment value
+            newStudent.value.billing.tuitionFee = Math.round(totalTuition * 1.15)
+            newStudent.value.billing.miscellaneousFee = Math.round(totalMisc * 1.3)
+            newStudent.value.billing.initialPayment = 2750
             newStudent.value.yearLevel = '4th Year'
             break
     }
 
     newStudent.value.discountType = 'none'
-    newStudent.value.discount = 0
+    newStudent.value.billing.discount = 0
 }
 
 // APPLIES THE SELECTED DISCOUNT TYPE AND UPDATES FEES
 const applyDiscountType = () => {
-    const totalBeforeDiscount = newStudent.value.tuitionFee +
-        newStudent.value.miscellaneousFee +
-        newStudent.value.InitialPayment
+    const totalBeforeDiscount = newStudent.value.billing.tuitionFee +
+        newStudent.value.billing.miscellaneousFee +
+        newStudent.value.billing.initialPayment
 
     switch (newStudent.value.discountType) {
         case 'honor':
-            newStudent.value.discount = Math.round(totalBeforeDiscount * 0.15)
+            newStudent.value.billing.discount = Math.round(totalBeforeDiscount * 0.15)
             break
         case 'highHonor':
-            newStudent.value.discount = Math.round(totalBeforeDiscount * 0.30)
+            newStudent.value.billing.discount = Math.round(totalBeforeDiscount * 0.30)
             break
         case 'highestHonor':
-            newStudent.value.discount = Math.round(totalBeforeDiscount * 0.50)
+            newStudent.value.billing.discount = Math.round(totalBeforeDiscount * 0.50)
             break
         case 'freshman':
         case 'continuing':
-            newStudent.value.discount = Math.round(totalBeforeDiscount * 0.10)
+            newStudent.value.billing.discount = Math.round(totalBeforeDiscount * 0.10)
             break
         default:
-            newStudent.value.discount = 0
+            newStudent.value.billing.discount = 0
     }
 }
 
 // UPDATES THE PAYMENT AMOUNT BASED ON PAYMENT TYPE
 const updatePaymentAmount = () => {
-    if (newPayment.value.type === "Full Payment") {
-        newPayment.value.amount = currentStudent.value.remainingBalance
-    } else if (newPayment.value.type === "Full Payment (before exam)") {
-        newPayment.value.amount = Math.max(0, currentStudent.value.remainingBalance - 1200)
+    if (newPayment.value.description === "Full Payment") {
+        newPayment.value.amount = currentStudent.value.billing.remainingBalance
+    } else if (newPayment.value.description === "Full Payment (before exam)") {
+        newPayment.value.amount = Math.max(0, currentStudent.value.billing.remainingBalance - 1200)
     } else {
-        newPayment.value.amount = ''
+        newPayment.value.amount = 0
     }
 }
 
@@ -650,62 +815,59 @@ const updatePaymentAmount = () => {
 const submitPayment = () => {
     if (!currentStudent.value.id) return
 
-    const type = newPayment.value.type
-    let amount = parseFloat(newPayment.value.amount)
+    const description = newPayment.value.description
+    let amount = parseFloat(newPayment.value.amount.toString())
     const date = newPayment.value.date
 
-    if (!amount || isNaN(amount) || !date || !type) {
+    if (!amount || isNaN(amount) || !date || !description) {
         alert('Please fill in all payment details')
         return
     }
 
-    if (type !== "Full Payment (before exam)" && amount > currentStudent.value.remainingBalance) {
+    if (description !== "Full Payment (before exam)" && amount > currentStudent.value.billing.remainingBalance) {
         alert('Payment amount cannot exceed remaining balance')
         return
     }
 
-    const paymentId = 'pay' + Date.now()
-    const payment = {
-        id: paymentId,
-        type,
-        amount,
+    const payment: Payment = {
+        description,
         date,
-        status: 'Pending'
+        amount
     }
 
-    const index = studentBills.value.findIndex(s => s.id === currentStudent.value.id)
+    const index = students.value.findIndex(s => s.id === currentStudent.value.id)
     if (index === -1) return
 
-    studentBills.value[index].payments = [...studentBills.value[index].payments, payment]
-    currentStudent.value.payments = [...currentStudent.value.payments, payment]
+    students.value[index].billing.payments.push(payment)
+    currentStudent.value.billing.payments.push(payment)
 
-    if (type === "Full Payment (before exam)") {
-        studentBills.value[index].totalFees -= 1200
-        currentStudent.value.totalFees -= 1200
-        studentBills.value[index].remainingBalance = 0
-        currentStudent.value.remainingBalance = 0
+    if (description === "Full Payment (before exam)") {
+        students.value[index].billing.totalTuition -= 1200
+        currentStudent.value.billing.totalTuition -= 1200
+        students.value[index].billing.remainingBalance = 0
+        currentStudent.value.billing.remainingBalance = 0
     } else {
-        studentBills.value[index].remainingBalance -= amount
-        if (studentBills.value[index].remainingBalance < 0) {
-            studentBills.value[index].remainingBalance = 0
+        students.value[index].billing.totalPaid += amount
+        currentStudent.value.billing.totalPaid += amount
+        students.value[index].billing.remainingBalance -= amount
+        if (students.value[index].billing.remainingBalance < 0) {
+            students.value[index].billing.remainingBalance = 0
         }
-        currentStudent.value.remainingBalance = studentBills.value[index].remainingBalance
+        currentStudent.value.billing.remainingBalance = students.value[index].billing.remainingBalance
     }
 
     newPayment.value = {
-        type: 'Initial Payment',
-        amount: '',
-        date: ''
+        description: 'Initial Payment',
+        date: '',
+        amount: 0
     }
     showPaymentForm.value = false
 }
 
 // INITIATES EDITING MODE FOR A PAYMENT
-const startEditingPayment = (payment) => {
-    currentStudent.value.payments.forEach(p => {
-        if (p.id !== payment.id) {
-            p.isEditing = false;
-        }
+const startEditingPayment = (payment: Payment) => {
+    currentStudent.value.billing.payments.forEach((p: Payment) => {
+        p.isEditing = p.id === payment.id;
     });
 
     payment.isEditing = true;
@@ -713,19 +875,19 @@ const startEditingPayment = (payment) => {
 }
 
 // CANCELS THE PAYMENT EDITING MODE
-const cancelEditingPayment = (payment) => {
+const cancelEditingPayment = (payment: Payment) => {
     payment.isEditing = false;
-    delete payment.editAmount;
+    payment.editAmount = undefined;
 }
 
 // SAVES THE EDITED PAYMENT AMOUNT
-const saveEditedPayment = (payment) => {
+const saveEditedPayment = (payment: Payment) => {
     if (!payment.editAmount || isNaN(payment.editAmount)) {
         alert('Please enter a valid amount');
         return;
     }
 
-    const newAmount = parseFloat(payment.editAmount);
+    const newAmount = payment.editAmount;
     if (newAmount <= 0) {
         alert('Amount must be greater than zero');
         return;
@@ -733,26 +895,202 @@ const saveEditedPayment = (payment) => {
 
     const amountDifference = payment.amount - newAmount;
 
-    const studentIndex = studentBills.value.findIndex(s => s.id === currentStudent.value.id);
+    const studentIndex = students.value.findIndex(s => s.id === currentStudent.value.id);
     if (studentIndex === -1) return;
 
-    const paymentIndex = studentBills.value[studentIndex].payments.findIndex(p => p.id === payment.id);
+    const paymentIndex = students.value[studentIndex].billing.payments.findIndex((p: Payment) => p.id === payment.id);
     if (paymentIndex === -1) return;
 
-    studentBills.value[studentIndex].payments[paymentIndex].amount = newAmount;
+    students.value[studentIndex].billing.payments[paymentIndex].amount = newAmount;
 
-    studentBills.value[studentIndex].remainingBalance += amountDifference;
-    if (studentBills.value[studentIndex].remainingBalance < 0) {
-        studentBills.value[studentIndex].remainingBalance = 0;
+    students.value[studentIndex].billing.remainingBalance += amountDifference;
+    if (students.value[studentIndex].billing.remainingBalance < 0) {
+        students.value[studentIndex].billing.remainingBalance = 0;
     }
 
-    currentStudent.value.payments[paymentIndex].amount = newAmount;
-    currentStudent.value.remainingBalance = studentBills.value[studentIndex].remainingBalance;
+    currentStudent.value.billing.payments[paymentIndex].amount = newAmount;
+    currentStudent.value.billing.remainingBalance = students.value[studentIndex].billing.remainingBalance;
 
     payment.isEditing = false;
-    delete payment.editAmount;
+    payment.editAmount = undefined;
 }
-//
+
+const handlePaymentAction = (paymentIdentifier: string | number, action: string) => {
+    if (action === 'delete') {
+        const studentIndex = students.value.findIndex(s => s.id === currentStudent.value.id);
+        if (studentIndex === -1) return;
+
+        const paymentIndex = students.value[studentIndex].billing.payments.findIndex((p: Payment) => 
+            (p.id && p.id === paymentIdentifier) || 
+            (!p.id && p.description === paymentIdentifier)
+        );
+
+        if (paymentIndex === -1) return;
+
+        const payment = students.value[studentIndex].billing.payments[paymentIndex];
+
+        students.value[studentIndex].billing.remainingBalance += payment.amount;
+        students.value[studentIndex].billing.totalPaid -= payment.amount;
+
+        students.value[studentIndex].billing.payments.splice(paymentIndex, 1);
+
+        currentStudent.value.billing.remainingBalance = students.value[studentIndex].billing.remainingBalance;
+        currentStudent.value.billing.totalPaid = students.value[studentIndex].billing.totalPaid;
+        currentStudent.value.billing.payments = [...students.value[studentIndex].billing.payments];
+    }
+}
+
+const isPaymentButtonDisabled = computed(() => {
+    return !newPayment.value.description ||
+        !newPayment.value.date ||
+        !newPayment.value.amount ||
+        isNaN(parseFloat(newPayment.value.amount.toString()));
+})
+
+// APPLIES THE DISCOUNT TO THE CURRENT STUDENT
+const applyDiscount = () => {
+    const totalBeforeDiscount = currentStudent.value.billing.tuitionFee +
+        currentStudent.value.billing.miscellaneousFee;
+
+    currentStudent.value.billing.totalTuition = totalBeforeDiscount - currentStudent.value.billing.discount;
+
+    const totalPaid = currentStudent.value.billing.totalPaid;
+    currentStudent.value.billing.remainingBalance = currentStudent.value.billing.totalTuition - totalPaid;
+
+    if (currentStudent.value.billing.remainingBalance < 0) {
+        currentStudent.value.billing.remainingBalance = 0;
+    }
+}
+
+const hasBillingInfo = (student: Student): boolean => {
+    return student.billing &&
+        ((typeof student.billing.totalTuition === 'number' && student.billing.totalTuition > 0) ||
+            (typeof student.billing.totalTuition === 'string' && student.billing.totalTuition !== ''));
+}
+
+const safeLocaleString = (value: string | number | null | undefined): string => {
+    if (value === null || value === undefined || value === '') {
+        return '0.00';
+    }
+
+    if (typeof value === 'string') {
+        const parsedValue = parseFloat(value);
+        if (!isNaN(parsedValue)) {
+            return parsedValue.toLocaleString();
+        }
+        return '0.00';
+    }
+
+    if (typeof value === 'number') {
+        return value.toLocaleString();
+    }
+
+    return '0.00';
+}
+
+
+// SELECTS A STUDENT ID FROM THE DROPDOWN (ADD STUDENT BILLING MODAL CAN ONLY SELECT STUDENT WITHOUT BILLING)
+const selectStudent = (student: Student) => {
+    const hasBilling = hasBillingInfo(student);
+
+    newStudent.value.id = student.id;
+    studentIdInput.value = student.id;
+    studentName.value = `${student.firstName} ${student.lastName}`;
+
+    showStudentDropdown.value = false;
+    if (hasBilling) {
+        return;
+    }
+
+    newStudent.value.firstName = student.firstName;
+    newStudent.value.lastName = student.lastName;
+    newStudent.value.middleName = student.middleName || '';
+    newStudent.value.suffix = student.suffix || '';
+    newStudent.value.course = student.course;
+    newStudent.value.yearLevel = student.yearLevel;
+    newStudent.value.block = student.block || '';
+    newStudent.value.birthday = student.birthday || '';
+    newStudent.value.email = student.email || '';
+    newStudent.value.phone = student.phone || '';
+    newStudent.value.status = student.status || 'New';
+
+    applyCoursePreset(student.course);
+    const year = student.yearLevel.split(' ')[0].toLowerCase();
+    applyYearPreset(year);
+}
+
+const handleStudentIdChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const id = target.value;
+    studentIdInput.value = id;
+    searchStudentById(id);
+}
+
+    // ATUOMATICALLY MULTIPLIES THE FEES BASED ON YEAR LEVEL
+const getYearAdjustedFees = (course: string, yearLevel: string) => {
+    const courseToUse = course || 'BSCS'
+    const baseFees = getFeeStructure(courseToUse);
+    const totalBaseTuition = baseFees.tuition.basicTuition;
+    const totalBaseLaboratory = baseFees.tuition.laboratory;
+    const totalBaseDevelopment = baseFees.misc.development;
+    const totalBaseLibrary = baseFees.misc.library;
+    const totalBaseComputer = baseFees.misc.computer;
+    const totalBaseAthletic = baseFees.misc.athletic;
+
+    let tuitionMultiplier = 1;
+    let miscMultiplier = 1;
+
+    if (yearLevel.includes('2nd')) {
+        tuitionMultiplier = 1.05;
+        miscMultiplier = 1.1;
+    } else if (yearLevel.includes('3rd')) {
+        tuitionMultiplier = 1.1;
+        miscMultiplier = 1.2;
+    } else if (yearLevel.includes('4th')) {
+        tuitionMultiplier = 1.15;
+        miscMultiplier = 1.3;
+    }
+
+    return {
+        tuition: {
+            basicTuition: Math.round(totalBaseTuition * tuitionMultiplier),
+            laboratory: Math.round(totalBaseLaboratory * tuitionMultiplier)
+        },
+        misc: {
+            development: Math.round(totalBaseDevelopment * miscMultiplier),
+            library: Math.round(totalBaseLibrary * miscMultiplier),
+            computer: Math.round(totalBaseComputer * miscMultiplier),
+            athletic: Math.round(totalBaseAthletic * miscMultiplier)
+        }
+    };
+}
+
+// SEARCH STUDENT BY ID
+const searchStudentById = (id: string) => {
+    if (!id.trim()) {
+        matchingStudents.value = [];
+        showStudentDropdown.value = false;
+        return;
+    }
+
+    const matches = students.value.filter(student =>
+        student.id.toLowerCase().includes(id.toLowerCase())
+    );
+
+    matchingStudents.value = matches;
+    showStudentDropdown.value = true; 
+}
+
+// HANDLES THE COURSE CHANGE AND UPDATES FEE STRUCTURE
+const handleCourseChange = () => {
+    loadFeeStructure(newStudent.value.course)
+}
+
+// HANDLES THE YEAR LEVEL CHANGE AND UPDATES FEES
+const handleYearChange = () => {
+    const year = newStudent.value.yearLevel.split(' ')[0].toLowerCase()
+    applyYearPreset(year)
+}
 </script>
 
 
@@ -798,11 +1136,11 @@ const saveEditedPayment = (payment) => {
                         <tbody>
                             <tr v-for="student in filteredStudents" :key="student.id">
                                 <td>{{ student.id }}</td>
-                                <td>{{ student.name }}</td>
+                                <td>{{ `${student.firstName} ${student.lastName}` }}</td>
                                 <td>{{ student.course }}</td>
-                                <td>₱{{ student.totalFees.toLocaleString() }}</td>
-                                <td>₱{{ (student.totalFees - student.remainingBalance).toLocaleString() }}</td>
-                                <td>₱{{ student.remainingBalance.toLocaleString() }}</td>
+                                <td>₱{{ safeLocaleString(student.billing?.totalTuition) }}</td>
+                                <td>₱{{ safeLocaleString(student.billing?.totalPaid) }}</td>
+                                <td>₱{{ safeLocaleString(student.billing?.remainingBalance) }}</td>
                                 <td class="action-buttons">
                                     <button class="action-btn view" @click="openViewModal(student.id)">
                                         <i class="fas fa-eye"></i>
@@ -810,7 +1148,6 @@ const saveEditedPayment = (payment) => {
                                     <button class="action-btn edit-btn" @click="editStudent(student.id)">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
-
                                 </td>
                             </tr>
                         </tbody>
@@ -830,11 +1167,38 @@ const saveEditedPayment = (payment) => {
                         <div class="student-info-grid">
                             <div class="info-group">
                                 <label>Student ID</label>
-                                <input type="text" v-model="newStudent.id" placeholder="Enter Student ID">
+                                <div class="search-input-container">
+                                    <input type="text" v-model="studentIdInput" @input="handleStudentIdChange($event)"
+                                        placeholder="Enter Student ID">
+                                    <div v-if="showStudentDropdown" class="student-dropdown">
+                                        <div v-if="matchingStudents.length === 0" class="no-students">
+                                            No matching students found
+                                        </div>
+                                        <div v-else v-for="student in matchingStudents" :key="student.id"
+                                            @click="!hasBillingInfo(student) && selectStudent(student)" :class="[
+                                                'student-item',
+                                                { 'disabled-item': hasBillingInfo(student) }
+                                            ]">
+                                            <div class="student-info">
+                                                <span class="student-id">{{ student.id }}</span>
+                                                <span class="student-name">{{ student.firstName }} {{ student.lastName
+                                                    }}</span>
+                                            </div>
+                                            <div class="status-tag" :class="{
+                                                'has-billing': hasBillingInfo(student)
+                                            }">
+                                                {{ hasBillingInfo(student)
+                                                    ? 'Already has billing'
+                                                    : 'No billing yet' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="info-group">
                                 <label>Name</label>
-                                <input type="text" v-model="newStudent.name" placeholder="Enter Student Name">
+                                <input type="text" v-model="studentName"
+                                    placeholder="Student Name">
                             </div>
                             <div class="info-group">
                                 <label>Course</label>
@@ -859,23 +1223,19 @@ const saveEditedPayment = (payment) => {
                         </div>
 
                         <div class="course-selector">
-                            <div class="course-option" 
-                                :class="{ active: editFeePreset === 'BSCS' }"
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSCS' }"
                                 @click="loadFeeStructure('BSCS')">
                                 BSCS
                             </div>
-                            <div class="course-option" 
-                                :class="{ active: editFeePreset === 'BSIT' }"
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSIT' }"
                                 @click="loadFeeStructure('BSIT')">
                                 BSIT
                             </div>
-                            <div class="course-option" 
-                                :class="{ active: editFeePreset === 'BSBA' }"
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSBA' }"
                                 @click="loadFeeStructure('BSBA')">
                                 BSBA
                             </div>
-                            <div class="course-option" 
-                                :class="{ active: editFeePreset === 'BSA' }"
+                            <div class="course-option" :class="{ active: editFeePreset === 'BSA' }"
                                 @click="loadFeeStructure('BSA')">
                                 BSA
                             </div>
@@ -893,15 +1253,15 @@ const saveEditedPayment = (payment) => {
                             <div class="student-info-grid">
                                 <div class="info-group">
                                     <label>Tuition Fee</label>
-                                    <input type="number" v-model="newStudent.tuitionFee">
+                                    <input type="number" v-model="newStudent.billing.tuitionFee">
                                 </div>
                                 <div class="info-group">
                                     <label>Miscellaneous Fee</label>
-                                    <input type="number" v-model="newStudent.miscellaneousFee">
+                                    <input type="number" v-model="newStudent.billing.miscellaneousFee">
                                 </div>
                                 <div class="info-group">
                                     <label>Initial Payment</label>
-                                    <input type="number" v-model="newStudent.InitialPayment">
+                                    <input type="number" v-model="newStudent.billing.initialPayment">
                                 </div>
                                 <div class="info-group">
                                     <label>Discount</label>
@@ -921,26 +1281,22 @@ const saveEditedPayment = (payment) => {
                             </div>
 
                             <div class="preset-buttons">
-                                <button type="button" 
-                                    class="preset-btn" 
+                                <button type="button" class="preset-btn"
                                     :class="{ active: newStudent.yearLevel === '1st Year' }"
                                     @click.prevent="applyYearPreset('1st')">
                                     1st Year
                                 </button>
-                                <button type="button" 
-                                    class="preset-btn" 
+                                <button type="button" class="preset-btn"
                                     :class="{ active: newStudent.yearLevel === '2nd Year' }"
                                     @click.prevent="applyYearPreset('2nd')">
                                     2nd Year
                                 </button>
-                                <button type="button" 
-                                    class="preset-btn" 
+                                <button type="button" class="preset-btn"
                                     :class="{ active: newStudent.yearLevel === '3rd Year' }"
                                     @click.prevent="applyYearPreset('3rd')">
                                     3rd Year
                                 </button>
-                                <button type="button" 
-                                    class="preset-btn" 
+                                <button type="button" class="preset-btn"
                                     :class="{ active: newStudent.yearLevel === '4th Year' }"
                                     @click.prevent="applyYearPreset('4th')">
                                     4th Year
@@ -953,23 +1309,23 @@ const saveEditedPayment = (payment) => {
                             <div class="exam-fees-grid">
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Prelim Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{ safeLocaleString(newStudent.billing.tuitionFee *
+                                        0.2) }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Midterm Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{ safeLocaleString(newStudent.billing.tuitionFee *
+                                        0.2) }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Pre-final Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{ safeLocaleString(newStudent.billing.tuitionFee *
+                                        0.2) }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Final Exam</span>
-                                    <span class="exam-fee-value">₱{{ (newStudent.tuitionFee * 0.2).toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{ safeLocaleString(newStudent.billing.tuitionFee *
+                                        0.2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -977,17 +1333,19 @@ const saveEditedPayment = (payment) => {
                         <div class="summary-cards">
                             <div class="summary-card">
                                 <h4>Total Tuition</h4>
-                                <p>₱{{ (newStudent.tuitionFee + newStudent.miscellaneousFee +
-                                    newStudent.InitialPayment - newStudent.discount).toLocaleString() }}</p>
+                                <p>₱{{ safeLocaleString(newStudent.billing.tuitionFee +
+                                    newStudent.billing.miscellaneousFee -
+                                    newStudent.billing.discount) }}</p>
                             </div>
                             <div class="summary-card">
                                 <h4>Total Paid</h4>
-                                <p>₱0.00</p>
+                                <p>₱{{ safeLocaleString(newStudent.billing.initialPayment) }}</p>
                             </div>
                             <div class="summary-card highlight">
                                 <h4>Remaining Balance</h4>
-                                <p>₱{{ (newStudent.tuitionFee + newStudent.miscellaneousFee +
-                                    newStudent.InitialPayment - newStudent.discount).toLocaleString() }}</p>
+                                <p>₱{{ safeLocaleString(newStudent.billing.tuitionFee +
+                                    newStudent.billing.miscellaneousFee -
+                                    newStudent.billing.discount - newStudent.billing.initialPayment) }}</p>
                             </div>
                         </div>
                     </form>
@@ -1079,38 +1437,44 @@ const saveEditedPayment = (payment) => {
                     <form class="student-form">
                         <div class="student-info-grid">
                             <div class="info-group">
-                                <label>Name</label>
-                                <input type="text" v-model="currentStudent.name" readonly disabled>
+                                <label>Student ID</label>
+                                <input type="text" v-model="currentStudent.id" readonly disabled>
                             </div>
                             <div class="info-group">
-                                <label>Year Level</label>
-                                <input type="text" v-model="currentStudent.yearLevel" readonly disabled>
+                                <label>Name</label>
+                                <input type="text" :value="`${currentStudent.firstName} ${currentStudent.lastName}`"
+                                    readonly disabled>
                             </div>
                             <div class="info-group">
                                 <label>Tuition Fee</label>
-                                <input type="number" v-model="currentStudent.tuitionFee">
+                                <input type="number" v-model="currentStudent.billing.tuitionFee">
                             </div>
                             <div class="info-group">
                                 <label>Miscellaneous Fee</label>
-                                <input type="number" v-model="currentStudent.miscellaneousFee">
+                                <input type="number" v-model="currentStudent.billing.miscellaneousFee">
                             </div>
                             <div class="info-group">
                                 <label>Initial Payment</label>
-                                <input type="number" v-model="currentStudent.InitialPayment">
+                                <input type="number" v-model="currentStudent.billing.initialPayment">
                             </div>
                             <div class="info-group">
                                 <label>Discount</label>
-                                <select v-model="currentStudent.discount" @change="applyDiscount">
+                                <select v-model="currentStudent.billing.discount" @change="applyDiscount">
                                     <template v-if="currentStudent.yearLevel === '1st Year'">
                                         <option :value="0">No Discount</option>
-                                        <option :value="currentStudent.tuitionFee * 0.15">Honor Student (15%)</option>
-                                        <option :value="currentStudent.tuitionFee * 0.30">High Honor (30%)</option>
-                                        <option :value="currentStudent.tuitionFee * 0.50">Highest Honor (50%)</option>
-                                        <option :value="currentStudent.tuitionFee * 0.10">Freshman (10%)</option>
+                                        <option :value="currentStudent.billing.tuitionFee * 0.15">Honor Student (15%)
+                                        </option>
+                                        <option :value="currentStudent.billing.tuitionFee * 0.30">High Honor (30%)
+                                        </option>
+                                        <option :value="currentStudent.billing.tuitionFee * 0.50">Highest Honor (50%)
+                                        </option>
+                                        <option :value="currentStudent.billing.tuitionFee * 0.10">Freshman (10%)
+                                        </option>
                                     </template>
                                     <template v-else>
                                         <option :value="0">No Discount</option>
-                                        <option :value="currentStudent.tuitionFee * 0.10">Continuing Student (10%)
+                                        <option :value="currentStudent.billing.tuitionFee * 0.10">Continuing Student
+                                            (10%)
                                         </option>
                                     </template>
                                 </select>
@@ -1123,22 +1487,26 @@ const saveEditedPayment = (payment) => {
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Prelim Exam</span>
                                     <span class="exam-fee-value">₱{{
-                                        currentStudent.examFees.prelim.toLocaleString() }}</span>
+                                        currentStudent.billing.examFees?.prelim.toLocaleString()
+                                        }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Midterm Exam</span>
                                     <span class="exam-fee-value">₱{{
-                                        currentStudent.examFees.midterm.toLocaleString() }}</span>
+                                        currentStudent.billing.examFees?.midterm.toLocaleString()
+                                        }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Pre-final Exam</span>
                                     <span class="exam-fee-value">₱{{
-                                        currentStudent.examFees.prefinal.toLocaleString() }}</span>
+                                        currentStudent.billing.examFees?.prefinal.toLocaleString()
+                                        }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Final Exam</span>
                                     <span class="exam-fee-value">₱{{
-                                        currentStudent.examFees.final.toLocaleString() }}</span>
+                                        currentStudent.billing.examFees?.final.toLocaleString()
+                                        }}</span>
                                 </div>
                             </div>
                         </div>
@@ -1147,11 +1515,11 @@ const saveEditedPayment = (payment) => {
                             <h3 class="labels">Payments</h3>
                             <div>
                                 <button class="action-button" @click="showPaymentForm = true" v-if="!showPaymentForm"
-                                    :disabled="currentStudent.remainingBalance <= 0"
-                                    :class="{ 'disabled': currentStudent.remainingBalance <= 0 }">
+                                    :disabled="currentStudent.billing.remainingBalance <= 0"
+                                    :class="{ 'disabled': currentStudent.billing.remainingBalance <= 0 }">
                                     <i class="fas fa-plus"></i>
-                                    {{ currentStudent.remainingBalance <= 0 ? 'No Balance Remaining' : 'Add Payment' }}
-                                        </button>
+                                    {{ currentStudent.billing.remainingBalance <= 0 ? 'No Balance Remaining'
+                                        : 'Add Payment' }} </button>
                             </div>
                         </div>
 
@@ -1160,7 +1528,7 @@ const saveEditedPayment = (payment) => {
                             <div class="payment-form-grid">
                                 <div class="info-group">
                                     <label>Payment Type</label>
-                                    <select v-model="newPayment.type" @change="updatePaymentAmount">
+                                    <select v-model="newPayment.description" @change="updatePaymentAmount">
                                         <option value="Initial Payment">Initial Payment</option>
                                         <option value="Prelim">Prelim</option>
                                         <option value="Midterm">Midterm</option>
@@ -1195,7 +1563,7 @@ const saveEditedPayment = (payment) => {
 
                         <!-- THIS TABLE WILL APPEAR IF THERE'S A PAYMENT TRANSACTION THAT HAS BEEN DONE -->
                         <table class="payment-table"
-                            v-if="currentStudent.payments && currentStudent.payments.length > 0">
+                            v-if="currentStudent.billing.payments && currentStudent.billing.payments.length > 0">
                             <thead>
                                 <tr>
                                     <th>Payment Type</th>
@@ -1205,10 +1573,11 @@ const saveEditedPayment = (payment) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="payment in currentStudent.payments" :key="payment.id">
-                                    <td>{{ payment.type }}</td>
+                                <tr v-for="payment in currentStudent.billing.payments"
+                                    :key="payment.id || payment.description">
+                                    <td>{{ payment.description }}</td>
                                     <td>{{ payment.date }}</td>
-                                    <td>₱{{ payment.amount.toLocaleString() }}</td>
+                                    <td>₱{{ safeLocaleString(payment.amount) }}</td>
                                     <td>
                                         <div class="payment-actions-row">
                                             <button class="payment-action-btn payment-edit" v-if="!payment.isEditing"
@@ -1216,8 +1585,9 @@ const saveEditedPayment = (payment) => {
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
                                             <div v-else class="payment-edit-form">
-                                                <input type="number" v-model="payment.editAmount"
-                                                    :max="currentStudent.remainingBalance + payment.amount" min="1">
+                                                <input type="number" v-model.number="payment.editAmount"
+                                                    :max="currentStudent.billing.remainingBalance + payment.amount"
+                                                    min="1">
                                                 <button class="payment-action-btn payment-save"
                                                     @click="saveEditedPayment(payment)">
                                                     <i class="fas fa-check"></i>
@@ -1228,7 +1598,7 @@ const saveEditedPayment = (payment) => {
                                                 </button>
                                             </div>
                                             <button class="payment-action-btn payment-delete"
-                                                @click="handlePaymentAction(payment.id, 'delete')">
+                                                @click="handlePaymentAction(payment.id || payment.description, 'delete')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -1240,20 +1610,19 @@ const saveEditedPayment = (payment) => {
                         <div class="summary-cards">
                             <div class="summary-card">
                                 <h4>Total Tuition</h4>
-                                <p>₱{{ newPayment.type === "Full Payment (before exam)"
-                                    ? (currentStudent.totalFees - 1200).toLocaleString()
-                                    : currentStudent.totalFees.toLocaleString() }}</p>
+                                <p>₱{{ safeLocaleString(currentStudent.billing.tuitionFee +
+                                    currentStudent.billing.miscellaneousFee
+                                    - currentStudent.billing.discount) }}</p>
                             </div>
                             <div class="summary-card">
                                 <h4>Total Paid</h4>
-                                <p>₱{{ (currentStudent.totalFees -
-                                    currentStudent.remainingBalance).toLocaleString() }}</p>
+                                <p>₱{{ safeLocaleString(currentStudent.billing.totalPaid) }}</p>
                             </div>
                             <div class="summary-card highlight">
                                 <h4>Remaining Balance</h4>
-                                <p>₱{{ newPayment.type === "Full Payment (before exam)"
-                                    ? (currentStudent.remainingBalance - 1200).toLocaleString()
-                                    : currentStudent.remainingBalance.toLocaleString() }}</p>
+                                <p>₱{{ safeLocaleString(currentStudent.billing.tuitionFee +
+                                    currentStudent.billing.miscellaneousFee
+                                    - currentStudent.billing.discount - currentStudent.billing.totalPaid) }}</p>
                             </div>
                         </div>
                     </form>
@@ -1264,7 +1633,6 @@ const saveEditedPayment = (payment) => {
                     </div>
                 </div>
             </div>
-
 
             <!-- VIEW STUDENT'S BILL MODAL -->
             <div class="modal" :class="{ active: showViewModal }" @click="closeViewModal">
@@ -1282,7 +1650,7 @@ const saveEditedPayment = (payment) => {
                             </div>
                             <div class="info-group">
                                 <label>Name</label>
-                                <span>{{ viewStudent.name }}</span>
+                                <span>{{ `${viewStudent.firstName} ${viewStudent.lastName}` }}</span>
                             </div>
                             <div class="info-group">
                                 <label>Course</label>
@@ -1301,19 +1669,19 @@ const saveEditedPayment = (payment) => {
                             <div class="student-info-grid">
                                 <div class="info-group">
                                     <label>Tuition Fee</label>
-                                    <span>₱{{ viewStudent.tuitionFee?.toLocaleString() }}</span>
+                                    <span>₱{{ safeLocaleString(viewStudent.billing?.tuitionFee) }}</span>
                                 </div>
                                 <div class="info-group">
                                     <label>Miscellaneous Fee</label>
-                                    <span>₱{{ viewStudent.miscellaneousFee?.toLocaleString() }}</span>
+                                    <span>₱{{ safeLocaleString(viewStudent.billing?.miscellaneousFee) }}</span>
                                 </div>
                                 <div class="info-group">
                                     <label>Initial Payment</label>
-                                    <span>₱{{ viewStudent.InitialPayment?.toLocaleString() }}</span>
+                                    <span>₱{{ safeLocaleString(viewStudent.billing?.initialPayment) }}</span>
                                 </div>
                                 <div class="info-group">
                                     <label>Discount</label>
-                                    <span>₱{{ viewStudent.discount?.toLocaleString() }}</span>
+                                    <span>₱{{ safeLocaleString(viewStudent.billing?.discount) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -1324,13 +1692,11 @@ const saveEditedPayment = (payment) => {
                                 <div class="fee-breakdown-grid">
                                     <div class="fee-item">
                                         <span class="fee-label">Basic Tuition Fee</span>
-                                        <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').tuition.basicTuition.toLocaleString() }}</span>
+                                        <span class="fee-value">₱{{ getYearAdjustedFees(viewStudent.course, viewStudent.yearLevel).tuition.basicTuition.toLocaleString() }}</span>
                                     </div>
                                     <div class="fee-item">
                                         <span class="fee-label">Laboratory Fee</span>
-                                        <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').tuition.laboratory.toLocaleString() }}</span>
+                                        <span class="fee-value">₱{{ getYearAdjustedFees(viewStudent.course, viewStudent.yearLevel).tuition.laboratory.toLocaleString() }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1340,71 +1706,57 @@ const saveEditedPayment = (payment) => {
                                 <div class="fee-breakdown-grid">
                                     <div class="fee-item">
                                         <span class="fee-label">Development Fee</span>
-                                        <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').misc.development.toLocaleString() }}</span>
+                                        <span class="fee-value">₱{{ getYearAdjustedFees(viewStudent.course, viewStudent.yearLevel).misc.development.toLocaleString() }}</span>
                                     </div>
                                     <div class="fee-item">
                                         <span class="fee-label">Library Fee</span>
-                                        <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').misc.library.toLocaleString() }}</span>
+                                        <span class="fee-value">₱{{ getYearAdjustedFees(viewStudent.course, viewStudent.yearLevel).misc.library.toLocaleString() }}</span>
                                     </div>
                                     <div class="fee-item">
                                         <span class="fee-label">Computer Laboratory Fee</span>
-                                        <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').misc.computer.toLocaleString() }}</span>
+                                        <span class="fee-value">₱{{ getYearAdjustedFees(viewStudent.course, viewStudent.yearLevel).misc.computer.toLocaleString() }}</span>
                                     </div>
                                     <div class="fee-item">
                                         <span class="fee-label">Athletic Fee</span>
-                                        <span class="fee-value">₱{{ getFeeStructure(viewStudent.feePreset ||
-                                            'default').misc.athletic.toLocaleString() }}</span>
+                                        <span class="fee-value">₱{{ getYearAdjustedFees(viewStudent.course, viewStudent.yearLevel).misc.athletic.toLocaleString() }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
 
                         <div class="exam-fees">
                             <h3 class="labels">Exam Fees</h3>
                             <div class="exam-fees-grid">
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Prelim Exam</span>
-                                    <span class="exam-fee-value">₱{{ viewStudent.examFees?.prelim.toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{
+                                        safeLocaleString(viewStudent.billing?.examFees?.prelim)
+                                        }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Midterm Exam</span>
-                                    <span class="exam-fee-value">₱{{ viewStudent.examFees?.midterm.toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{
+                                        safeLocaleString(viewStudent.billing?.examFees?.midterm)
+                                        }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Pre-final Exam</span>
-                                    <span class="exam-fee-value">₱{{ viewStudent.examFees?.prefinal.toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{
+                                        safeLocaleString(viewStudent.billing?.examFees?.prefinal)
+                                        }}</span>
                                 </div>
                                 <div class="exam-fee-item">
                                     <span class="exam-fee-label">Final Exam</span>
-                                    <span class="exam-fee-value">₱{{ viewStudent.examFees?.final.toLocaleString()
-                                    }}</span>
+                                    <span class="exam-fee-value">₱{{
+                                        safeLocaleString(viewStudent.billing?.examFees?.final)
+                                        }}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="summary-cards">
-                            <div class="summary-card">
-                                <h4>Total Tuition</h4>
-                                <p>₱{{ viewStudent.totalFees?.toLocaleString() }}</p>
-                            </div>
-                            <div class="summary-card">
-                                <h4>Total Paid</h4>
-                                <p>₱{{ (viewStudent.totalFees - viewStudent.remainingBalance)?.toLocaleString() }}</p>
-                            </div>
-                            <div class="summary-card highlight">
-                                <h4>Remaining Balance</h4>
-                                <p>₱{{ viewStudent.remainingBalance?.toLocaleString() }}</p>
-                            </div>
-                        </div>
-
-                        <!-- THIS PAYMENT HISTORY TABLE WILL APPEAR IF THERE IS AN EXISTING PAYMENT TRANSACTION -->
-                        <div v-if="viewStudent.payments && viewStudent.payments.length > 0">
+                              <!-- THIS PAYMENT HISTORY TABLE WILL APPEAR IF THERE IS AN EXISTING PAYMENT TRANSACTION -->
+                              <div v-if="viewStudent.billing?.payments && viewStudent.billing.payments.length > 0">
                             <h3 class="labels history">Payment History</h3>
                             <table class="payment-table">
                                 <thead>
@@ -1415,14 +1767,32 @@ const saveEditedPayment = (payment) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="payment in viewStudent.payments" :key="payment.id">
-                                        <td>{{ payment.type }}</td>
+                                    <tr v-for="payment in viewStudent.billing.payments"
+                                        :key="payment.id || payment.description">
+                                        <td>{{ payment.description }}</td>
                                         <td>{{ payment.date }}</td>
-                                        <td>₱{{ payment.amount.toLocaleString() }}</td>
+                                        <td>₱{{ safeLocaleString(payment.amount) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="summary-cards">
+                            <div class="summary-card">
+                                <h4>Total Tuition</h4>
+                                <p>₱{{ safeLocaleString(viewStudent.billing?.totalTuition) }}</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Total Paid</h4>
+                                <p>₱{{ safeLocaleString(viewStudent.billing?.totalPaid) }}</p>
+                            </div>
+                            <div class="summary-card highlight">
+                                <h4>Remaining Balance</h4>
+                                <p>₱{{ safeLocaleString(viewStudent.billing?.remainingBalance) }}</p>
+                            </div>
+                        </div>
+
+                  
                     </div>
 
                     <div class="form-actions">
@@ -1430,12 +1800,98 @@ const saveEditedPayment = (payment) => {
                     </div>
                 </div>
             </div>
-            <UnsavedChangesModal 
-          :is-open="isUnsavedChangesModalOpen"
-          @close="handleUnsavedChanges(false)"
-          @confirm="handleUnsavedChanges(true)"
-        />
+
+            <!-- UNSAVED CHANGES WARNING -->
+            <UnsavedChangesModal :is-open="isUnsavedChangesModalOpen" @close="handleUnsavedChanges(false)"
+                @confirm="handleUnsavedChanges(true)" />
         </section>
-   
+
     </main>
 </template>
+
+<style>
+.search-input-container {
+    position: relative;
+    width: 100%;
+}
+
+.student-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    color: white;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    margin-top: 5px;
+}
+
+.student-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-item:hover:not(.disabled-item) {
+    background-color: #f5f5f5;
+}
+
+.disabled-item {
+    cursor: not-allowed;
+    opacity: 0.7;
+    background-color: #f0f0f0;
+}
+
+.student-item:last-child {
+    border-bottom: none;
+}
+
+.student-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.student-id {
+    font-weight: bold;
+    color: #444;
+    font-size: 1em;
+}
+
+.student-name {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 2px;
+}
+
+.status-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 0.75em;
+    border-radius: 4px;
+    color: white;
+    background-color: #4caf50;
+    white-space: nowrap;
+}
+
+.status-tag.has-billing {
+    background-color: #f44336;
+}
+
+.no-students {
+    padding: 12px;
+    text-align: center;
+    color: #888;
+    font-size: 0.9em;
+}
+
+
+</style>

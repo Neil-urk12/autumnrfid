@@ -1,204 +1,51 @@
-<script setup>
-import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+<script setup lang="ts">
+import { ref, computed, defineAsyncComponent } from 'vue'
+import type { Subject, SubjectEditable, SubjectWithGrades, Student, ConfirmationData, StudentBasicInfo } from '@/typescript/models'
+import mockData from '@/mock/models.json'
+import Toast from '@/components/Toast.vue'
+
 const ConfirmationModal = defineAsyncComponent(() => import('@/components/ConfirmationModal.vue'))
 const UnsavedChangesModal = defineAsyncComponent(() => import('@/components/UnsavedChangesModal.vue'))
 const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
-import Toast from '@/components/Toast.vue'
 
-// MOCK DATA
-const validGrades = [
-    '1', '1.25', '1.50', '1.75',
-    '2', '2.25', '2.50', '2.75',
-    '3', '3.25', '3.50', '3.75',
-    '4', '5', '0', 'INC'
-]
 
-const subjects = ref([
-    { code: "ENG", name: "English" },
-    { code: "MATH", name: "Mathematics" },
-    { code: "CHAR", name: "Conduct/Char. Build. Act" },
-    { code: "SCI", name: "Science & Tech." },
-    { code: "COMP", name: "Computer" },
-    { code: "CIG", name: "Current Issues/Geography" }
-])
+const students = ref<Student[]>(mockData.students)
+const validGrades = ref<string[]>(mockData.validGrades)
+const subjects = ref<SubjectEditable[]>(mockData.subjects.map(subject => ({ ...subject, grade: '' })))
+const editSubjects = ref<SubjectEditable[]>(mockData.subjects.map(subject => ({ ...subject, grade: '' })))
+const deleteSubjects = ref<SubjectWithGrades[]>([])
+const availableSubjects = ref<Subject[]>(mockData.availableSubjects)
 
-const editSubjects = ref([
-    { code: "SCI", name: "Science & Tech.", grade: "" },
-    { code: "COMP", name: "Computer", grade: "" }
-])
+const isConfirmationModalOpen = ref<boolean>(false)
+const isAddModalOpen = ref<boolean>(false)
+const isEditModalOpen = ref<boolean>(false)
+const isDeleteModalOpen = ref<boolean>(false)
+const isUnsavedChangesModalOpen = ref<boolean>(false)
+const modalToClose = ref<'add' | 'edit' | null>(null)
 
-const deleteSubjects = ref([
-    { code: "COM", name: "Computer Fundamentals", grade: "1.2" },
-    { code: "TECH", name: "Information", grade: "1" }
-])
-
-const availableSubjects = ref([
-    { code: "PHY", name: "Physics" },
-    { code: "CHEM", name: "Chemistry" },
-    { code: "BIO", name: "Biology" },
-])
-
-const students = ref([
-    {
-        id: '2023-0001',
-        name: 'John Cez',
-        course: 'Computer Science',
-        grades: {
-            prelim: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            midterm: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            prefinals: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            finals: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            }
-        },
-        gwa: '',
-        remarks: ''
-    },
-    {
-        id: '2023-0002',
-        name: 'Jan Rosa',
-        course: 'Computer Science',
-        grades: {
-            prelim: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            midterm: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            prefinals: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            finals: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            }
-        },
-        gwa: '',
-        remarks: ''
-    },
-    {
-        id: '2023-0003',
-        name: 'Lightning Mcqueen',
-        course: 'Information Technology',
-        grades: {
-            prelim: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            midterm: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            prefinals: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            },
-            finals: {
-                'ENG': '',
-                'MATH': '',
-                'CHAR': '',
-                'SCI': '',
-                'COMP': '',
-                'CIG': ''
-            }
-        },
-        gwa: '',
-        remarks: ''
-    }
-])
-//
-
-// STATE 
-const isConfirmationModalOpen = ref(false)
-const isAddModalOpen = ref(false)
-const isEditModalOpen = ref(false)
-const isDeleteModalOpen = ref(false)
-const isUnsavedChangesModalOpen = ref(false)
-const modalToClose = ref(null)
-const filterContainerActive = ref(false)
-const isAddSubjectDisabled = computed(() => !selectedGradingPeriod.value)
-const addGradingPeriod = ref('')
-const editGradingPeriod = ref('')
-
-const confirmationData = ref({
+const confirmationData = ref<ConfirmationData>({
     title: '',
     itemName: '',
     itemInfo: null
 })
 
-const studentInfo = ref({
+const studentInfo = ref<StudentBasicInfo>({
     id: '',
     name: '',
     course: ''
 })
 
-const searchQuery = ref('')
-const activeFilters = ref([])
-const activeFilter = ref('all')
-const selectedGradingPeriod = ref('')
-const showNewSubjectForm = ref(false)
-const showToast = ref(false)
-const toastMessage = ref('')
+const searchQuery = ref<string>('')
+const activeFilters = ref<string[]>([])
+const activeFilter = ref<string>('all')
+const selectedGradingPeriod = ref<'prelim' | 'midterm' | 'prefinals' | 'finals' | ''>('')
+const showNewSubjectForm = ref<boolean>(false)
+const showToast = ref<boolean>(false)
+const toastMessage = ref<string>('')
+const selectedSubject = ref<string>('')
 
-const newSubject = ref({
+const newSubject = ref<SubjectEditable>({
     code: '',
     name: '',
     grade: ''
@@ -209,29 +56,35 @@ const filteredStudents = computed(() => {
     return students.value.filter(student => {
         const matchesSearch = !searchQuery.value ||
             student.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            student.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
             student.course.toLowerCase().includes(searchQuery.value.toLowerCase())
 
         const matchesStatus = activeFilter.value === 'all' ||
-            (activeFilter.value === 'passed' && student.remarks.toLowerCase() === 'passed') ||
-            (activeFilter.value === 'failed' && student.remarks.toLowerCase() === 'failed') ||
-            (activeFilter.value === 'incomplete' && student.remarks.toLowerCase() === 'incomplete')
+            (activeFilter.value === 'passed' && student.grades.gwa && Number(student.grades.gwa) <= 3.00) ||
+            (activeFilter.value === 'failed' && student.grades.gwa && Number(student.grades.gwa) > 3.00) ||
+            (activeFilter.value === 'incomplete' && !student.grades.gwa)
 
         return matchesSearch && matchesStatus
     })
 })
 
-// GETS THE CURRENT GRADING PERIOD FOR A STUDENT
-const currentPeriod = computed(() => {
+// GETS THE CURRENT GRADING PERIOD FOR A STUDENT AND PROCEEDS TO NEXT PERIOD
+const currentPeriod = computed((): 'prelim' | 'midterm' | 'prefinals' | 'finals' | '' => {
     const student = students.value.find(s => s.id === studentInfo.value.id)
-    if (!student) return 'prelim'
+    if (!student) return ''
 
-    const periods = ['prelim', 'midterm', 'prefinals', 'finals']
+    const periods: ('prelim' | 'midterm' | 'prefinals' | 'finals')[] = ['prelim', 'midterm', 'prefinals', 'finals']
 
-    // FIND THE NEXT PERIOD WHERE NO GRADES ARE ENTERED
-    const nextPeriod = periods.find(period => {
-        return !Object.values(student.grades[period]).some(grade => grade)
-    })
+    const allPeriodsHaveGrades = periods.every(period =>
+        Object.values(student.grades[period]).every(grade => grade !== '')
+    )
+
+    if (allPeriodsHaveGrades) {
+        return ''
+    }
+    const nextPeriod = periods.find(period =>
+        Object.values(student.grades[period]).every(grade => grade === '')
+    )
 
     return nextPeriod || ''
 })
@@ -241,7 +94,7 @@ const editablePeriods = computed(() => {
     const student = students.value.find(s => s.id === studentInfo.value.id)
     if (!student) return []
 
-    const periods = ['prelim', 'midterm', 'prefinals', 'finals']
+    const periods: ('prelim' | 'midterm' | 'prefinals' | 'finals')[] = ['prelim', 'midterm', 'prefinals', 'finals']
     return periods.filter(period => hasGradesForPeriod(period))
 })
 
@@ -250,7 +103,7 @@ const hasUnsavedChanges = computed(() => {
     if (isAddModalOpen.value) {
         return subjects.value.some(subject => {
             const cleanGrade = subject.grade.trim()
-            return cleanGrade !== '' && validGrades.includes(cleanGrade)
+            return cleanGrade !== '' && validGrades.value.includes(cleanGrade)
         })
     } else if (isEditModalOpen.value) {
         const student = students.value.find(s => s.id === studentInfo.value.id)
@@ -258,17 +111,18 @@ const hasUnsavedChanges = computed(() => {
 
         return editSubjects.value.some(subject => {
             const currentGrade = subject.grade.trim()
-            const originalGrade = student.grades[selectedGradingPeriod.value][subject.code] || ''
+            const period = selectedGradingPeriod.value as keyof typeof student.grades
+            const originalGrade = period ? (student.grades[period] as Record<string, string>)[subject.code] || '' : ''
 
             return currentGrade !== originalGrade &&
-                (currentGrade === '' || validGrades.includes(currentGrade))
+                (currentGrade === '' || validGrades.value.includes(currentGrade))
         })
     }
     return false
 })
 
 // SHOWS THE DELETE CONFIRMATION MODAL
-const showDeleteConfirmation = (title, itemName, itemInfo = null) => {
+const showDeleteConfirmation = (title: string, itemName: string, itemInfo: any = null) => {
     confirmationData.value = {
         title,
         itemName,
@@ -278,8 +132,8 @@ const showDeleteConfirmation = (title, itemName, itemInfo = null) => {
 }
 
 // HANDLES THE CONFIRMATION OF DELETION
-const handleConfirmDelete = (itemInfo) => {
-    if (itemInfo.name) {
+const handleConfirmDelete = (itemInfo: any) => {
+    if (itemInfo?.name) {
         deleteSubjects.value = deleteSubjects.value.filter(
             subject => subject.name !== itemInfo.name
         )
@@ -287,23 +141,19 @@ const handleConfirmDelete = (itemInfo) => {
     isConfirmationModalOpen.value = false
 }
 
-// TOGGLES THE FILTER CONTAINER VISIBILITY
-const toggleFilterContainer = () => {
-    filterContainerActive.value = !filterContainerActive.value
-}
 
 // OPENS THE ADD GRADES MODAL
-const openAddGradesModal = (studentId) => {
+const openAddGradesModal = (studentId: string) => {
     const student = students.value.find(s => s.id === studentId)
     if (!student) return
 
     studentInfo.value = {
         id: studentId,
-        name: student.name,
+        name: `${student.firstName} ${student.lastName}`,
         course: student.course
     }
 
-    // AUTOMATICALLY SET THE GRADING PERIOD
+    subjects.value = mockData.subjects.map(subject => ({ ...subject, grade: '' }))
     selectedGradingPeriod.value = currentPeriod.value
     isAddModalOpen.value = true
 }
@@ -333,19 +183,19 @@ const closeEditGradesModal = () => {
 }
 
 // OPENS THE EDIT GRADES MODAL
-const openEditGrades = (studentId) => {
+const openEditGrades = (studentId: string) => {
     const student = students.value.find(s => s.id === studentId)
     if (!student) return
 
     studentInfo.value = {
         id: student.id,
-        name: student.name,
+        name: `${student.firstName} ${student.lastName}`,
         course: student.course
     }
 
     selectedGradingPeriod.value = ''
 
-    editSubjects.value = subjects.value.map(subject => ({
+    editSubjects.value = mockData.subjects.map(subject => ({
         ...subject,
         grade: ''
     }))
@@ -354,26 +204,39 @@ const openEditGrades = (studentId) => {
 }
 
 // OPENS THE DELETE GRADES MODAL
-const openDeleteGrades = (studentId) => {
+const openDeleteGrades = (studentId: string) => {
     const student = students.value.find(s => s.id === studentId)
     if (!student) return
 
     studentInfo.value = {
         id: student.id,
-        name: student.name,
+        name: `${student.firstName} ${student.lastName}`,
         course: student.course
     }
 
-    loadGradesForDelete()
+    deleteSubjects.value = mockData.subjects.map(subject => {
+        const periodGrades = {
+            prelim: student.grades.prelim[subject.code] || '',
+            midterm: student.grades.midterm[subject.code] || '',
+            prefinals: student.grades.prefinals[subject.code] || '',
+            finals: student.grades.finals[subject.code] || ''
+        }
 
-    selectedGradingPeriod.value = ''
+        const currentGrade = calculateSubjectGrade(periodGrades)
+
+        return {
+            ...subject,
+            grade: currentGrade,
+            periodGrades
+        }
+    })
+
     isDeleteModalOpen.value = true
 }
 
-// CALCULATES THE AVERAGE GRADE FOR A SUBJECT
-const calculateSubjectAverage = (student, subjectCode) => {
-    const periods = ['prelim', 'midterm', 'prefinals', 'finals']
-    const grades = periods.map(period => student.grades[period][subjectCode])
+// CALCULATES THE AVERAGE GRADE FOR A SUBJECT ACROSS PERIODS
+const calculateSubjectGrade = (periodGrades: Record<string, string>) => {
+    const grades = Object.values(periodGrades)
         .filter(grade => grade !== '')
         .map(Number)
 
@@ -383,37 +246,6 @@ const calculateSubjectAverage = (student, subjectCode) => {
     return (total / grades.length).toFixed(2)
 }
 
-// LOADS GRADES FOR DELETION
-const loadGradesForDelete = () => {
-    const student = students.value.find(s => s.id === studentInfo.value.id)
-    if (!student) return
-
-    const periods = ['prelim', 'midterm', 'prefinals', 'finals']
-
-    deleteSubjects.value = subjects.value.map(subject => {
-        const existingGrades = periods
-            .map(period => student.grades[period][subject.code])
-            .filter(grade => grade !== '')
-            .map(Number)
-
-        // CALCULATE OVERALL GRADES
-        let totalGrade = '--'
-        if (existingGrades.length > 0) {
-            const sum = existingGrades.reduce((acc, grade) => acc + grade, 0)
-            totalGrade = (sum / existingGrades.length).toFixed(2)
-        }
-
-        return {
-            ...subject,
-            grade: student.grades[selectedGradingPeriod.value]?.[subject.code] || '--', // CURRENT PERIOD GRADE
-            totalGrade, // OVERALL AVERAGE OF THE SUBJECT ON ALL PERIODS
-            periodGrades: periods.reduce((acc, period) => {
-                acc[period] = student.grades[period][subject.code] || ''
-                return acc
-            }, {})
-        }
-    })
-}
 
 // CLOSES THE DELETE GRADES MODAL
 const closeDeleteGradesModal = () => {
@@ -421,9 +253,10 @@ const closeDeleteGradesModal = () => {
 }
 
 // ADDS A NEW SUBJECT
-const addNewSubject = (subject = null) => {
+const addNewSubject = (subject: Subject | null = null) => {
     if (subject) {
         subjects.value.push({ ...subject, grade: '' })
+        selectedSubject.value = ''
     } else {
         showNewSubjectForm.value = true
     }
@@ -449,117 +282,104 @@ const confirmDeleteSubjects = () => {
     const student = students.value.find(s => s.id === studentInfo.value.id)
     if (!student) return
 
-    Object.keys(student.grades[selectedGradingPeriod.value]).forEach(code => {
-        student.grades[selectedGradingPeriod.value][code] = ''
+    const periods: ('prelim' | 'midterm' | 'prefinals' | 'finals')[] = ['prelim', 'midterm', 'prefinals', 'finals']
+    periods.forEach(period => {
+        Object.keys(student.grades[period]).forEach(code => {
+            student.grades[period][code] = ''
+        })
     })
 
-    student[selectedGradingPeriod.value] = ''
-    computeFinalGrade(student.id)
+    student.grades.gwa = ''
+    student.grades.remarks = ''
 
     closeDeleteGradesModal()
 }
 
+
 // HANDLES GRADE INPUT VALIDATION
-const handleGradeInput = (subject, value) => {
-    const cleanValue = value.trim()
+const validateGradeInput = (subject: SubjectEditable) => {
+    const cleanValue = subject.grade.trim();
 
     if (cleanValue === '') {
         subject.grade = ''
-        showToast.value = false
-        toastMessage.value = ''
-        return
+        showToast.value = false;
+        toastMessage.value = '';
+        return;
     }
 
-    // Check if the input is a valid grade (either whole number or decimal)
-    const isValidGrade = validGrades.some(validGrade => {
-        // Convert both to numbers for comparison
-        const inputNum = Number(cleanValue)
-        const validNum = Number(validGrade)
-        return inputNum === validNum
-    })
+    const isValidGrade = validGrades.value.some(validGrade => {
+        const inputNum = Number(cleanValue);
+        const validNum = Number(validGrade);
+        return inputNum === validNum;
+    });
 
     if (!isValidGrade) {
         subject.grade = cleanValue
-        toastMessage.value = 'Please enter a valid grade (1, 1.25, 1.50, etc)'
-        showToast.value = true
+        toastMessage.value = 'Please enter a valid grade (1, 1.25, 1.50, etc)';
+        showToast.value = true;
     } else {
-        // Store the grade as-is during editing
-        subject.grade = cleanValue
-        showToast.value = false
-        toastMessage.value = ''
+        showToast.value = false;
+        toastMessage.value = '';
     }
-}
-
-// SYNCHRONIZES GRADES BETWEEN SOURCE AND TARGET ARRAYS
-const syncGrades = (sourceArray, targetArray) => {
-    sourceArray.forEach(sourceSubject => {
-        const targetSubject = targetArray.find(t => t.code === sourceSubject.code)
-        if (targetSubject) {
-            targetSubject.grade = sourceSubject.grade
-        }
-    })
 }
 
 // HANDLES SUBMISSION OF ADD GRADES FORM
-const handleSubmit = (e) => {
+const handleSubmit = (e: Event) => {
     e.preventDefault()
 
-    const periodGrades = subjects.value.filter(subject => subject.grade)
+    const student = students.value.find(s => s.id === studentInfo.value.id)
+    if (!student || !selectedGradingPeriod.value) return
 
-    if (periodGrades.length > 0) {
-        const hasInvalidGrades = periodGrades.some(subject => {
-            const cleanGrade = subject.grade.trim()
-            return !validGrades.some(validGrade => Number(cleanGrade) === Number(validGrade))
-        })
+    const periodGrades = subjects.value.filter(subject => subject.grade.trim() !== '')
 
-        if (hasInvalidGrades) {
-            toastMessage.value = 'Please enter valid grades for all subjects'
-            showToast.value = true
-            return
-        }
-
-        // UPDATE EACH SUBJECT GRADE
-        const student = students.value.find(s => s.id === studentInfo.value.id)
-        if (student) {
-            periodGrades.forEach(subject => {
-                // Convert whole numbers to decimal format when saving
-                const grade = subject.grade.includes('.') ? subject.grade : `${subject.grade}.00`
-                student.grades[selectedGradingPeriod.value][subject.code] = grade
-            })
-
-            // PERIOD AVERAGE
-            const periodGradesArray = Object.values(student.grades[selectedGradingPeriod.value])
-            const validGrades = periodGradesArray.filter(grade => grade)
-            if (validGrades.length > 0) {
-                const average = validGrades.reduce((sum, grade) => sum + Number(grade), 0) / validGrades.length
-                student[selectedGradingPeriod.value] = average.toFixed(2)
-            }
-        }
-
-        computeFinalGrade(studentInfo.value.id)
-
-        editSubjects.value = subjects.value.map(subject => ({
-            ...subject,
-            grade: periodGrades.find(p => p.code === subject.code)?.grade || ''
-        }))
-
-        subjects.value.forEach(subject => subject.grade = '')
-        selectedGradingPeriod.value = '' // Reset to default
-        closeAddGradesModal()
+    if (periodGrades.length === 0) {
+        toastMessage.value = 'Please enter at least one grade'
+        showToast.value = true
+        return
     }
+
+    const hasInvalidGrades = periodGrades.some(subject => {
+        const cleanGrade = subject.grade.trim()
+        return !validGrades.value.some(validGrade => Number(cleanGrade) === Number(validGrade))
+    })
+
+    if (hasInvalidGrades) {
+        toastMessage.value = 'Please enter valid grades for all subjects'
+        showToast.value = true
+        return
+    }
+
+    // UPDATE EACH SUBJECT GRADE
+    periodGrades.forEach(subject => {
+        // Convert whole numbers to decimal format when saving
+        const grade = subject.grade.includes('.') ? subject.grade : `${subject.grade}.00`
+        const period = selectedGradingPeriod.value as keyof typeof student.grades
+        if (period) {
+            (student.grades[period] as Record<string, string>)[subject.code] = grade
+        }
+    })
+
+    // Compute final grade after updating grades
+    computeFinalGrade(studentInfo.value.id)
+
+    // Reset form
+    subjects.value = mockData.subjects.map(subject => ({ ...subject, grade: '' }))
+    selectedGradingPeriod.value = ''
+    isAddModalOpen.value = false
+    showToast.value = false
 }
 
 // HANDLES SUBMISSION OF EDIT GRADES FORM
-const handleEditSubmit = (e) => {
+const handleEditSubmit = (e: Event) => {
     e.preventDefault()
 
     // GET SUBJECT GRADES FOR SELECTED PERIOD
     const periodGrades = editSubjects.value.filter(subject => subject.grade)
 
-    if (periodGrades.length > 0) {
+    if (periodGrades.length > 0 && selectedGradingPeriod.value) {
         const hasInvalidGrades = periodGrades.some(subject => {
             const cleanGrade = subject.grade.trim()
-            return !validGrades.some(validGrade => Number(cleanGrade) === Number(validGrade))
+            return !validGrades.value.some(validGrade => Number(cleanGrade) === Number(validGrade))
         })
 
         if (hasInvalidGrades) {
@@ -571,19 +391,15 @@ const handleEditSubmit = (e) => {
         const student = students.value.find(s => s.id === studentInfo.value.id)
         if (student) {
             periodGrades.forEach(subject => {
-                // Convert whole numbers to decimal format when saving
                 const grade = subject.grade.includes('.') ? subject.grade : `${subject.grade}.00`
-                student.grades[selectedGradingPeriod.value][subject.code] = grade
+                const period = selectedGradingPeriod.value as keyof typeof student.grades
+                if (period) {
+                    (student.grades[period] as Record<string, string>)[subject.code] = grade
+                }
             })
 
-            const periodGradesArray = Object.values(student.grades[selectedGradingPeriod.value])
-            const validGrades = periodGradesArray.filter(grade => grade)
-            if (validGrades.length > 0) {
-                const average = validGrades.reduce((sum, grade) => sum + Number(grade), 0) / validGrades.length
-                student[selectedGradingPeriod.value] = average.toFixed(2)
-            }
+            computeFinalGrade(studentInfo.value.id)
         }
-        computeFinalGrade(studentInfo.value.id)
 
         editSubjects.value.forEach(subject => subject.grade = '')
         selectedGradingPeriod.value = ''
@@ -591,12 +407,27 @@ const handleEditSubmit = (e) => {
     }
 }
 
+// LOADS GRADES FOR A SELECTED PERIOD
+const loadPeriodGrades = () => {
+    const student = students.value.find(s => s.id === studentInfo.value.id)
+    if (!student || !selectedGradingPeriod.value) return
+
+    editSubjects.value = mockData.subjects.map(subject => {
+        const period = selectedGradingPeriod.value as keyof typeof student.grades
+        const grade = period ? (student.grades[period] as Record<string, string>)[subject.code] || '' : ''
+        return {
+            ...subject,
+            grade
+        }
+    })
+}
+
 // COMPUTES THE FINAL GRADE FOR A STUDENT
-const computeFinalGrade = (studentId) => {
+const computeFinalGrade = (studentId: string) => {
     const student = students.value.find(s => s.id === studentId)
     if (!student) return
 
-    const periods = ['prelim', 'midterm', 'prefinals', 'finals']
+    const periods: ('prelim' | 'midterm' | 'prefinals' | 'finals')[] = ['prelim', 'midterm', 'prefinals', 'finals']
     const weights = {
         prelim: 0.20,
         midterm: 0.20,
@@ -604,72 +435,62 @@ const computeFinalGrade = (studentId) => {
         finals: 0.40
     }
 
-    const hasAllPeriods = periods.every(period => {
-        const periodGrades = Object.values(student.grades[period])
-        return periodGrades.some(grade => grade !== '')
-    })
+    const hasAllPeriods = periods.every(period =>
+        Object.values(student.grades[period]).some(grade => grade !== '')
+    )
 
     if (hasAllPeriods) {
         let weightedSum = 0
+        let totalWeight = 0
 
         periods.forEach(period => {
             const periodGrades = Object.values(student.grades[period])
-            const periodAverage = periodGrades
                 .filter(grade => grade !== '')
-                .reduce((sum, grade) => sum + Number(grade), 0) / periodGrades.length
+                .map(Number)
 
-            weightedSum += periodAverage * weights[period]
-
-            student[period] = periodAverage.toFixed(2)
+            if (periodGrades.length > 0) {
+                const periodAverage = periodGrades.reduce((sum, grade) => sum + grade, 0) / periodGrades.length
+                weightedSum += periodAverage * weights[period]
+                totalWeight += weights[period]
+            }
         })
 
-        student.gwa = weightedSum.toFixed(2)
+        if (totalWeight > 0) {
+            const gwa = (weightedSum / totalWeight).toFixed(2)
+            const remarks = Number(gwa) === 0 ? 'Incomplete' :
+                Number(gwa) <= 3.00 ? 'Passed' : 'Failed'
 
-        // SETS REMARKS BASED ON GWA
-        student.remarks = Number(student.gwa) === 0 ? 'Incomplete' :
-            Number(student.gwa) <= 3.00 ? 'Passed' : 'Failed'
-    } else {
-        student.gwa = ''
-        student.remarks = ''
+            student.grades.gwa = gwa
+            student.grades.remarks = remarks
+        }
     }
 }
 
 // HANDLES SEARCH QUERY CHANGES
-const handleSearch = (query) => {
+const handleSearch = (query: string) => {
     searchQuery.value = query || ''
 }
 
 // HANDLES FILTER CHANGES
-const handleFilterChange = (filters) => {
+const handleFilterChange = (filters: string[]) => {
     activeFilters.value = filters || []
 }
 
 // SETS THE ACTIVE FILTER
-const setFilter = (filter) => {
+const setFilter = (filter: string) => {
     activeFilter.value = filter === activeFilter.value ? 'all' : filter
 }
 
 // CHECKS IF A PERIOD HAS GRADES
-const hasGradesForPeriod = (period) => {
+const hasGradesForPeriod = (period: 'prelim' | 'midterm' | 'prefinals' | 'finals') => {
     const student = students.value.find(s => s.id === studentInfo.value.id)
     if (!student) return false
 
-    return Object.values(student.grades[period]).some(grade => grade)
-}
-
-// LOADS GRADES FOR A SELECTED PERIOD
-const loadPeriodGrades = () => {
-    const student = students.value.find(s => s.id === studentInfo.value.id)
-    if (!student) return
-
-    editSubjects.value = subjects.value.map(subject => ({
-        ...subject,
-        grade: student.grades[selectedGradingPeriod.value][subject.code] || ''
-    }))
+    return Object.values(student.grades[period]).some(grade => grade !== '')
 }
 
 // HANDLES UNSAVED CHANGES MODAL ACTIONS
-const handleUnsavedChanges = (confirm) => {
+const handleUnsavedChanges = (confirm: boolean) => {
     if (confirm) {
         if (modalToClose.value === 'add') {
             closeAddGradesModal()
@@ -681,13 +502,29 @@ const handleUnsavedChanges = (confirm) => {
     modalToClose.value = null
 }
 
-onMounted(() => {
-    const handleClickOutside = (e, modalRef, closeFunction) => {
-        if (e.target === modalRef) {
-            closeFunction()
+// CALCULATES THE AVERAGE GRADE FOR A PERIOD
+const calculatePeriodAverage = (student: Student, period: 'prelim' | 'midterm' | 'prefinals' | 'finals') => {
+    const grades = Object.values(student.grades[period])
+        .filter(grade => grade !== '')
+        .map(Number)
+
+    if (grades.length === 0) return '-'
+
+    const total = grades.reduce((sum, grade) => sum + grade, 0)
+    return (total / grades.length).toFixed(2)
+}
+
+// HANDLES SUBJECT SELECTION FROM DROPDOWN
+const handleSubjectSelect = () => {
+    if (selectedSubject.value) {
+        try {
+            const subject = JSON.parse(selectedSubject.value);
+            addNewSubject(subject);
+        } catch (error) {
+            console.error('Error parsing subject JSON:', error);
         }
     }
-})
+}
 </script>
 
 <template>
@@ -738,19 +575,19 @@ onMounted(() => {
                         <tbody>
                             <tr v-for="student in filteredStudents" :key="student.id">
                                 <td>{{ student.id }}</td>
-                                <td>{{ student.name }}</td>
+                                <td>{{ student.firstName }} {{ student.lastName }}</td>
                                 <td>{{ student.course }}</td>
-                                <td>{{ student.prelim || '-' }}</td>
-                                <td>{{ student.midterm || '-' }}</td>
-                                <td>{{ student.prefinals || '-' }}</td>
-                                <td>{{ student.finals || '-' }}</td>
-                                <td>{{ student.gwa || '-' }}</td>
+                                <td>{{ calculatePeriodAverage(student, 'prelim') }}</td>
+                                <td>{{ calculatePeriodAverage(student, 'midterm') }}</td>
+                                <td>{{ calculatePeriodAverage(student, 'prefinals') }}</td>
+                                <td>{{ calculatePeriodAverage(student, 'finals') }}</td>
+                                <td>{{ student.grades.gwa || '-' }}</td>
                                 <td>
-                                    <span v-if="student.remarks" :class="[
+                                    <span v-if="student.grades.gwa" :class="[
                                         'status-badge',
-                                        `status-${student.remarks.toLowerCase()}`
+                                        `status-${student.grades.remarks.toLowerCase()}`
                                     ]">
-                                        {{ student.remarks }}
+                                        {{ student.grades.remarks }}
                                     </span>
                                     <span v-else>-</span>
                                 </td>
@@ -794,9 +631,10 @@ onMounted(() => {
                             </div>
                             <div class="info-group">
                                 <label>Grading Period</label>
-                                <input type="text"
-                                    :value="selectedGradingPeriod.charAt(0).toUpperCase() + selectedGradingPeriod.slice(1)"
-                                    readonly required class="readonly-input">
+                                <input type="text" :value="selectedGradingPeriod
+                                    ? selectedGradingPeriod.charAt(0).toUpperCase() + selectedGradingPeriod.slice(1)
+                                    : 'All periods have grades'" readonly required class="readonly-input"
+                                    :class="{ 'no-periods': !selectedGradingPeriod }">
                             </div>
                         </div>
 
@@ -808,7 +646,7 @@ onMounted(() => {
                                         <i class="fa-solid fa-plus"></i> Add Custom Subject
                                     </button>
                                     <div class="subject-select">
-                                        <select @change="(e) => addNewSubject(JSON.parse(e.target.value))"
+                                        <select @change="handleSubjectSelect"
                                             v-model="selectedSubject">
                                             <option value="">Select Existing Subject</option>
                                             <option v-for="subject in availableSubjects" :key="subject.code"
@@ -837,6 +675,7 @@ onMounted(() => {
                                 </div>
                             </div>
 
+
                             <div class="subjects-list">
                                 <template v-if="selectedGradingPeriod">
                                     <div class="subjects-grid">
@@ -847,21 +686,22 @@ onMounted(() => {
                                                 <input type="text" required
                                                     placeholder="Enter grade (1.00, 1.25, 1.50, etc)"
                                                     v-model="subject.grade"
-                                                    @input="(e) => handleGradeInput(subject, e.target.value)"
+                                                    @input="() => validateGradeInput(subject)"
                                                     :class="{ 'error': subject.grade && !validGrades.includes(subject.grade) }">
                                             </div>
                                         </div>
                                     </div>
                                 </template>
                                 <p v-else style="color: var(--text-secondary); text-align: center;">
-                                    Please select a grading period
+                                    All grading periods have been completed for this student
                                 </p>
                             </div>
                         </div>
 
                         <div class="form-actions">
                             <button type="button" class="cancel-btn" @click="closeAddGradesModal">Cancel</button>
-                            <button type="submit" class="submit-btn">Add Grades</button>
+                            <button type="submit" class="submit-btn" :disabled="!selectedGradingPeriod">Add
+                                Grades</button>
                         </div>
                     </form>
                 </div>
@@ -907,6 +747,21 @@ onMounted(() => {
                         <div class="subjects-section">
                             <div class="subjects-header">
                                 <h3>Subject Grades</h3>
+                                <div class="subject-actions" v-if="selectedGradingPeriod === 'prelim'">
+                                    <button type="button" class="add-subject-btn" @click="addNewSubject()">
+                                        <i class="fa-solid fa-plus"></i> Add Custom Subject
+                                    </button>
+                                    <div class="subject-select">
+                                        <select @change="handleSubjectSelect"
+                                            v-model="selectedSubject">
+                                            <option value="">Select Existing Subject</option>
+                                            <option v-for="subject in availableSubjects" :key="subject.code"
+                                                :value="JSON.stringify(subject)">
+                                                {{ subject.name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="subjects-list">
                                 <template v-if="selectedGradingPeriod">
@@ -918,7 +773,7 @@ onMounted(() => {
                                                 <input type="text" required
                                                     placeholder="Enter grade (1.00, 1.25, 1.50, etc)"
                                                     v-model="subject.grade"
-                                                    @input="(e) => handleGradeInput(subject, e.target.value)"
+                                                    @input="() => validateGradeInput(subject)"
                                                     :class="{ 'error': subject.grade && !validGrades.includes(subject.grade) }">
                                             </div>
                                         </div>
@@ -971,8 +826,22 @@ onMounted(() => {
                                         <span class="subject-name">{{ subject.name }}</span>
                                         <div class="grade-details">
                                             <span class="total-grade">
-                                                Grade: {{ subject.totalGrade }}
+                                                Grade: {{ subject.grade }}
                                             </span>
+                                            <div class="period-grades" v-if="subject.periodGrades">
+                                                <span v-if="subject.periodGrades.prelim" class="period-grade">
+                                                    Prelim: {{ subject.periodGrades.prelim }}
+                                                </span>
+                                                <span v-if="subject.periodGrades.midterm" class="period-grade">
+                                                    Midterm: {{ subject.periodGrades.midterm }}
+                                                </span>
+                                                <span v-if="subject.periodGrades.prefinals" class="period-grade">
+                                                    Prefinals: {{ subject.periodGrades.prefinals }}
+                                                </span>
+                                                <span v-if="subject.periodGrades.finals" class="period-grade">
+                                                    Finals: {{ subject.periodGrades.finals }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                     <button type="button" class="delete-subject-btn" @click="showDeleteConfirmation(
@@ -1000,6 +869,7 @@ onMounted(() => {
                 placeholder-text="Enter Subject Name to Confirm Deletion" @close="isConfirmationModalOpen = false"
                 @confirm="handleConfirmDelete" />
 
+            <!-- UNSAVED CHANGES WARNING -->
             <UnsavedChangesModal :is-open="isUnsavedChangesModalOpen" @close="handleUnsavedChanges(false)"
                 @confirm="handleUnsavedChanges(true)" />
 
@@ -1008,3 +878,4 @@ onMounted(() => {
         </section>
     </main>
 </template>
+

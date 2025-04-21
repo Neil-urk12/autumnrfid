@@ -1,27 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { ref, defineAsyncComponent, computed, watch } from 'vue'
+import type { Student } from '@/typescript/models'
+import mockData from '@/mock/models.json'
+
 const ConfirmationModal = defineAsyncComponent(() => import('@/components/ConfirmationModal.vue'))
 const UnsavedChangesModal = defineAsyncComponent(() => import('@/components/UnsavedChangesModal.vue'))
 const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 
-// MOCK 
-const students = ref([
-  {
-    id: '2023-0001',
-    firstName: 'John',
-    lastName: 'Cez',
-    middleName: '',
-    suffix: '',
-    course: 'BSCS',
-    block: 'A',
-    yearLevel: '3rd Year',
-    status: 'Continuing',
-    birthday: '2000-01-01',
-    email: 'john.cez@example.com',
-    phone: '+63 123456789'
-  }
-])
+const students = ref<Student[]>(mockData.students as Student[])
+const courses = mockData.courses
+const yearLevels = mockData.yearLevels
+const statusOptions = mockData.statusOptions 
+const deleteStatusOptions = mockData.deleteStatusOptions
 
 const formData = ref({
   id: '',
@@ -38,24 +29,18 @@ const formData = ref({
   phone: ''
 })
 
-const courses = ['BSIT', 'BSCS', 'BSIS', 'BSHM']
-const yearLevels = ['1st Year', '2nd Year', '3rd Year', '4th Year']
-const statusOptions = ['New', 'Continuing', 'Probationary']
-const deleteStatusOptions = ['Dropped', 'Withdrawn']
-
 // STATE 
-const isAddModalOpen = ref(false)
-const isEditModalOpen = ref(false)
-const selectedStudentId = ref(null)
-const filterContainerActive = ref(false)
-const searchQuery = ref('')
-const isConfirmationModalOpen = ref(false)
-const isUnsavedChangesModalOpen = ref(false)
-const modalToClose = ref(null)
-const activeFilters = ref([])
+const isAddModalOpen = ref<boolean>(false)
+const isEditModalOpen = ref<boolean>(false)
+const selectedStudentId = ref<string | null>(null)
+const searchQuery = ref<string>('')
+const isConfirmationModalOpen = ref<boolean>(false)
+const isUnsavedChangesModalOpen = ref<boolean>(false)
+const modalToClose = ref<'add' | 'edit' | null>(null)
+const activeFilters = ref<string[]>([])
 
 // GET BLOCK OPTIONS BASED ON COURSE AND YEAR LEVEL
-const getBlockOptions = (course, yearLevel) => {
+const getBlockOptions = (course: string, yearLevel: string) => {
   if (!course || !yearLevel) return []
   const year = yearLevel.charAt(0)
   const coursePrefix = course.replace('BS', '')
@@ -65,7 +50,14 @@ const getBlockOptions = (course, yearLevel) => {
 
 // BLOCK OPTIONS BASED ON FORM DATA
 const blockOptions = computed(() => {
-  return getBlockOptions(formData.value.course, formData.value.yearLevel)
+  const options = getBlockOptions(formData.value.course, formData.value.yearLevel)
+  if (formData.value.block && !options.includes(formData.value.block)) {
+    const blockPattern = /^[A-Z]{2}\d{2}[A-Z]$/
+    if (blockPattern.test(formData.value.block)) {
+      options.push(formData.value.block)
+    }
+  }
+  return options
 })
 
 watch(() => formData.value.course, () => {
@@ -76,10 +68,6 @@ watch(() => formData.value.yearLevel, () => {
   formData.value.block = ''
 })
 
-// TOGGLE FILTER CONTAINER VISIBILITY 
-const toggleFilterContainer = () => {
-  filterContainerActive.value = !filterContainerActive.value
-}
 
 // OPEN ADD STUDENT MODAL WITH EMPTY FORM 
 const openAddModal = () => {
@@ -125,7 +113,7 @@ const closeAddModal = () => {
 }
 
 // OPEN EDIT STUDENT MODAL 
-const openEditModal = (studentId) => {
+const openEditModal = (studentId: string) => {
   const student = students.value.find(s => s.id === studentId)
   if (student) {
     formData.value = { ...student }
@@ -152,8 +140,8 @@ const closeEditModal = () => {
   }
 }
 
-// TRNASFORM INPUT TO CAMEL CASE
-const toCamelCase = (str) => {
+// TRANSFORM INPUT TO CAMEL CASE
+const toCamelCase = (str: string) => {
   return str
     .trim()
     .toLowerCase()
@@ -163,41 +151,36 @@ const toCamelCase = (str) => {
 }
 
 // VALIDATE NAME INPUT
-const validateNameInput = (event) => {
-  // ONLY ALLOW LETTERS, SPACES, AND SOME SPECIAL CHARACTERS FOR NAME INPUTS
-  const regex = /[^a-zA-Z\s.,-]/g
-  const input = event.target
-  const cursorPosition = input.selectionStart
+const validateNameInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const cursorPosition = input.selectionStart ?? 0
   
   const originalValue = input.value
-  
+  const regex = /[^a-zA-Z\s.,-]/g
   const newValue = originalValue.replace(regex, '')
   
   if (newValue !== originalValue) {
     input.value = newValue
-    event.target.dispatchEvent(new Event('input'))
+    input.dispatchEvent(new Event('input'))
     input.setSelectionRange(cursorPosition - 1, cursorPosition - 1)
   }
 }
 
 // VALIDATE PHONE INPUT
-const validatePhoneInput = (event) => {
-  // ONLY ALLOW NUMBERS FOR THE PHONE INPUT
+const validatePhoneInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
   const regex = /[^0-9+]/g
-  event.target.value = event.target.value.replace(regex, '')
+  input.value = input.value.replace(regex, '')
 }
 
 // VALIDATE BIRTH YEAR
-const validateBirthYear = (birthday) => {
+const validateBirthYear = (birthday: string) => {
   const birthYear = new Date(birthday).getFullYear()
-  if (birthYear >= 2010) {
-    return false
-  }
-  return true
+  return birthYear < 2010
 }
 
 // HANDLE ADD STUDENT SUBMISSION 
-const handleSubmitAdd = (e) => {
+const handleSubmitAdd = (e: Event) => {
   e.preventDefault()
   
   const studentData = { ...formData.value }
@@ -219,7 +202,7 @@ const handleSubmitAdd = (e) => {
     return
   }
   
-  students.value.push(studentData)
+  students.value.push(studentData as Student)
   isAddModalOpen.value = false
 
   // RESET AFTER SAVING
@@ -240,7 +223,7 @@ const handleSubmitAdd = (e) => {
 }
 
 // HANDLE EDIT STUDENT SUBMISSION 
-const handleSubmitEdit = (e) => {
+const handleSubmitEdit = (e: Event) => {
   e.preventDefault()
   
   const studentData = { ...formData.value }
@@ -264,7 +247,7 @@ const handleSubmitEdit = (e) => {
   
   const index = students.value.findIndex(s => s.id === selectedStudentId.value)
   if (index !== -1) {
-    students.value[index] = studentData
+    students.value[index] = studentData as Student
     isEditModalOpen.value = false
     selectedStudentId.value = null
 
@@ -290,38 +273,53 @@ const handleSubmitEdit = (e) => {
 const confirmationData = ref({
   title: '',
   itemName: '',
-  itemInfo: null
+  itemInfo: null as Student | null
 })
 
 // SHOW DELETE CONFIRMATION MODAL
-const showDeleteConfirmation = (title, itemName, itemInfo = null) => {
-  confirmationData.value = { title, itemName, itemInfo }
+const showDeleteConfirmation = (title: string, itemName: string, itemInfo: Student) => {
+  confirmationData.value = { 
+    title, 
+    itemName: `${itemName} (This will remove the student from this list and mark them as Dropped or Withdrawn)`, 
+    itemInfo 
+  }
   isConfirmationModalOpen.value = true
 }
 
 // HANDLE DELETE CONFIRMATION 
-const handleConfirmDelete = (itemInfo) => {
+const handleConfirmDelete = (itemInfo: Student & { newStatus: string }) => {
   const index = students.value.findIndex(s => s.id === itemInfo.id)
   if (index !== -1) {
-    const student = { ...students.value[index], status: itemInfo.newStatus }
-    students.value.splice(index, 1)
+    if (itemInfo.newStatus && (itemInfo.newStatus === 'Dropped' || itemInfo.newStatus === 'Withdrawn')) {
+      students.value[index].status = itemInfo.newStatus
+    } else {
+      students.value[index].status = 'Withdrawn'
+    }
+    students.value = students.value.filter(student => 
+      student.id !== itemInfo.id || 
+      (student.status !== 'Dropped' && student.status !== 'Withdrawn')
+    )
   }
   isConfirmationModalOpen.value = false
 }
 
 // HANDLE SEARCH QUERY 
-const handleSearch = (query) => {
+const handleSearch = (query: string) => {
   searchQuery.value = query || ''
 }
 
 // HANDLE FILTER CHANGES 
-const handleFilterChange = (filters) => {
+const handleFilterChange = (filters: string[]) => {
   activeFilters.value = filters || []
 }
 
 // FILTERED STUDENTS
 const filteredStudents = computed(() => {
   return students.value.filter(student => {
+    if (student.status === 'Dropped' || student.status === 'Withdrawn') {
+      return false
+    }
+    
     const fullName = getFullName(student).toLowerCase()
     const matchesSearch = !searchQuery.value ||
       student.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
@@ -341,7 +339,7 @@ const filteredStudents = computed(() => {
 })
 
 // CHECK IF STUDENT ID EXISTS 
-const isStudentIdExists = (id, excludeCurrentId = null) => {
+const isStudentIdExists = (id: string, excludeCurrentId: string | null = null) => {
   return students.value.some(student => 
     student.id === id.toUpperCase() && 
     student.id !== (excludeCurrentId || '').toUpperCase()
@@ -349,7 +347,7 @@ const isStudentIdExists = (id, excludeCurrentId = null) => {
 }
 
 // GET FULL NAME OF STUDENT 
-const getFullName = (student) => {
+const getFullName = (student: Student) => {
   return `${student.firstName} ${student.lastName}`.trim()
 }
 
@@ -362,8 +360,8 @@ const hasUnsavedChanges = computed(() => {
     if (!originalStudent) return false
 
     return Object.keys(formData.value).some(key => {
-      const originalValue = String(originalStudent[key] || '').trim()
-      const currentValue = String(formData.value[key] || '').trim()
+      const originalValue = String(originalStudent[key as keyof Student] || '').trim()
+      const currentValue = String(formData.value[key as keyof typeof formData.value] || '').trim()
       
       if (!originalValue && !currentValue) return false
       
@@ -374,7 +372,7 @@ const hasUnsavedChanges = computed(() => {
 })
 
 // HANDLE UNSAVED CHANGES MODAL 
-const handleUnsavedChanges = (confirm) => {
+const handleUnsavedChanges = (confirm: boolean) => {
   if (confirm) {
     if (modalToClose.value === 'add') {
       isAddModalOpen.value = false

@@ -1,56 +1,26 @@
-<script setup>
+<script setup lang="ts">
 import { ref, defineAsyncComponent, computed } from 'vue'
+import type { Student, StudentGrades, StudentBilling } from '@/typescript/models'
+import studentsData from '@/mock/models.json'
+
 const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 
-// MOCK
-const students = ref([
-  {
-    id: '2023-0001',
-    name: 'John Cez',
-    course: 'Computer Science',
-    yearLevel: '3rd Year',
-    status: 'Continuing',
-    email: 'john.cez@example.com',
-    phone: '+63 29483928',
-    address: 'Compostella'
-  },
-  {
-    id: '2023-0002',
-    name: 'Emily Casupana',
-    course: 'Information Technology',
-    yearLevel: '2nd Year',
-    status: 'Probationary',
-    email: 'emily.casupana@example.com',
-    phone: '+63 12345678',
-    address: 'Davao City'
-  },
-  {
-    id: '2023-0003',
-    name: 'Jan Rosa',
-    course: 'Computer Engineering',
-    yearLevel: '1st Year',
-    status: 'Dropped',
-    email: 'jan.rosa@example.com',
-    phone: '+63 87654321',
-    address: 'Tagum City'
-  }
-])
+const students = ref<Student[]>(studentsData.students as Student[])
 
-
-const activeCategory = ref('information')
-const isModalOpen = ref(false)
-const selectedStudentId = ref(null)
-const searchQuery = ref('')
-const activeFilters = ref([])
+const activeCategory = ref<'information' | 'grades' | 'bills'>('information')
+const isModalOpen = ref<boolean>(false)
+const selectedStudentId = ref<string | null>(null)
+const searchQuery = ref<string>('')
+const activeFilters = ref<string[]>([])
 
 // SWITCHES THE ACTIVE CATEGORY TAB IN THE MODAL
-const switchCategory = (category) => {
+const switchCategory = (category: 'information' | 'grades' | 'bills') => {
   activeCategory.value = category
 }
 
 // OPENS THE STUDENT DETAILS MODAL AND SETS THE SELECTED STUDENT ID
-const openModal = (studentId) => {
+const openModal = (studentId: string) => {
   selectedStudentId.value = studentId
   isModalOpen.value = true
 }
@@ -62,34 +32,35 @@ const closeModal = () => {
 }
 
 // UPDATES THE SEARCH QUERY VALUE
-const handleSearch = (query) => {
+const handleSearch = (query: string) => {
   searchQuery.value = query
 }
 
 // UPDATES THE ACTIVE FILTERS ARRAY
-const handleFilterChange = (filters) => {
+const handleFilterChange = (filters: string[]) => {
   activeFilters.value = filters
 }
 
 // HANDLES THE FILTER BUTTON CLICKS AND UPDATES THE ACTIVE FILTERS
-const handleFilterClick = (filter) => {
+const handleFilterClick = (filter: string) => {
+  const statusFilters = ['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'];
+  
   if (activeFilters.value.includes(filter)) {
     activeFilters.value = []
   } else {
-    activeFilters.value = activeFilters.value.filter(f => 
-      !['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(f)
-    )
+    if (statusFilters.includes(filter)) {
+      activeFilters.value = activeFilters.value.filter(f => !statusFilters.includes(f))
+    }
     activeFilters.value.push(filter)
   }
 }
 
-
 // HANDLES SEARCH AND FILTER
 const filteredStudents = computed(() => {
-  return students.value.filter(student => {
+  return students.value.filter((student: Student) => {
     const matchesSearch = searchQuery.value === '' ||
       student.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      student.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       student.course.toLowerCase().includes(searchQuery.value.toLowerCase())
 
     const statusFilter = activeFilters.value.find(filter => 
@@ -104,15 +75,66 @@ const filteredStudents = computed(() => {
       !['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(filter)
     )
     
-    const matchesOtherFilters = otherFilters.length === 0 ||
-      otherFilters.some(filter =>
-        student.yearLevel.includes(filter) ||
-        student.course.includes(filter)
-      )
+    const blockFilters = otherFilters.filter(filter => 
+      /^[A-Z]{2,}\d{1,2}[A-Z]$/.test(filter)
+    )
+    
+    const courseYearFilters = otherFilters.filter(filter => 
+      !blockFilters.includes(filter)
+    )
+    
+    const matchesBlock = blockFilters.length === 0 || 
+      blockFilters.some(filter => student.block === filter)
+    
+    const matchesCourseYear = courseYearFilters.length === 0 ||
+      courseYearFilters.some(filter => {
+        if (/^[1-4](st|nd|rd|th)(\sYear)?$/.test(filter)) {
+          const yearFilter = filter.includes('Year') ? filter : `${filter} Year`;
+          return student.yearLevel === yearFilter;
+        }
+        return student.course.includes(filter);
+      })
 
-    return matchesSearch && matchesStatus && matchesOtherFilters
+    return matchesSearch && matchesStatus && matchesBlock && matchesCourseYear
   })
 })
+//
+
+const getStudentInfo = (studentId: string | null) => {
+  if (!studentId) return null
+  const student = students.value.find((s: Student) => s.id === studentId)
+  if (!student) return null
+  
+  return {
+    id: student.id,
+    firstName: student.firstName,
+    lastName: student.lastName,
+    middleName: student.middleName,
+    suffix: student.suffix,
+    birthday: student.birthday,
+    course: student.course,
+    block: student.block,
+    yearLevel: student.yearLevel,
+    status: student.status,
+    email: student.email,
+    phone: student.phone
+  }
+}
+
+const getStudentGrades = (studentId: string | null): StudentGrades | null => {
+  if (!studentId) return null
+  const student = students.value.find((s: Student) => s.id === studentId)
+  return student?.grades || null
+}
+
+const subjects = ref(studentsData.subjects)
+const getStudentBilling = (studentId: string | null): StudentBilling | null => {
+  if (!studentId) return null
+  const student = students.value.find((s: Student) => s.id === studentId)
+  return student?.billing || null
+}
+
+const categories = ['information', 'grades', 'bills'] as const
 </script>
 
 <template>
@@ -165,7 +187,7 @@ const filteredStudents = computed(() => {
             <tbody>
               <tr v-for="student in filteredStudents" :key="student.id">
                 <td>{{ student.id }}</td>
-                <td>{{ student.name }}</td>
+                <td>{{ student.firstName }} {{ student.lastName }}</td>
                 <td>{{ student.course }}</td>
                 <td>{{ student.yearLevel }}</td>
                 <td>
@@ -193,100 +215,112 @@ const filteredStudents = computed(() => {
           </div>
 
           <div class="category-buttons">
-            <button v-for="category in ['information', 'grades', 'bills']" :key="category" class="category-btn"
-              :class="{ active: activeCategory === category }" @click="switchCategory(category)">
+            <button v-for="category in categories" 
+              :key="category" 
+              class="category-btn"
+              :class="{ active: activeCategory === category }" 
+              @click="switchCategory(category)">
               {{ category.charAt(0).toUpperCase() + category.slice(1) }}
             </button>
           </div>
 
           <!-- STUDENT DETAILS -->
           <div class="category-content" :class="{ active: activeCategory === 'information' }" id="information-content">
-            <div class="student-info-grid">
-              <template v-if="selectedStudentId">
-                <div v-for="(value, key) in students.find(s => s.id === selectedStudentId)" :key="key"
-                  class="info-group">
-                  <label>{{ key.charAt(0).toUpperCase() + key.slice(1) }}</label>
-                  <span>{{ value }}</span>
-                </div>
-              </template>
+            <div class="scrollable-content">
+              <div class="student-info-grid">
+                <template v-if="selectedStudentId">
+                  <div v-for="(value, key) in getStudentInfo(selectedStudentId)" :key="key"
+                    class="info-group">
+                    <label>{{ String(key).charAt(0).toUpperCase() + String(key).slice(1) }}</label>
+                    <span>{{ value }}</span>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
 
           <!-- STUDENT GRADES -->
           <div class="category-content" :class="{ active: activeCategory === 'grades' }" id="grades-content">
-            <div class="grades-summary">
-              <table class="grades-table">
-                <thead>
-                  <tr>
-                    <th class="subject-col">Subject</th>
-                    <th>Prelim</th>
-                    <th>Midterm</th>
-                    <th>Prefinals</th>
-                    <th>Finals</th>
-                    <th>GWA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="subject-col">Computer Fundamentals</td>
-                    <td class="grade-col">1.00</td>
-                    <td class="grade-col">1.25</td>
-                    <td class="grade-col">1.00</td>
-                    <td class="grade-col">1.00</td>
-                    <td class="grade-col">1.00</td>
-                  </tr>
-                  <tr>
-                    <td class="subject-col">Information Management</td>
-                    <td class="grade-col">1.00</td>
-                    <td class="grade-col">1.00</td>
-                    <td class="grade-col">1.00</td>
-                    <td class="grade-col">1.00</td>
-                    <td class="grade-col">1.00</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="scrollable-content">
+              <div class="grades-summary">
+                <template v-if="getStudentGrades(selectedStudentId)">
+                  <table class="grades-table">
+                    <thead>
+                      <tr>
+                        <th class="subject-col">Subject</th>
+                        <th>Prelim</th>
+                        <th>Midterm</th>
+                        <th>Prefinals</th>
+                        <th>Finals</th>
+                        <th>GWA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="subject in subjects" :key="subject.code">
+                        <td class="subject-col">{{ subject.name }}</td>
+                        <td class="grade-col">{{ getStudentGrades(selectedStudentId)?.prelim[subject.code] || '-' }}</td>
+                        <td class="grade-col">{{ getStudentGrades(selectedStudentId)?.midterm[subject.code] || '-' }}</td>
+                        <td class="grade-col">{{ getStudentGrades(selectedStudentId)?.prefinals[subject.code] || '-' }}</td>
+                        <td class="grade-col">{{ getStudentGrades(selectedStudentId)?.finals[subject.code] || '-' }}</td>
+                        <td class="grade-col">{{ getStudentGrades(selectedStudentId)?.gwa || '-' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="remarks-container" v-if="getStudentGrades(selectedStudentId)?.remarks">
+                    <span :class="['status-badge', `status-${getStudentGrades(selectedStudentId)?.remarks.toLowerCase()}`]">
+                      Remarks: {{ getStudentGrades(selectedStudentId)?.remarks }}
+                    </span>
+                  </div>
+                </template>
+                <p v-else>No grades available for this student.</p>
+              </div>
             </div>
           </div>
 
           <!-- STUDENT BILLS -->
           <div class="category-content" :class="{ active: activeCategory === 'bills' }" id="bills-content">
-            <div class="bills-summary">
-              <div class="balance-grid">
-                <div class="balance-item">
-                  <h3>Total Tuition</h3>
-                  <span class="amount">₱27,380.00</span>
-                </div>
-                <div class="balance-item">
-                  <h3>Total Paid</h3>
-                  <span class="amount paid">₱22,500.00</span>
-                </div>
-                <div class="balance-item">
-                  <h3>Remaining Balance</h3>
-                  <span class="amount remaining">₱4,880.00</span>
-                </div>
-              </div>
-              <div class="bills-table-container">
-                <table class="bills-table">
-                  <thead>
-                    <tr>
-                      <th class="desc-col">Description</th>
-                      <th class="date-col">Date</th>
-                      <th class="amount-col">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="desc-col">Tuition Fee</td>
-                      <td class="date-col">2024-01-15</td>
-                      <td class="amount-col">₱22,500.00</td>
-                    </tr>
-                    <tr>
-                      <td class="desc-col">Prelim Exam</td>
-                      <td class="date-col">2024-01-15</td>
-                      <td class="amount-col">₱4,880.00</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="scrollable-content">
+              <div class="bills-summary">
+                <template v-if="getStudentBilling(selectedStudentId)">
+                  <div class="balance-grid">
+                    <div class="balance-item">
+                      <h3>Total Tuition</h3>
+                      <span class="amount">₱{{ getStudentBilling(selectedStudentId)?.totalTuition.toFixed(2) }}</span>
+                    </div>
+                    <div class="balance-item">
+                      <h3>Total Paid</h3>
+                      <span class="amount paid">₱{{ getStudentBilling(selectedStudentId)?.totalPaid.toFixed(2) }}</span>
+                    </div>
+                    <div class="balance-item">
+                      <h3>Remaining Balance</h3>
+                      <span class="amount remaining">₱{{ getStudentBilling(selectedStudentId)?.remainingBalance.toFixed(2) }}</span>
+                    </div>
+                  </div>
+
+                  <h3 class="section-title">Payment History</h3>
+                  <div class="bills-table-container">
+                    <table class="bills-table">
+                      <thead>
+                        <tr>
+                          <th class="desctit">Description</th>
+                          <th class="desctit">Date</th>
+                          <th class="desctit">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="paydat" v-for="(payment, index) in getStudentBilling(selectedStudentId)?.payments" :key="index">
+                          <td class="desc-col">{{ payment.description }}</td>
+                          <td class="desc-col">{{ payment.date }}</td>
+                          <td class="desc-col">₱{{ payment.amount.toFixed(2) }}</td>
+                        </tr>
+                        <tr v-if="getStudentBilling(selectedStudentId)?.payments.length === 0">
+                          <td colspan="3" class="no-data">No payment records found</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </template>
+                <p v-else>No billing information available for this student.</p>
               </div>
             </div>
           </div>
