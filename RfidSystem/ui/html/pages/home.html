@@ -1,0 +1,298 @@
+{{template "layouts/base" .}}
+
+{{define "content"}}
+
+<body>
+
+    <div class="navbar" id="main-navbar" style="display: none;">
+        <button hx-get="/student-partial" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
+        <button hx-get="/grades" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
+        <button hx-get="/bills" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
+    </div>
+
+    </div>
+
+    <main id="main" hx-ext="sse" sse-connect="/stream" sse-swap="studentcallback">
+
+        <div class="container-home" id="student-data-container">
+
+            <div id="welcome-section" class="welcome-wrapper">
+                <div class="welcome-content">
+                    <h1>Welcome to RFID</h1>
+                    <p>Please scan your RFID card to view your student information.</p>
+                    <i class="scan-icon fas fa-qrcode"></i>
+                </div>
+            </div>
+
+            <div id="alternating-messages" class="message-wrapper">
+                <div class="message-content">
+                    <p class="message-item">View your current semester grades and academic progress</p>
+                    <p class="message-item">Check your class schedule and room assignments</p>
+                    <p class="message-item">Monitor your attendance and participation records</p>
+                    <p class="message-item">Access your tuition balance and payment deadlines</p>
+                    <p class="message-item">Stay updated with school announcements and events</p>
+                    <p class="message-item">Track your academic requirements and prerequisites</p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+    <!-- <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p> -->
+
+    <!-- Idle Timeout Modal -->
+    <div id="idle-timeout-modal" class="idle-modal-overlay" style="display: none;">
+        <div class="idle-modal-content">
+            <h3>Are you still there?</h3>
+            <p>Returning to home screen in <span id="idle-countdown">10</span> seconds...</p>
+            <div class="idle-modal-buttons">
+                <button id="idle-confirm-btn">Yes, continue</button>
+                <button id="idle-return-btn" hx-get="/" hx-target="#main" hx-swap="innerHTML">No, return home</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Idle Timeout Modal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const messages = document.querySelectorAll('.message-item')
+            let currentIndex = 0
+            // Idle Timeout Variables
+            let idleTimeoutId = null;
+            let modalCountdownIntervalId = null;
+            let modalCountdownValue = 10; // seconds for modal countdown
+            let isUserInfoActive = false; // Track if student/bills/grades view is active
+            const idleTimeoutDuration = 30000; // 30 seconds idle time
+
+            // Modal Element References
+            const idleTimeoutModal = document.getElementById('idle-timeout-modal');
+            const idleCountdownSpan = document.getElementById('idle-countdown');
+            const idleConfirmBtn = document.getElementById('idle-confirm-btn');
+            const idleReturnBtn = document.getElementById('idle-return-btn');
+
+            function showNextMessage() {
+                messages.forEach(msg => msg.classList.remove('active'))
+                messages[currentIndex].classList.add('active')
+                currentIndex = (currentIndex + 1) % messages.length
+            }
+            // --- Idle Timeout Functions ---
+
+            function resetIdleTimer() {
+                console.log('Resetting idle timer. isUserInfoActive:', isUserInfoActive);
+                clearTimeout(idleTimeoutId);
+                if (isUserInfoActive) {
+                    idleTimeoutId = setTimeout(showIdleModal, idleTimeoutDuration);
+                    console.log('Idle timer started/reset. Timeout ID:', idleTimeoutId);
+                } else {
+                    console.log('Idle timer not started (user info not active).');
+                }
+            }
+
+            function showIdleModal() {
+                console.log('Idle timeout reached. Showing modal.');
+                modalCountdownValue = 10;
+                if (idleCountdownSpan) idleCountdownSpan.textContent = modalCountdownValue;
+                if (idleTimeoutModal) idleTimeoutModal.style.display = 'flex';
+
+                clearTimeout(idleTimeoutId); // Stop the main idle timer once modal is shown
+                clearInterval(modalCountdownIntervalId); // Clear any previous countdown interval
+
+                modalCountdownIntervalId = setInterval(() => {
+                    modalCountdownValue--;
+                    if (idleCountdownSpan) idleCountdownSpan.textContent = modalCountdownValue;
+                    console.log('Modal countdown:', modalCountdownValue);
+                    if (modalCountdownValue <= 0) {
+                        console.log('Modal countdown finished. Returning home.');
+                        returnToHome();
+                    }
+                }, 1000);
+            }
+
+            function hideIdleModal() {
+                console.log('Hiding idle modal.');
+                if (idleTimeoutModal) idleTimeoutModal.style.display = 'none';
+                clearInterval(modalCountdownIntervalId);
+            }
+
+            function returnToHome() {
+                console.log('Executing returnToHome function.');
+                hideIdleModal();
+                clearTimeout(idleTimeoutId);
+                isUserInfoActive = false;
+
+                htmx.ajax("GET", "/");
+            }
+
+            // --- End Idle Timeout Functions ---
+
+            showNextMessage()
+            setInterval(showNextMessage, 4000)
+
+            // Add SSE ping logging
+            const sseSource = new EventSource('/stream')
+
+            sseSource.addEventListener('ping', function (e) {
+                console.log('SSE Ping received:', JSON.parse(e.data))
+            })
+
+            // Store student ID when received
+            let currentStudentId = '';
+
+            document.body.addEventListener('htmx:afterSwap', function (event) {
+                console.log('htmx:afterSwap Event:', event);
+                console.log('htmx:afterSwap Event Detail:', event.detail);
+                if (!event || !event.detail) {
+                    console.log('htmx:afterSwap - Event or event.detail is undefined');
+                    return;
+                }
+
+                const navbar = document.getElementById('main-navbar');
+                const requestPath = event.detail.pathInfo ? event.detail.pathInfo.requestPath : null;
+                console.log("htmx:afterSwap - Request Path:", requestPath);
+
+                // --- Idle Timer Logic ---
+                if (requestPath) {
+                    const isNowUserInfoActive = requestPath.startsWith('/student-partial/') ||
+                        requestPath === '/grades' ||
+                        requestPath === '/bills';
+
+                    if (isNowUserInfoActive) {
+                        console.log('User info view loaded. Activating idle timer.');
+                        isUserInfoActive = true;
+                        resetIdleTimer(); // Start or reset the timer
+                    } else {
+                        // Check if navigating away from user info (e.g., back to home, or error)
+                        const isReturningHome = requestPath === '/' || requestPath === '/error'; // Add other non-user paths if needed
+                        if (isReturningHome) {
+                            console.log('Navigated away from user info. Deactivating idle timer.');
+                            isUserInfoActive = false;
+                            clearTimeout(idleTimeoutId);
+                            hideIdleModal(); // Ensure modal is hidden
+                        }
+                        // If navigating between non-user-info pages, do nothing with the timer state
+                    }
+                } else {
+                    console.log('htmx:afterSwap - No requestPath found in event details.');
+                    // Potentially deactivate timer if path is unknown? Or maintain state?
+                    // Let's deactivate for safety.
+                    isUserInfoActive = false;
+                    clearTimeout(idleTimeoutId);
+                    hideIdleModal();
+                }
+                // --- End Idle Timer Logic ---
+
+
+                // --- Existing Logic (Student ID & Navbar) ---
+                // Check if we can find the student ID (only relevant if navbar exists)
+                if (navbar) {
+                    const studentIdElement = document.getElementById('current-student-id');
+                    if (studentIdElement && studentIdElement.value) {
+                        const currentStudentIdValue = studentIdElement.value; // Use a different variable name
+                        console.log('Current student ID found:', currentStudentIdValue);
+
+                        // Update RFID Button
+                        const rfidButton = navbar.querySelector('button[hx-get^="/student-partial"]');
+                        if (rfidButton) {
+                            rfidButton.setAttribute('hx-get', `/student-partial/${currentStudentIdValue}`);
+                            console.log('Updated RFID button hx-get:', rfidButton.getAttribute('hx-get'));
+                            htmx.process(rfidButton);
+                        }
+
+                        // Update Grades Button
+                        const gradesButton = navbar.querySelector('button[hx-get^="/grades"]');
+                        if (gradesButton) {
+                            gradesButton.setAttribute('hx-get', `/grades?student-id=${currentStudentIdValue}`);
+                            console.log('Updated Grades button hx-get:', gradesButton.getAttribute('hx-get'));
+                            htmx.process(gradesButton);
+                        }
+
+                        // Update Bills Button
+                        const billsButton = navbar.querySelector('button[hx-get^="/bills"]');
+                        if (billsButton) {
+                            billsButton.setAttribute('hx-get', `/bills?student-id=${currentStudentIdValue}`);
+                            console.log('Updated Bills button hx-get:', billsButton.getAttribute('hx-get'));
+                            htmx.process(billsButton);
+                        }
+                    } else {
+                        console.log('Current student ID element not found or has no value in this swap.');
+                    }
+
+                    // Handle navbar visibility based on the same path check
+                    if (requestPath) {
+                        const showNav = requestPath.startsWith('/student-partial/') ||
+                            requestPath === '/grades' ||
+                            requestPath === '/bills';
+                        const hideNav = requestPath === '/' || requestPath === '/error';
+
+                        // Determine final display state
+                        let finalDisplay = navbar.style.display; // Keep current state by default
+                        if (showNav) {
+                            finalDisplay = 'flex';
+                        } else if (hideNav) {
+                            finalDisplay = 'none';
+                        }
+                        // Only update if the state needs changing or is initially unset
+                        if (navbar.style.display !== finalDisplay) {
+                            navbar.style.display = finalDisplay;
+                            console.log('Navbar display set to:', finalDisplay);
+                        }
+                    }
+                }
+                // --- End Existing Logic ---
+            });
+
+            sseSource.addEventListener('connected', function (e) {
+                console.log('SSE Connected:', JSON.parse(e.data))
+            })
+
+            sseSource.addEventListener('studentcallback', function (e) {
+                console.log('Received studentcallback event:', e.data);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = e.data;
+                document.body.appendChild(tempDiv);
+                htmx.process(tempDiv);
+
+                // Explicitly show navbar
+                const navbar = document.getElementById('main-navbar');
+                if (navbar) {
+                    navbar.style.display = 'flex';
+                }
+
+                // Explicitly hide welcome messages
+                const welcomeSection = document.getElementById('welcome-section');
+                if (welcomeSection) {
+                    welcomeSection.style.display = 'none';
+                }
+            })
+
+            sseSource.onerror = function (e) {
+                console.error('SSE Error:', e)
+            }
+            // --- Idle Timeout Event Listeners ---
+            document.addEventListener('click', resetIdleTimer);
+            // document.addEventListener('mousemove', throttledResetIdleTimer); // Removed mousemove listener
+            document.addEventListener('keypress', resetIdleTimer); // Keep keypress listener
+
+            if (idleConfirmBtn) {
+                idleConfirmBtn.addEventListener('click', () => {
+                    console.log('Idle modal "Yes" clicked.');
+                    hideIdleModal();
+                    resetIdleTimer(); // User is active, reset the main timer
+                });
+            } else {
+                console.error("Could not find #idle-confirm-btn");
+            }
+
+            if (idleReturnBtn) {
+                idleReturnBtn.addEventListener('click', () => {
+                    console.log('Idle modal "No" clicked.');
+                    returnToHome();
+                });
+            } else {
+                console.error("Could not find #idle-return-btn");
+            }
+            // --- End Idle Timeout Event Listeners ---
+
+        })
+    </script>
+    {{end}}
