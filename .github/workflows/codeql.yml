@@ -2,9 +2,9 @@ name: "CodeQL Analysis"
 
 on:
   push:
-    branches: [ "main", "develop" ] # Includes both 'main' and 'develop'
+    branches: [ "main", "develop", "feature" ] # Includes both 'main' and 'develop'
   pull_request:
-    branches: [ "main", "develop" ] # PRs to both branches
+    branches: [ "main", "develop", "feature" ] # PRs to both branches
   schedule:
     - cron: '23 2 * * 1' # Weekly scan (Monday at 2:23 AM UTC)
 
@@ -43,8 +43,8 @@ jobs:
     - name: Build Go code
       if: matrix.language == 'go' # Conditional Go build step
       run: |
-        go get -d -v ./... # Get dependencies
-        go build ./...    # Build the application
+        go install
+        go build RfidSystem/cmd/web/main.go   # Build the application
 
     - name: Build JavaScript code (if applicable)
       if: matrix.language == 'javascript' # Conditional JavaScript build step
