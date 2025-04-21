@@ -1,3 +1,4 @@
 .env
 /tmp/build-errors.log
 /tmp/main
+RfidAdmin/node_modules
