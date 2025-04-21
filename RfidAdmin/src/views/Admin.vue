@@ -4,10 +4,11 @@ const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"));
 </script>
 
 <template>
-    <div class="sidebar">
-        <Sidebar />
-    </div>
-
-    <section id="#dashboard">
-    </section>
+    <main>
+        <div class="sidebar">
+            <Sidebar />
+        </div>
+        <section>
+        </section>
+    </main>
 </template>
