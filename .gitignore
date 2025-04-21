@@ -11,3 +11,6 @@ Admin/tmp/*
 Admin/tmp/*
 Admin/.air.toml
 Admin/tmp/build-errors.log
+/tmp/build-errors.log
+/tmp/main
+RfidAdmin/node_modules
