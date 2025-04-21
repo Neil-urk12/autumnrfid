@@ -5,12 +5,16 @@ import (
 	"log"
 	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
+	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-var cardScanCache = NewLRUCache(5, time.Hour)
+var (
+	cardScanCache = NewLRUCache(5, time.Hour)
+	cacheMutex    = &sync.RWMutex{}
+)
 
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	rfid := ctx.FormValue("rfid")
@@ -19,7 +23,13 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 
 	// Try cache first
+	cacheMutex.RLock()
 	if cached, found := cardScanCache.Get(rfid); found {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("Cache type assertion failed: %v", r)
+			}
+		}()
 		student, ok := cached.(*model.StudentInfoViewModel)
 		if ok && student != nil {
 			log.Printf("[CACHE HIT] Student found: %s\n", student.Student.StudentID)
@@ -28,6 +38,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 			return ctx.SendString("Processing (cache)")
 		}
 	}
+	cacheMutex.RUnlock()
 
 	rfidRepo := repositories.NewRFIDRepository(h.db)
 	// student, err := rfidRepo.GetStudentByRFID(rfid)
@@ -46,7 +57,9 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 
 	log.Printf("Student found: %s\n", student.Student.StudentID)
 	// Store in cache
+	cacheMutex.Lock()
 	cardScanCache.Set(rfid, student)
+	cacheMutex.Unlock()
 
 	htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 
