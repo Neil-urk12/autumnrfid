@@ -1,0 +1,24 @@
+{
+  "name": "rfid-admin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pinia": "^3.0.2",
+    "vue": "^3.3.0",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vue/compiler-sfc": "^3.3.0",
+    "typescript": "^5.8.3",
+    "vite": "^4.0.0",
+    "vue-tsc": "^1.0.0"
+  }
+}

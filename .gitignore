@@ -1,0 +1,16 @@
+.env
+RfidSystem/tmp/build-errors.log
+RfidSystem/tmp/*
+.air.toml
+/tmp/main.exe
+/Admin/tmp/main
+/Admin/tmp/main.exe
+/Admin/tmp/*
+/Admin/.air.toml
+Admin/tmp/*
+Admin/tmp/*
+Admin/.air.toml
+Admin/tmp/build-errors.log
+/tmp/build-errors.log
+/tmp/main
+RfidAdmin/node_modules
