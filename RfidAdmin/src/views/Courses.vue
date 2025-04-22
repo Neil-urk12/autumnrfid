@@ -3,7 +3,7 @@ import { ref, computed, defineAsyncComponent } from 'vue'
 import type { Course, ConfirmationData, CourseForm } from '@/typescript/models'
 import mockData from '@/mock/models.json'
 
-const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
+
 const ConfirmationModal = defineAsyncComponent(() => import("@/components/ConfirmationModal.vue"))
 const UnsavedChangesModal = defineAsyncComponent(() => import("@/components/UnsavedChangesModal.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
@@ -261,10 +261,6 @@ const handleUnsavedChanges = (confirm: boolean) => {
 
 <template>
   <main>
-    <div class="sidebar">
-      <Sidebar />
-    </div>
-
     <section>
       <div class="container">
         <div class="welcome-header" style="padding-bottom: 0;">

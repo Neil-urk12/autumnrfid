@@ -3,7 +3,6 @@ import { ref, computed, defineAsyncComponent } from 'vue'
 import { Student, Payment, FeeStructure } from '@/typescript/models'
 import mockData from '@/mock/models.json'
 
-const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 const UnsavedChangesModal = defineAsyncComponent(() => import("@/components/UnsavedChangesModal.vue"))
 
@@ -1096,9 +1095,7 @@ const handleYearChange = () => {
 
 <template>
     <main>
-        <div class="sidebar">
-            <Sidebar />
-        </div>
+
         <section>
             <div class="container">
                 <div class="welcome-header">

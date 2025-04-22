@@ -3,7 +3,7 @@ import { ref, defineAsyncComponent, computed } from 'vue'
 import type { Student, StudentGrades, StudentBilling } from '@/typescript/models'
 import studentsData from '@/mock/models.json'
 
-const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
+// const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 
 const students = ref<Student[]>(studentsData.students as Student[])
@@ -139,10 +139,7 @@ const categories = ['information', 'grades', 'bills'] as const
 
 <template>
   <main>
-    <div class="sidebar">
-      <Sidebar />
-    </div>
-
+    
     <section>
       <div class="container">
         <div class="welcome-header">
