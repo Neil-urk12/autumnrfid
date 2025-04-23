@@ -67,8 +67,8 @@ type Student struct {
 	BlockSection  *string `json:"block_section,omitempty" db:"block_section"`
 	// FirstAccessTimestamp *time.Time `json:"first_access_timestamp,omitempty" db:"first_access_timestamp"`
 	// LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
-	FirstAccessTimestamp string `json:"first_access_timestamp" db:"first_access_timestamp"`
-	LastAccessTimestamp  string `json:"last_access_timestamp" db:"last_access_timestamp"`
+	FirstAccessTimestamp string  `json:"first_access_timestamp" db:"first_access_timestamp"`
+	LastAccessTimestamp  string  `json:"last_access_timestamp" db:"last_access_timestamp"`
 	Status               *string `json:"status,omitempty" db:"status"`
 }
 

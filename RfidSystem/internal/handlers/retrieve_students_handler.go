@@ -31,6 +31,30 @@ func (h *AppHandler) GetStudentById(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(student)
 }
+
+func (h *AppHandler) GetGrades(ctx *fiber.Ctx) error {
+	studentID := ctx.Params("id")
+	log.Printf("Received request to get grades for student with ID: %s\n", studentID)
+
+	grades, err := h.RFIDRepository.GetStudentGradesByID(studentID)
+	if err != nil {
+		if err.Error() == "student not found" {
+			log.Printf("Student not found with ID: %s\n", studentID)
+			return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
+		}
+		log.Printf("Error retrieving grades for student ID %s: %v\n", studentID, err)
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+	}
+
+	if grades == nil {
+		log.Printf("Grades not found for student ID: %s (nil returned without error)\n", studentID)
+		return ctx.Status(fiber.StatusNotFound).SendString("Grades not found")
+	}
+
+	log.Println(ctx.JSON(grades))
+	return ctx.JSON(grades)
+}
+
 func (h *AppHandler) RetrieveStudentsHandler(ctx *fiber.Ctx) error {
 	page := ctx.QueryInt("page", 1)
 	cacheKey := strconv.Itoa(page)

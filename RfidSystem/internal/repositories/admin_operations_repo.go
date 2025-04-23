@@ -144,6 +144,26 @@ func (r *RFIDRepository) GetStudentsForAssessmentTerm(termID int64, page, limit 
 	return students, totalStudents, nil
 }
 
+func (r *RFIDRepository) GetStudentGradesByID(studentId string) (*model.GradesRecord, error) {
+	// grades := &model.GradesRecord{}
+
+	query := "CALL GetStudent(?)"
+
+	rows, err := r.dbClient.DB.Query(query, studentId)
+	if err != nil {
+		log.Printf("Error querying student grades: %v\n", err)
+		return nil, fmt.Errorf("error querying student grades: %v", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+	}
+
+	return nil, nil
+}
+
 // GetStudentInfo retrieves detailed information for a specific student by their ID.
 func (r *RFIDRepository) GetStudentInfo(studentID string) (*model.Student, error) { // Changed parameter type to string
 	student := &model.Student{}
@@ -180,7 +200,7 @@ func (r *RFIDRepository) GetStudentInfo(studentID string) (*model.Student, error
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No student found with ID: %s\n", studentID) // Log string ID
-			return nil, fmt.Errorf("student not found") // Return a specific error for not found
+			return nil, fmt.Errorf("student not found")             // Return a specific error for not found
 		}
 		log.Printf("Error scanning student row for ID %s: %v\n", studentID, err) // Log string ID
 		return nil, fmt.Errorf("error scanning student row: %v", err)
