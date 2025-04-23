@@ -49,22 +49,22 @@ const router = createRouter({
 });
 
 // Navigation guard to check authentication
-router.beforeEach((to, from, next) => {
-    const authStore = useAuthStore();
-    const publicPages = ['/login'];
-    const authRequired = !publicPages.includes(to.path);
-    
-    if (authRequired && !authStore.isAuthenticated) {
-        // Redirect to login page if not authenticated
-        return next('/login');
-    }
-    
-    // If already logged in and trying to access login page, redirect to home
-    if (authStore.isAuthenticated && to.path === '/login') {
-        return next('/');
-    }
-    
-    next();
-});
+// router.beforeEach((to, from, next) => {
+//     const authStore = useAuthStore();
+//     const publicPages = ['/login'];
+//     const authRequired = !publicPages.includes(to.path);
+
+//     if (authRequired && !authStore.isAuthenticated) {
+//         // Redirect to login page if not authenticated
+//         return next('/login');
+//     }
+
+//     // If already logged in and trying to access login page, redirect to home
+//     if (authStore.isAuthenticated && to.path === '/login') {
+//         return next('/');
+//     }
+
+//     next();
+// });
 
 export default router
