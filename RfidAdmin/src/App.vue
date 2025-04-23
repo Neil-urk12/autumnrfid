@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
 
 const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
+const route = useRoute()
 </script>
 
 <template>
   <div class="app-layout">
-    <Sidebar />
+    <Sidebar v-if="route.path !== '/login'" />
     <div class="main-content">
       <router-view></router-view>
     </div>
