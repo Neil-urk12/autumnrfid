@@ -103,7 +103,8 @@ func main() {
 	}
 
 	// Pass the database client to the handler
-	appHandler := handlers.NewHandler(db)
+	rfidRepo := repositories.NewRFIDRepository(db)
+	appHandler := handlers.NewHandler(db, rfidRepo)
 
 	// Routes
 	app.Get("/", appHandler.HandleGetIndex)
@@ -113,6 +114,8 @@ func main() {
 	// app.Get("/student-partial/:rfid", appHandler.GetStudentPartial)
 	app.Get("/student-partial/:rfid", appHandler.HandleStudentInfo)
 	app.Get("/students/v1", appHandler.RetrieveStudentsHandler)
+	app.Get("/students/assessment-term/:termID", appHandler.HandleGetStudentsForAssessmentTerm)
+	// app.Get("/students/", )
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
 

@@ -8,10 +8,11 @@ import (
 
 type AppHandler struct {
 	db *repositories.DatabaseClient
+	RFIDRepository *repositories.RFIDRepository
 }
 
-func NewHandler(db *repositories.DatabaseClient) *AppHandler {
-	return &AppHandler{db: db}
+func NewHandler(db *repositories.DatabaseClient, rfidRepo *repositories.RFIDRepository) *AppHandler {
+	return &AppHandler{db: db, RFIDRepository: rfidRepo}
 }
 
 func (h *AppHandler) HandleGetIndex(ctx *fiber.Ctx) error {

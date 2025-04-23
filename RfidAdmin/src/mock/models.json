@@ -281,8 +281,8 @@
         },
         "payments": [
           {
-            "description": 0,
-            "date": 0,
+            "description": "",
+            "date": "",
             "amount": 0
           }
         ]
@@ -376,4 +376,4 @@
       }
     }
   }
-} 
+}

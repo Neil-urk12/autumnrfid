@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"log"
-	"rfidsystem/internal/repositories"
 	"strconv"
 	"time"
 
@@ -22,8 +21,7 @@ func (h *AppHandler) RetrieveStudentsHandler(ctx *fiber.Ctx) error {
 		}
 	}
 
-	rfidRepo := repositories.NewRFIDRepository(h.db)
-	students, err := rfidRepo.GetAllStudents(page)
+	students, err := h.RFIDRepository.GetAllStudents(page)
 
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")

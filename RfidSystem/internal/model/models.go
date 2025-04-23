@@ -69,6 +69,7 @@ type Student struct {
 	// LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
 	FirstAccessTimestamp string `json:"first_access_timestamp" db:"first_access_timestamp"`
 	LastAccessTimestamp  string `json:"last_access_timestamp" db:"last_access_timestamp"`
+	// Status               *string `json:"status,omitempty" db:"status"`
 }
 
 type Assessment struct {
@@ -156,13 +157,13 @@ type PaymentSchedule struct {
 }
 
 type PaymentScheduleViewModel struct {
-    ID               int64
-    AssessmentNumber int64
-    TermDescription  string
-    DueDate          string
-    ExpectedAmount   float64
-    ExpectedAmountFormatted string
-    SortOrder       int
+	ID                      int64
+	AssessmentNumber        int64
+	TermDescription         string
+	DueDate                 string
+	ExpectedAmount          float64
+	ExpectedAmountFormatted string
+	SortOrder               int
 }
 
 // -------------------------
@@ -212,4 +213,27 @@ type Grades struct {
 	Student     *Student
 	CurrentTerm *AcademicTerm
 	Grades      []GradesRecord
+}
+
+// StudentAssessmentSummary represents the summary of students for a specific assessment term.
+type StudentAssessmentSummary struct {
+	StudentID string  `json:"student_id" db:"StudentID"`
+	Name      *string `json:"name,omitempty" db:"Name"`
+	Course    *string `json:"course,omitempty" db:"Course"`
+	YearLevel *string `json:"year_level,omitempty" db:"YearLevel"`
+	Status    *string `json:"status,omitempty" db:"status"`
+}
+
+// PaginationMetadata holds information about the pagination state.
+type PaginationMetadata struct {
+	CurrentPage int `json:"currentPage"`
+	PageSize    int `json:"pageSize"`
+	TotalItems  int `json:"totalItems"`
+	TotalPages  int `json:"totalPages"`
+}
+
+// PaginatedStudentAssessmentResponse structures the paginated response for student assessments.
+type PaginatedStudentAssessmentResponse struct {
+	Data       []*StudentAssessmentSummary `json:"data"`
+	Pagination PaginationMetadata          `json:"pagination"`
 }

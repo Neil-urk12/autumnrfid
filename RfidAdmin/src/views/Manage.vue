@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, defineAsyncComponent, computed } from 'vue'
-import type { Student, StudentGrades, StudentBilling } from '@/typescript/models'
+import { ref, defineAsyncComponent, computed, onMounted } from 'vue'
+import type { Student, StudentGrades, StudentBilling, StudentAssessmentSummary, PaginatedStudentAssessmentResponse, PaginationMetadata } from '@/typescript/models'
 import studentsData from '@/mock/models.json'
 
-// const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 
 const students = ref<Student[]>(studentsData.students as Student[])
+const manageStudents = ref<StudentAssessmentSummary[]>([])
 
 const activeCategory = ref<'information' | 'grades' | 'bills'>('information')
 const isModalOpen = ref<boolean>(false)
@@ -44,61 +44,46 @@ const handleFilterChange = (filters: string[]) => {
 // HANDLES THE FILTER BUTTON CLICKS AND UPDATES THE ACTIVE FILTERS
 const handleFilterClick = (filter: string) => {
   const statusFilters = ['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'];
-  
-  if (activeFilters.value.includes(filter)) {
-    activeFilters.value = []
-  } else {
-    if (statusFilters.includes(filter)) {
-      activeFilters.value = activeFilters.value.filter(f => !statusFilters.includes(f))
+
+  if (statusFilters.includes(filter)) {
+    if (filter === 'All Students') {
+      activeFilters.value = ['All Students'];
+    } else {
+      if (activeFilters.value.includes(filter)) {
+        activeFilters.value = ['All Students'];
+      } else {
+        activeFilters.value = activeFilters.value.filter(f => !statusFilters.includes(f));
+        activeFilters.value.push(filter); 
+      }
     }
-    activeFilters.value.push(filter)
+  } else {
+    if (activeFilters.value.includes(filter)) {
+      activeFilters.value = activeFilters.value.filter(f => f !== filter);
+    } else {
+      activeFilters.value.push(filter);
+    }
   }
 }
 
 // HANDLES SEARCH AND FILTER
 const filteredStudents = computed(() => {
-  return students.value.filter((student: Student) => {
+  const activeStatusFilter = activeFilters.value.find(filter =>
+    ['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(filter)
+  );
+
+  return manageStudents.value.filter((student: StudentAssessmentSummary) => {
     const matchesSearch = searchQuery.value === '' ||
-      student.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      student.course.toLowerCase().includes(searchQuery.value.toLowerCase())
+      student.student_id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (student.name?.toLowerCase() ?? '').includes(searchQuery.value.toLowerCase()) ||
+      (student.course?.toLowerCase() ?? '').includes(searchQuery.value.toLowerCase());
 
-    const statusFilter = activeFilters.value.find(filter => 
-      ['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(filter)
-    )
-    
-    const matchesStatus = !statusFilter || 
-      statusFilter === 'All Students' || 
-      student.status === statusFilter
+    const matchesStatus = !activeStatusFilter ||
+      activeStatusFilter === 'All Students' ||
+      (student.status ?? '') === activeStatusFilter;
 
-    const otherFilters = activeFilters.value.filter(filter => 
-      !['All Students', 'Continuing', 'Withdrawn', 'Dropped', 'Probationary'].includes(filter)
-    )
-    
-    const blockFilters = otherFilters.filter(filter => 
-      /^[A-Z]{2,}\d{1,2}[A-Z]$/.test(filter)
-    )
-    
-    const courseYearFilters = otherFilters.filter(filter => 
-      !blockFilters.includes(filter)
-    )
-    
-    const matchesBlock = blockFilters.length === 0 || 
-      blockFilters.some(filter => student.block === filter)
-    
-    const matchesCourseYear = courseYearFilters.length === 0 ||
-      courseYearFilters.some(filter => {
-        if (/^[1-4](st|nd|rd|th)(\sYear)?$/.test(filter)) {
-          const yearFilter = filter.includes('Year') ? filter : `${filter} Year`;
-          return student.yearLevel === yearFilter;
-        }
-        return student.course.includes(filter);
-      })
-
-    return matchesSearch && matchesStatus && matchesBlock && matchesCourseYear
-  })
-})
-//
+    return matchesSearch && matchesStatus;
+  });
+});
 
 const getStudentInfo = (studentId: string | null) => {
   if (!studentId) return null
@@ -135,6 +120,47 @@ const getStudentBilling = (studentId: string | null): StudentBilling | null => {
 }
 
 const categories = ['information', 'grades', 'bills'] as const
+
+// Define refs for pagination state (optional, for future UI implementation)
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalStudents = ref(0);
+const totalPages = ref(0);
+
+// Function to fetch students for a specific assessment term with pagination
+const fetchStudentsForTerm = async (termId: number, page: number = 1, limit: number = 10) => {
+  try {
+    // Construct URL with query parameters
+    const url = `http://localhost:8080/students/assessment-term/${termId}?page=${page}&limit=${limit}`;
+    console.log(`Fetching from URL: ${url}`); 
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const responseData: PaginatedStudentAssessmentResponse = await response.json();
+
+    console.log('Fetched Paginated Response:', responseData);
+    console.log('Fetched Students Data (responseData.data):', responseData.data);
+    console.log('Fetched Pagination Metadata (responseData.pagination):', responseData.pagination);
+
+    currentPage.value = responseData.pagination.currentPage;
+    pageSize.value = responseData.pagination.pageSize;
+    totalStudents.value = responseData.pagination.totalItems;
+    totalPages.value = responseData.pagination.totalPages;
+
+    console.log('Mock Students Data Structure (first student):', students.value.length > 0 ? students.value[0] : 'No mock data');
+    console.log('Fetched Students Data Structure (first student):', responseData.data.length > 0 ? responseData.data[0] : 'No fetched data');
+    manageStudents.value = responseData.data as StudentAssessmentSummary[];
+
+  } catch (error) {
+    console.error('Error fetching students for assessment term:', error);
+  }
+};
+
+onMounted(() => {
+  fetchStudentsForTerm(1, currentPage.value, pageSize.value);
+});
 </script>
 
 <template>
@@ -182,18 +208,18 @@ const categories = ['information', 'grades', 'bills'] as const
               </tr>
             </thead>
             <tbody>
-              <tr v-for="student in filteredStudents" :key="student.id">
-                <td>{{ student.id }}</td>
-                <td>{{ student.firstName }} {{ student.lastName }}</td>
+              <tr v-for="student in filteredStudents" :key="student.student_id">
+                <td>{{ student.student_id }}</td>
+                <td>{{ student.name }}</td>
                 <td>{{ student.course }}</td>
-                <td>{{ student.yearLevel }}</td>
+                <td>{{ student.year_level }}</td>
                 <td>
                   <span :class="['status-badge', `status-${student.status.toLowerCase()}`]">
                     {{ student.status }}
                   </span>
                 </td>
                 <td>
-                  <button class="action-btn" @click="openModal(student.id)">
+                  <button class="action-btn" @click="openModal(student.student_id)">
                     View
                   </button>
                 </td>
