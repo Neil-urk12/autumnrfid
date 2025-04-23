@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"rfidsystem/internal/model"
@@ -141,4 +142,49 @@ func (r *RFIDRepository) GetStudentsForAssessmentTerm(termID int64, page, limit 
 	// Note: We already checked totalStudents earlier, so len(students) might be 0 for later pages, which is expected.
 
 	return students, totalStudents, nil
+}
+
+// GetStudentInfo retrieves detailed information for a specific student by their ID.
+func (r *RFIDRepository) GetStudentInfo(studentID string) (*model.Student, error) { // Changed parameter type to string
+	student := &model.Student{}
+
+	query := `
+		SELECT
+			student_ID, department_ID, first_Name, last_Name, middle_Name,
+			birthday, contact_number, email, year_Level, program, block_section,
+			first_access_timestamp, last_access_timestamp, status
+		FROM Students
+		WHERE student_ID = ?;
+	`
+
+	log.Printf("Executing query: %s with student_id: %s\n", query, studentID) // Log string ID
+
+	row := r.dbClient.DB.QueryRow(query, studentID) // Pass string ID
+	err := row.Scan(
+		&student.StudentID,
+		&student.DepartmentID,
+		&student.FirstName,
+		&student.LastName,
+		&student.MiddleName,
+		&student.Birthday,
+		&student.ContactNumber,
+		&student.Email,
+		&student.YearLevel,
+		&student.Program,
+		&student.BlockSection,
+		&student.FirstAccessTimestamp,
+		&student.LastAccessTimestamp,
+		&student.Status,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No student found with ID: %s\n", studentID) // Log string ID
+			return nil, fmt.Errorf("student not found") // Return a specific error for not found
+		}
+		log.Printf("Error scanning student row for ID %s: %v\n", studentID, err) // Log string ID
+		return nil, fmt.Errorf("error scanning student row: %v", err)
+	}
+
+	return student, nil
 }

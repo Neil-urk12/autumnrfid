@@ -69,7 +69,7 @@ type Student struct {
 	// LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
 	FirstAccessTimestamp string `json:"first_access_timestamp" db:"first_access_timestamp"`
 	LastAccessTimestamp  string `json:"last_access_timestamp" db:"last_access_timestamp"`
-	// Status               *string `json:"status,omitempty" db:"status"`
+	Status               *string `json:"status,omitempty" db:"status"`
 }
 
 type Assessment struct {

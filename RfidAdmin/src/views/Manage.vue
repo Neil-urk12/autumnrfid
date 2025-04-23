@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, defineAsyncComponent, computed, onMounted } from 'vue'
-import type { Student, StudentGrades, StudentBilling, StudentAssessmentSummary, PaginatedStudentAssessmentResponse, PaginationMetadata } from '@/typescript/models'
+import type { Student, StudentGrades, StudentBilling, StudentAssessmentSummary, PaginatedStudentAssessmentResponse, PaginationMetadata, BaseStudent } from '@/typescript/models'
 import studentsData from '@/mock/models.json'
 
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
@@ -13,6 +13,7 @@ const isModalOpen = ref<boolean>(false)
 const selectedStudentId = ref<string | null>(null)
 const searchQuery = ref<string>('')
 const activeFilters = ref<string[]>([])
+const currentStudentInfo = ref<BaseStudent | null>(null)
 
 // SWITCHES THE ACTIVE CATEGORY TAB IN THE MODAL
 const switchCategory = (category: 'information' | 'grades' | 'bills') => {
@@ -20,9 +21,12 @@ const switchCategory = (category: 'information' | 'grades' | 'bills') => {
 }
 
 // OPENS THE STUDENT DETAILS MODAL AND SETS THE SELECTED STUDENT ID
-const openModal = (studentId: string) => {
+const openModal = async (studentId: string) => {
   selectedStudentId.value = studentId
   isModalOpen.value = true
+  // Fetch student information and grades when the modal is opened
+  console.log(selectedStudentId.value)
+  await getStudentInfoForViewing()
 }
 
 // CLOSES THE MODAL AND RESETS THE SELECTED STUDENT ID
@@ -31,10 +35,14 @@ const closeModal = () => {
   selectedStudentId.value = null
 }
 
-// UPDATES THE SEARCH QUERY VALUE
-const handleSearch = (query: string) => {
-  searchQuery.value = query
+async function getStudentInfoForViewing() {
+  const response = await fetch(`http://localhost:8080/students/${selectedStudentId.value}`);
+  const data = await response.json();
+  currentStudentInfo.value = data;
 }
+
+// UPDATES THE SEARCH QUERY VALUE
+const handleSearch = (query: string) => searchQuery.value = query
 
 // UPDATES THE ACTIVE FILTERS ARRAY
 const handleFilterChange = (filters: string[]) => {
@@ -140,19 +148,18 @@ const fetchStudentsForTerm = async (termId: number, page: number = 1, limit: num
     }
     const responseData: PaginatedStudentAssessmentResponse = await response.json();
 
-    console.log('Fetched Paginated Response:', responseData);
-    console.log('Fetched Students Data (responseData.data):', responseData.data);
-    console.log('Fetched Pagination Metadata (responseData.pagination):', responseData.pagination);
+    // console.log('Fetched Paginated Response:', responseData);
+    // console.log('Fetched Students Data (responseData.data):', responseData.data);
+    // console.log('Fetched Pagination Metadata (responseData.pagination):', responseData.pagination);
 
     currentPage.value = responseData.pagination.currentPage;
     pageSize.value = responseData.pagination.pageSize;
     totalStudents.value = responseData.pagination.totalItems;
     totalPages.value = responseData.pagination.totalPages;
 
-    console.log('Mock Students Data Structure (first student):', students.value.length > 0 ? students.value[0] : 'No mock data');
-    console.log('Fetched Students Data Structure (first student):', responseData.data.length > 0 ? responseData.data[0] : 'No fetched data');
+    // console.log('Mock Students Data Structure (first student):', students.value.length > 0 ? students.value[0] : 'No mock data');
+    // console.log('Fetched Students Data Structure (first student):', responseData.data.length > 0 ? responseData.data[0] : 'No fetched data');
     manageStudents.value = responseData.data as StudentAssessmentSummary[];
-
   } catch (error) {
     console.error('Error fetching students for assessment term:', error);
   }
@@ -252,7 +259,7 @@ onMounted(() => {
             <div class="scrollable-content">
               <div class="student-info-grid">
                 <template v-if="selectedStudentId">
-                  <div v-for="(value, key) in getStudentInfo(selectedStudentId)" :key="key"
+                  <div v-for="(value, key) in currentStudentInfo" :key="key"
                     class="info-group">
                     <label>{{ String(key).charAt(0).toUpperCase() + String(key).slice(1) }}</label>
                     <span>{{ value }}</span>

@@ -115,7 +115,7 @@ func main() {
 	app.Get("/student-partial/:rfid", appHandler.HandleStudentInfo)
 	app.Get("/students/v1", appHandler.RetrieveStudentsHandler)
 	app.Get("/students/assessment-term/:termID", appHandler.HandleGetStudentsForAssessmentTerm)
-	// app.Get("/students/", )
+	app.Get("/students/:id", appHandler.GetStudentById)
 	// SSE endpoint - crucial for real-time updates
 	app.Get("/stream", appHandler.HandleSSE)
 

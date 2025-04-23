@@ -17,6 +17,59 @@ export interface Student {
     discountType?: string;
 }
 
+export interface BaseStudent {
+    id: string;
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    suffix?: string;
+    birthday: string;
+    course: string;
+    block: string;
+    yearLevel: string;
+    status: string;
+    email: string;
+    phone: string;
+}
+
+// export interface Student {
+//     id: string; // Corresponds to student_ID (string)
+//     firstName: string; // Corresponds to first_Name (*string)
+//     lastName: string; // Corresponds to last_Name (*string)
+//     middleName: string; // Corresponds to middle_Name (*string)
+//     suffix?: string; // Added back as optional, accessed in frontend
+//     birthday: string; // Corresponds to birthday (*string)
+//     course: string; // Corresponds to program (*string)
+//     block: string;
+//     yearLevel: number | null | string;
+//     status: string;
+//     email: string;
+//     phone: string;
+//     grades?: StudentGrades;
+//     billing?: StudentBilling;
+//     feePreset?: string;
+//     discountType?: string;
+// }
+
+// export interface Student {
+//     id: string; // Corresponds to student_ID (string)
+//     firstName: string; // Corresponds to first_Name (*string)
+//     lastName: string; // Corresponds to last_Name (*string)
+//     middleName: string; // Corresponds to middle_Name (*string)
+//     suffix?: string; // Added back as optional, accessed in frontend
+//     birthday: string; // Corresponds to birthday (*string)
+//     course: string; // Corresponds to program (*string)
+//     block: string;
+//     yearLevel: number | null | string;
+//     status: string;
+//     email: string;
+//     phone: string;
+//     grades?: StudentGrades;
+//     billing?: StudentBilling;
+//     feePreset?: string;
+//     discountType?: string;
+// }
+
 export interface StudentGrades {
     prelim: Record<string, string>;
     midterm: Record<string, string>;
