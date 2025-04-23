@@ -24,7 +24,10 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 
 	// Try cache first
 	cacheMutex.RLock()
-	if cached, found := cardScanCache.Get(rfid); found {
+	cached, found := cardScanCache.Get(rfid)
+	cacheMutex.RUnlock()
+	if found {
+		// Type assertion to view model
 		defer func() {
 			if r := recover(); r != nil {
 				log.Printf("Cache type assertion failed: %v", r)
@@ -38,7 +41,6 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 			return ctx.SendString("Processing (cache)")
 		}
 	}
-	cacheMutex.RUnlock()
 
 	rfidRepo := repositories.NewRFIDRepository(h.db)
 	// student, err := rfidRepo.GetStudentByRFID(rfid)
