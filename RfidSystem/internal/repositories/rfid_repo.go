@@ -74,7 +74,7 @@ func (r *RFIDRepository) GetStudentSummaryData(studentId string) (*model.Student
 
 	if student == nil {
 		log.Printf("No student found with ID: %s\n", studentId)
-		return nil, fmt.Errorf("no student found with ID: %s", studentId)
+		return nil, nil
 	}
 
 	log.Printf("Student summary data retrieved for ID: %s\n", studentId)
