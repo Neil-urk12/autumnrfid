@@ -16,6 +16,9 @@ jobs:
         with:
           go-version: '1.24'
           cache: true
+
+      - name: Move directory
+        run: cd RfidSystem
       
       - name: Install dependencies
         run: go mod download
@@ -42,4 +45,4 @@ jobs:
         uses: golangci/golangci-lint-action@v6.5.1
       
       - name: Run linting
-        run: golangci-lint run
+        run: cd RfidSystem && golangci-lint run
