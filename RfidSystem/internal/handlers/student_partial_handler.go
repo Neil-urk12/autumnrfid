@@ -18,18 +18,32 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student ID is required")
 	}
 
-	log.Printf("Retrieving data")
 	// Try cache first
 	if cached, found := studentInfoCache.Get(studentId); found {
 		studentInfo, ok := cached.(*model.StudentInfoViewModel)
 		if ok && studentInfo != nil && studentInfo.Student != nil {
-			log.Printf("[CACHE HIT] Student info retrieved successfully for %s", studentId)
+			// Format payment schedules for view
+			var formattedSchedules []model.PaymentScheduleViewModel
+			for _, schedule := range studentInfo.PaymentSchedules {
+				if schedule.TermDescription == "Initial" {
+					continue
+				}
+				formattedSchedules = append(formattedSchedules, model.PaymentScheduleViewModel{
+					ID:                      schedule.ID,
+					AssessmentNumber:        schedule.AssessmentNumber,
+					TermDescription:         schedule.TermDescription,
+					DueDate:                 schedule.DueDate,
+					ExpectedAmount:          schedule.ExpectedAmount,
+					ExpectedAmountFormatted: formatAmount(schedule.ExpectedAmount),
+					SortOrder:               schedule.SortOrder,
+				})
+			}
 			return ctx.Render("partials/student_info", fiber.Map{
 				"Student":          studentInfo.Student,
 				"YearLevel":        studentInfo.YearLevel,
 				"GradesSummary":    studentInfo.GradesSummary,
 				"Assessment":       formatAssessmentForView(studentInfo.Assessment),
-				"PaymentSchedules": studentInfo.PaymentSchedules, // Already formatted in cache
+				"PaymentSchedules": formattedSchedules,
 			})
 		}
 	}

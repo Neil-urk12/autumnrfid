@@ -5,7 +5,6 @@ import mockData from '@/mock/models.json'
 
 const ConfirmationModal = defineAsyncComponent(() => import('@/components/ConfirmationModal.vue'))
 const UnsavedChangesModal = defineAsyncComponent(() => import('@/components/UnsavedChangesModal.vue'))
-const Sidebar = defineAsyncComponent(() => import("@/components/Sidebar.vue"))
 const Searchbar = defineAsyncComponent(() => import("@/components/Searchbar.vue"))
 
 const students = ref<Student[]>(mockData.students as Student[])
@@ -402,9 +401,6 @@ const handleUnsavedChanges = (confirm: boolean) => {
 
 <template>
   <main>
-    <div class="sidebar">
-      <Sidebar />
-    </div>
 
     <section>
       <div class="container">

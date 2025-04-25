@@ -67,8 +67,9 @@ type Student struct {
 	BlockSection  *string `json:"block_section,omitempty" db:"block_section"`
 	// FirstAccessTimestamp *time.Time `json:"first_access_timestamp,omitempty" db:"first_access_timestamp"`
 	// LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
-	FirstAccessTimestamp string `json:"first_access_timestamp" db:"first_access_timestamp"`
-	LastAccessTimestamp  string `json:"last_access_timestamp" db:"last_access_timestamp"`
+	FirstAccessTimestamp string  `json:"first_access_timestamp" db:"first_access_timestamp"`
+	LastAccessTimestamp  string  `json:"last_access_timestamp" db:"last_access_timestamp"`
+	Status               *string `json:"status,omitempty" db:"status"`
 }
 
 type Assessment struct {
@@ -137,10 +138,10 @@ type Payment struct {
 	ID               int64 `json:"payment_id" db:"payment_id"`
 	AssessmentNumber int64 `json:"assessment_number" db:"assessment_number"`
 	// PaymentDate      time.Time `json:"payment_date" db:"payment_date"`
-	PaymentDate     string  `json:"payment_data" db:"payment_data"`
-	Amount          float64 `json:"amount" db:"amount"`
-	Description     *string `json:"description,omitempty" db:"description"`
-	Status          string  `json:"status" db:"status"`
+	PaymentDate string  `json:"payment_data" db:"payment_data"`
+	Amount      float64 `json:"amount" db:"amount"`
+	Description *string `json:"description,omitempty" db:"description"`
+	// Status          string  `json:"status" db:"status"`
 	PaymentMethod   *string `json:"payment_method,omitempty" db:"payment_method"`
 	ReferenceNumber *string `json:"reference_number,omitempty" db:"reference_number"`
 }
@@ -156,13 +157,13 @@ type PaymentSchedule struct {
 }
 
 type PaymentScheduleViewModel struct {
-    ID               int64
-    AssessmentNumber int64
-    TermDescription  string
-    DueDate          string
-    ExpectedAmount   float64
-    ExpectedAmountFormatted string
-    SortOrder       int
+	ID                      int64
+	AssessmentNumber        int64
+	TermDescription         string
+	DueDate                 string
+	ExpectedAmount          float64
+	ExpectedAmountFormatted string
+	SortOrder               int
 }
 
 // -------------------------
@@ -175,10 +176,10 @@ type FeeBreakdown struct {
 
 type PaymentRecord struct {
 	// Date            time.Time
-	PaymentDate     string
-	Description     *string
-	Amount          float64
-	Status          string
+	PaymentDate string
+	Description *string
+	Amount      float64
+	// Status          string
 	PaymentMethod   *string
 	ReferenceNumber *string
 }
@@ -212,4 +213,27 @@ type Grades struct {
 	Student     *Student
 	CurrentTerm *AcademicTerm
 	Grades      []GradesRecord
+}
+
+// StudentAssessmentSummary represents the summary of students for a specific assessment term.
+type StudentAssessmentSummary struct {
+	StudentID string  `json:"student_id" db:"StudentID"`
+	Name      *string `json:"name,omitempty" db:"Name"`
+	Course    *string `json:"course,omitempty" db:"Course"`
+	YearLevel *string `json:"year_level,omitempty" db:"YearLevel"`
+	Status    *string `json:"status,omitempty" db:"status"`
+}
+
+// PaginationMetadata holds information about the pagination state.
+type PaginationMetadata struct {
+	CurrentPage int `json:"currentPage"`
+	PageSize    int `json:"pageSize"`
+	TotalItems  int `json:"totalItems"`
+	TotalPages  int `json:"totalPages"`
+}
+
+// PaginatedStudentAssessmentResponse structures the paginated response for student assessments.
+type PaginatedStudentAssessmentResponse struct {
+	Data       []*StudentAssessmentSummary `json:"data"`
+	Pagination PaginationMetadata          `json:"pagination"`
 }
