@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"time"
 	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 var billsCache = NewLRUCache(5, time.Hour)
-
 
 func formatAmount(amount float64) string {
 	return fmt.Sprintf("%.2f", amount)
@@ -42,7 +41,10 @@ func formatAssessmentForView(assessment *model.Assessment) model.AssessmentViewM
 }
 
 func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
-	studentId := ctx.Query("student-id")
+	studentId := ctx.FormValue("rfid")
+	if studentId == "" {
+		studentId = ctx.Query("student-id")
+	}
 	if studentId == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
 	}

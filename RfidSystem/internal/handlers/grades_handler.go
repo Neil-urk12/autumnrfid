@@ -15,7 +15,10 @@ var semesterGradesCache = NewLRUCache(5, time.Hour)
 
 
 func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
-	studentId := ctx.Query("student-id")
+	studentId := ctx.FormValue("rfid")
+	if studentId == "" {
+		studentId = ctx.Query("student-id")
+	}
 	if studentId == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
 	}

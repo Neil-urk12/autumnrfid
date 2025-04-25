@@ -12,7 +12,18 @@ import (
 var studentInfoCache = NewLRUCache(5, time.Hour)
 
 func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
-	studentId := ctx.Params("rfid")
+	// Support POST body or GET path parameter
+	var req struct {
+		RFID string `json:"rfid" form:"rfid"`
+	}
+	if err := ctx.BodyParser(&req); err != nil {
+		log.Printf("Error parsing request body: %v", err)
+		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+	}
+	studentId := req.RFID
+	if studentId == "" {
+		studentId = ctx.Params("rfid")
+	}
 	if studentId == "" {
 		log.Printf("Student ID is required")
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student ID is required")

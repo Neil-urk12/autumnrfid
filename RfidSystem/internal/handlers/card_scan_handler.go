@@ -19,7 +19,15 @@ var (
 )
 
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
-	rfid := ctx.FormValue("rfid")
+	var req struct {
+		RFID string `json:"rfid" form:"rfid"`
+	}
+	if err := ctx.BodyParser(&req); err != nil {
+		log.Printf("Error parsing request body: %v", err)
+		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+	}
+	rfid := req.RFID
+	log.Println(rfid, "RfID")
 	if rfid == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("RFID is required")
 	}
@@ -37,7 +45,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		}()
 		student, ok := cached.(*model.StudentInfoViewModel)
 		if ok && student != nil {
-			htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
+			htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 			GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 			return ctx.SendString("Processing (cache)")
 		}
@@ -63,7 +71,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	cardScanCache.Set(rfid, student)
 	cacheMutex.Unlock()
 
-	htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
+	htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 
 	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 	return ctx.SendString("Processing")
@@ -107,9 +115,10 @@ func (h *AppHandler) HandleCardScanWS(c *websocket.Conn) {
 		cacheMutex.RUnlock()
 		if found {
 			if s, ok := cached.(*model.StudentInfoViewModel); ok && s != nil {
-				htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
+				htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 				c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
 				c.WriteMessage(websocket.TextMessage, []byte("Processing (cache)"))
+				GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 				continue
 			}
 		}
@@ -122,13 +131,14 @@ func (h *AppHandler) HandleCardScanWS(c *websocket.Conn) {
 		if student == nil {
 			htmxInstruction := `<div hx-get="/error" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`
 			c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
+			GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 			continue
 		}
 		// Store in cache
 		cacheMutex.Lock()
 		cardScanCache.Set(rfid, student)
 		cacheMutex.Unlock()
-		htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
+		htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 		GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 		c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
 		c.WriteMessage(websocket.TextMessage, []byte("Processing"))

@@ -146,6 +146,10 @@ func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Get("/card-scan-ws", websocket.New(h.HandleCardScanWS))
 	app.Get("/ping", func(c *fiber.Ctx) error { return c.SendString("Fiber Web Server is running") })
 	app.Get("/bills", h.HandleBills)
+	// support HTMX POST navigation with hidden RFID
+	app.Post("/student-partial", h.HandleStudentInfo)
+	app.Post("/grades", h.HandleGrades)
+	app.Post("/bills", h.HandleBills)
 }
 
 // handleShutdown listens for interrupt signals to gracefully close resources.
