@@ -138,10 +138,10 @@ type Payment struct {
 	ID               int64 `json:"payment_id" db:"payment_id"`
 	AssessmentNumber int64 `json:"assessment_number" db:"assessment_number"`
 	// PaymentDate      time.Time `json:"payment_date" db:"payment_date"`
-	PaymentDate     string  `json:"payment_data" db:"payment_data"`
-	Amount          float64 `json:"amount" db:"amount"`
-	Description     *string `json:"description,omitempty" db:"description"`
-	Status          string  `json:"status" db:"status"`
+	PaymentDate string  `json:"payment_data" db:"payment_data"`
+	Amount      float64 `json:"amount" db:"amount"`
+	Description *string `json:"description,omitempty" db:"description"`
+	// Status          string  `json:"status" db:"status"`
 	PaymentMethod   *string `json:"payment_method,omitempty" db:"payment_method"`
 	ReferenceNumber *string `json:"reference_number,omitempty" db:"reference_number"`
 }
@@ -176,10 +176,10 @@ type FeeBreakdown struct {
 
 type PaymentRecord struct {
 	// Date            time.Time
-	PaymentDate     string
-	Description     *string
-	Amount          float64
-	Status          string
+	PaymentDate string
+	Description *string
+	Amount      float64
+	// Status          string
 	PaymentMethod   *string
 	ReferenceNumber *string
 }
