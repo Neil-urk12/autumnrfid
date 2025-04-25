@@ -95,7 +95,7 @@ func configureApp(engine *html.Engine) *fiber.App {
 		DisableStartupMessage: false,
 		IdleTimeout:           time.Hour * 24,
 		ReadTimeout:           time.Second * 60,
-		WriteTimeout:          time.Second * 60,
+		WriteTimeout:          0,
 		ColorScheme: fiber.Colors{
 			Black:   "\u001b[93m",
 			Red:     "\u001b[91m",
