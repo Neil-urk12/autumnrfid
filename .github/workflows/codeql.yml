@@ -37,20 +37,14 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
-        # build-mode: ${{ matrix.build-mode }}  <-- REMOVE THIS.  We handle build explicitly.
         # queries: security-extended,security-and-quality # Optional: Customize queries
 
     - name: Build Go code
       if: matrix.language == 'go' # Conditional Go build step
       run: |
-        go install ./...
-        go build -v ./...
-
-    # - name: Build JavaScript code (if applicable)
-    #   if: matrix.language == 'javascript' # Conditional JavaScript build step
-    #   run: |
-    #     npm install      # Install JavaScript dependencies (adjust for yarn/pnpm)
-    #     npm run build  # Run build script IF YOU HAVE ONE.  Otherwise, remove this line.
+        cd RfidSystem
+        go mod download
+        go build -v ./...  # Build the application
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
