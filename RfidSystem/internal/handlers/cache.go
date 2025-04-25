@@ -13,7 +13,7 @@ import (
 
 type cacheItem struct {
 	key       string
-	value     interface{}
+	value     any
 	expiresAt time.Time
 }
 

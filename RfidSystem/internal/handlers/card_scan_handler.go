@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"rfidsystem/internal/model"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 )
 
 var (
@@ -35,7 +37,6 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		}()
 		student, ok := cached.(*model.StudentInfoViewModel)
 		if ok && student != nil {
-			log.Printf("[CACHE HIT] Student found: %s\n", student.Student.StudentID)
 			htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 			GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 			return ctx.SendString("Processing (cache)")
@@ -57,7 +58,6 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
 	}
 
-	log.Printf("Student found: %s\n", student.Student.StudentID)
 	// Store in cache
 	cacheMutex.Lock()
 	cardScanCache.Set(rfid, student)
@@ -67,4 +67,70 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 
 	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 	return ctx.SendString("Processing")
+}
+
+// HandleCardScanWS handles websocket card scan requests with bidirectional communication.
+func (h *AppHandler) HandleCardScanWS(c *websocket.Conn) {
+	defer c.Close()
+	for {
+		_, msg, err := c.ReadMessage()
+		if err != nil {
+			log.Printf("WebSocket read error: %v", err)
+			return
+		}
+		// Parse JSON message
+		var payload struct {
+			Status string `json:"status"`
+			CardId string `json:"cardId"`
+		}
+		if err := json.Unmarshal(msg, &payload); err != nil {
+			log.Printf("WS JSON parse error: %v", err)
+			c.WriteMessage(websocket.TextMessage, []byte("Invalid message format"))
+			continue
+		}
+		// If absent, render home page
+		if payload.Status == "absent" {
+			htmxInstruction := `<div hx-get="/" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`
+			GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
+			c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
+			continue
+		}
+		// Use CardId as RFID
+		rfid := payload.CardId
+		if rfid == "" {
+			c.WriteMessage(websocket.TextMessage, []byte("RFID is required"))
+			continue
+		}
+		// Try cache first
+		cacheMutex.RLock()
+		cached, found := cardScanCache.Get(rfid)
+		cacheMutex.RUnlock()
+		if found {
+			if s, ok := cached.(*model.StudentInfoViewModel); ok && s != nil {
+				htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
+				c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
+				c.WriteMessage(websocket.TextMessage, []byte("Processing (cache)"))
+				continue
+			}
+		}
+		// Fetch from DB
+		student, err := h.RFIDRepository.GetStudentSummaryData(rfid)
+		if err != nil {
+			c.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Database error: %v", err)))
+			continue
+		}
+		if student == nil {
+			htmxInstruction := `<div hx-get="/error" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`
+			c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
+			continue
+		}
+		// Store in cache
+		cacheMutex.Lock()
+		cardScanCache.Set(rfid, student)
+		cacheMutex.Unlock()
+		htmxInstruction := fmt.Sprintf(`<div hx-get="/student-partial/%s" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
+		GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
+		c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
+		c.WriteMessage(websocket.TextMessage, []byte("Processing"))
+	}
 }
