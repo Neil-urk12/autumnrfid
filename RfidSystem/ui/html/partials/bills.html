@@ -38,7 +38,6 @@
                             <th>Date</th>
                             <th>Description</th>
                             <th>Amount</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,12 +49,6 @@
                                 }}Payment{{ end }}
                             </td>
                             <td>₱{{ .Amount }}</td>
-                            <td>
-                                <span
-                                    class="payment-status status-{{ lower .Status }}"
-                                    >{{ .Status }}</span
-                                >
-                            </td>
                         </tr>
                         {{ end }}
                     </tbody>

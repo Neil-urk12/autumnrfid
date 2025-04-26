@@ -1,4 +1,5 @@
 :root {
+    /* LIGHT MODE */
     --darkest-blue: #1e5470;
     --dark-blue: #34729b;
     --medium-blue: #6db0db;
@@ -6,6 +7,16 @@
     --aqua: #6fc0d3;
     --light-aqua: #c9eaef;
     --white: #ffffff;
+
+    /* NIGHT MODE */
+    --night-darkest: #040a1b;
+    --night-dark: #081029;
+    --night-medium: #0e1b40;
+    --night-light: #233463;
+    --night-accent: #132249;
+    --night-highlight: #6f7c9c;
+    --night-text: #cbcbd1;
+    --night-border: #1c2b50;
 }
 
 body {
@@ -15,37 +26,177 @@ body {
     padding: 0;
     height: 100vh;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.dark-mode {
+    background-color: var(--night-accent);
+    color: var(--night-text);
 }
 
 .navbar {
     display: flex;
     border-bottom: 8px solid var(--medium-blue);
+    transition: all 0.3s ease;
 }
+
+.dark-mode .navbar {
+    border-bottom: 8px solid var(--night-light);
+}
+
 
 .navbar button {
     flex: 1;
     text-align: center;
     text-decoration: none;
     font-weight: bold;
-    background: linear-gradient(
-        to bottom,
-        var(--dark-blue),
-        var(--darkest-blue)
-    );
+    background: linear-gradient(to bottom,
+            var(--dark-blue),
+            var(--darkest-blue));
     border: none;
     color: white;
     cursor: pointer;
     font-size: 1.1em;
     line-height: 70px;
     height: 70px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .navbar button {
+    background: linear-gradient(to bottom, var(--night-dark), var(--night-darkest));
+    color: var(--night-text);
 }
 
 .navbar button:hover {
     background: var(--medium-blue);
 }
 
-/*START OF HOME PAGE STYLES*/
-.container-home {
+.dark-mode .navbar button:hover {
+    background: var(--night-light);
+}
+
+.mode-toggle {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translate(50%, -50%);
+    z-index: 1000;
+    cursor: move;
+    user-select: none;
+    touch-action: none;
+    transition: all 0.3s ease;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 50%;
+}
+
+.toggle-button {
+    background: linear-gradient(to bottom, var(--dark-blue), var(--darkest-blue));
+    border: none;
+    padding: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(30, 84, 112, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(30, 84, 112, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(30, 84, 112, 0);
+    }
+}
+
+
+.toggle-button .icon {
+    font-size: 28px;
+    transition: all 0.3s ease;
+    margin-right: 0;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-mode .toggle-button {
+    background: linear-gradient(to bottom, var(--night-dark), var(--night-darkest));
+    color: var(--night-text);
+    animation: darkPulse 2s infinite;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .toggle-button:hover {
+    background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
+}
+
+@keyframes darkPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(14, 27, 64, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(14, 27, 64, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(14, 27, 64, 0);
+    }
+}
+
+.mode-toggle.dragging {
+    opacity: 0.8;
+}
+
+.mode-toggle.dragging .toggle-button {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.close-button {
+    position: absolute;
+    right: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--dark-blue);
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    transition: opacity 0.3s ease, background 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--darkest-blue);
+}
+
+.close-button:hover {
+    background: var(--darkest-blue);
+}
+
+.dark-mode .close-button {
+    background: var(--night-medium);
+}
+
+.dark-mode .close-button:hover {
+    background: var(--night-darkest);
+}
+
+ /*START OF HOME PAGE STYLES*/
+ .container-home {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 20px;
@@ -62,6 +213,13 @@ body {
     padding: 0;
     border: 1px solid var(--medium-blue);
     height: 100%;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .profile {
+    background-color: var(--night-dark);
+    border: 1px solid var(--night-light);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
 }
 
 .profile-header {
@@ -72,6 +230,11 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .profile-header {
+    background: var(--night-accent);
 }
 
 .profile img {
@@ -84,6 +247,10 @@ body {
     flex-shrink: 0;
 }
 
+.dark-mode .profile img {
+    border-color: var(--night-light);
+}
+
 .profile-info {
     text-align: left;
     flex-grow: 1;
@@ -93,6 +260,11 @@ body {
     margin: 0;
     color: var(--darkest-blue);
     font-size: 1.3em;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .profile-info h3 {
+    color: var(--night-text);
 }
 
 .profile-info h5 {
@@ -100,6 +272,11 @@ body {
     color: var(--dark-blue);
     font-size: 0.9em;
     font-weight: normal;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .profile-info h5 {
+    color: var(--night-highlight);
 }
 
 .info-table {
@@ -112,6 +289,12 @@ body {
 .info-table td {
     padding: 8px;
     border: 1px solid var(--medium-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .info-table th,
+.dark-mode .info-table td {
+    border: 1px solid var(--night-border);
 }
 
 .info-table th {
@@ -119,10 +302,22 @@ body {
     color: var(--darkest-blue);
     font-weight: bold;
     width: 40%;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .info-table th {
+    background: var(--night-accent);
+    color: var(--night-text);
 }
 
 .info-table td {
     background: var(--white);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .info-table td {
+    background: var(--night-darkest);
+    color: var(--night-text);
 }
 
 .info-table tr:first-child th {
@@ -131,6 +326,12 @@ body {
     font-weight: bold;
     text-align: left;
     padding: 8px 10px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .info-table tr:first-child th {
+    background: var(--night-dark);
+    color: var(--night-text);
 }
 
 .info-table tr:first-child td {
@@ -161,19 +362,30 @@ body {
     border: 1px solid var(--medium-blue);
     border-radius: 4px;
     height: 100%;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .summary {
+    background-color: var(--night-dark);
+    border: 1px solid var(--night-light);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
 }
 
 .summary-header {
-    background: linear-gradient(
-        to bottom,
-        var(--medium-blue),
-        var(--dark-blue)
-    );
+    background: linear-gradient(to bottom,
+            var(--medium-blue),
+            var(--dark-blue));
     color: var(--white);
     padding: 10px 15px;
     font-weight: bold;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .summary-header {
+    background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
+    color: var(--night-text);
 }
 
 .summary-content {
@@ -181,28 +393,39 @@ body {
     flex: 1;
     overflow: hidden;
     height: calc(100% - 45px);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .summary-content {
+    background: var(--night-darkest);
+    color: var(--night-text);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     background: var(--white);
+    transition: all 0.3s ease;
 }
 
-table,
-th,
-td {
-    border: 1px solid var(--medium-blue);
+.dark-mode table {
+    background: var(--night-darkest);
 }
 
 th {
     background: var(--light-blue);
     color: var(--dark-blue);
+    transition: all 0.3s ease;
 }
 
 .summary table th {
     background: var(--light-blue);
     color: var(--dark-blue);
+}
+
+.dark-mode .summary table th {
+    background: var(--night-accent);
+    color: var(--night-text);
 }
 
 .summary.full-width {
@@ -221,16 +444,30 @@ th {
     margin-bottom: 10px;
 }
 
+.dark-mode .bill-total {
+    border-color: var(--night-light);
+}
+
 .bill-amount {
     font-size: 1.8em;
     color: var(--dark-blue);
     font-weight: bold;
     margin: 7px 0;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .bill-amount {
+    color: var(--night-highlight);
 }
 
 .bill-label {
     color: var(--darkest-blue);
     font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .bill-label {
+    color: var(--night-highlight);
 }
 
 .bill-status {
@@ -240,6 +477,11 @@ th {
     padding: 12px;
     background: var(--light-blue);
     border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .bill-status {
+    background: var(--night-medium);
 }
 
 .status-item {
@@ -250,6 +492,11 @@ th {
     font-size: 1.2em;
     color: var(--darkest-blue);
     margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .status-amount {
+    color: var(--night-text);
 }
 
 .payment-schedule {
@@ -263,18 +510,34 @@ th {
     padding: 12px 6px;
     border-radius: 4px;
     text-align: center;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .payment-item {
+    background: var(--night-medium);
+    border: 1px solid var(--night-light);
 }
 
 .payment-title {
     font-weight: bold;
     color: var(--darkest-blue);
     margin-bottom: 4px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .payment-title {
+    color: var(--night-text);
 }
 
 .payment-amount {
     font-size: 1.1em;
     color: var(--dark-blue);
     margin: 4px 0;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .payment-amount {
+    color: var(--night-highlight);
 }
 
 .payment-date {
@@ -283,6 +546,12 @@ th {
     margin-top: 5px;
     padding-top: 10px;
     border-top: 1px solid var(--medium-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .payment-date {
+    color: var(--night-text);
+    border-top: 1px solid var(--night-border);
 }
 
 .grades-table-home {
@@ -304,8 +573,17 @@ th {
     font-weight: bold;
 }
 
+.dark-mode .grades-table-home th,
+.dark-mode .grades-table-home td {
+    border-color: var(--night-border);
+}
+
 .grades-table-home td {
     background: var(--white);
+}
+
+.dark-mode .grades-table-home td {
+    background: var(--night-darkest);
 }
 
 .grades-table-home td:not(.year-header),
@@ -317,6 +595,12 @@ th {
     background: var(--light-aqua) !important;
     color: var(--darkest-blue);
     font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .year-header {
+    background: var(--night-medium) !important;
+    color: var(--night-highlight);
 }
 
 .error-container {
@@ -429,26 +713,32 @@ th {
 }
 
 @keyframes slideMessages {
+
     0%,
     16% {
         transform: translateY(0);
     }
+
     20%,
     36% {
         transform: translateY(-40px);
     }
+
     40%,
     56% {
         transform: translateY(-80px);
     }
+
     60%,
     76% {
         transform: translateY(-120px);
     }
+
     80%,
     96% {
         transform: translateY(-160px);
     }
+
     100% {
         transform: translateY(0);
     }
@@ -597,6 +887,12 @@ th {
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid var(--medium-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .button-section {
+    background: var(--night-accent);
+    border-bottom: 2px solid var(--night-light);
 }
 
 .button-left {
@@ -607,12 +903,19 @@ th {
 
 .semester-info {
     background: var(--white);
-    width: 320px;
+    width: 400px;
     text-align: center;
     padding: 10px 0;
     border-radius: 4px;
     font-size: 15px;
     border: 1px solid var(--medium-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .semester-info {
+    background: var(--night-darkest);
+    border: 1px solid var(--night-border);
+    color: var(--night-text);
 }
 
 .semester-info span:first-child {
@@ -621,16 +924,33 @@ th {
     margin-right: 15px;
     padding-right: 15px;
     border-right: 2px solid var(--medium-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .semester-info span:first-child {
+    color: var(--night-highlight);
+    border-right: 2px solid var(--night-border);
 }
 
 .semester-info span:last-child {
     color: var(--dark-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .semester-info span:last-child {
+    color: var(--night-text);
 }
 
 .grades-section {
     background: var(--white);
     border-radius: 4px;
     border: 1px solid var(--medium-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .grades-section {
+    background: var(--night-dark);
+    border: 1px solid var(--night-border);
 }
 
 .grades-content {
@@ -638,12 +958,14 @@ th {
     flex: 1;
 }
 
+.dark-mode .grades-content {
+    background: var(--night-darkest);
+}
+
 .sidebar-btn {
-    background: linear-gradient(
-        to bottom,
-        var(--medium-blue),
-        var(--dark-blue)
-    );
+    background: linear-gradient(to bottom,
+            var(--medium-blue),
+            var(--dark-blue));
     color: var(--white);
     border: none;
     border-radius: 4px;
@@ -651,14 +973,22 @@ th {
     height: 42px;
     font-size: 1.1em;
     box-shadow: 0 2px 4px rgba(30, 84, 112, 0.1);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .sidebar-btn {
+    background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-btn:hover {
-    background: linear-gradient(
-        to bottom,
-        var(--dark-blue),
-        var(--darkest-blue)
-    );
+    background: linear-gradient(to bottom,
+            var(--dark-blue),
+            var(--darkest-blue));
+}
+
+.dark-mode .sidebar-btn:hover {
+    background: linear-gradient(to bottom, var(--night-light), var(--night-medium));
 }
 
 .semester-btn {
@@ -671,22 +1001,24 @@ th {
     border-radius: 4px;
     font-size: 1.05em;
     letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .semester-btn {
+    background: var(--night-darkest);
+    color: var(--night-text);
+    border: 1px solid var(--night-border);
 }
 
 .semester-btn.active {
-    background: linear-gradient(
-        to bottom,
-        var(--medium-blue),
-        var(--dark-blue)
-    );
+    background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
     color: var(--white);
     border: none;
+    cursor: pointer;
 }
 
-.semester-btn:hover:not(.active) {
-    background: var(--light-blue);
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(30, 84, 112, 0.2);
+.dark-mode .semester-btn.active {
+    background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
 }
 
 .grades-table-grades {
@@ -695,6 +1027,7 @@ th {
     border-radius: 4px;
     overflow: hidden;
     border: none;
+    transition: all 0.3s ease;
 }
 
 .grades-table-grades th,
@@ -703,6 +1036,16 @@ th {
     text-align: left;
     border: 1px solid var(--medium-blue);
     font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .grades-table-grades td {
+    background-color: var(--night-darkest);
+}
+
+.dark-mode .grades-table-grades th,
+.dark-mode .grades-table-grades td {
+    border: 1px solid var(--night-border);
 }
 
 .grades-table-grades th {
@@ -712,6 +1055,11 @@ th {
     font-size: 1em;
     letter-spacing: 0.3px;
     font-weight: bold;
+}
+
+.dark-mode .grades-table-grades th {
+    background: var(--night-accent);
+    color: var(--night-text);
 }
 
 .grades-table-grades th:first-child {
@@ -731,12 +1079,24 @@ th {
     background: var(--light-aqua) !important;
     color: var(--darkest-blue) !important;
     font-weight: bold !important;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .subject-name {
+    background: var(--night-medium) !important;
+    color: var(--night-highlight) !important;
 }
 
 .final-grade {
     background: var(--light-aqua) !important;
     color: var(--darkest-blue) !important;
     font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .final-grade {
+    background: var(--night-medium) !important;
+    color: var(--night-highlight) !important;
 }
 
 .gwa-row td {
@@ -744,6 +1104,12 @@ th {
     color: var(--darkest-blue) !important;
     font-weight: bold !important;
     padding: 15px !important;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .gwa-row td {
+    background: var(--night-accent) !important;
+    color: var(--night-text) !important;
 }
 
 .gwa-row td:last-child {
@@ -757,32 +1123,11 @@ th {
     margin-top: 25px;
     padding-top: 20px;
     border-top: 1px solid var(--medium-blue);
+    transition: all 0.3s ease;
 }
 
-.page-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--light-aqua) !important;
-    color: var(--medium-blue) !important;
-    border: 1px solid var(--medium-blue) !important;
-}
-
-.page-btn:not(:disabled) {
-    opacity: 1;
-    cursor: pointer;
-    background-color: var(--white);
-    color: var(--dark-blue);
-    border: 1px solid var(--medium-blue);
-}
-
-.page-btn.active:not(:disabled) {
-    background: linear-gradient(
-        to bottom,
-        var(--medium-blue),
-        var(--dark-blue)
-    );
-    color: var(--white);
-    border: none;
+.dark-mode .pagination {
+    border-top: 1px solid var(--night-border);
 }
 
 .page-btn {
@@ -794,46 +1139,33 @@ th {
     background: var(--white);
     border: 1px solid var(--medium-blue);
     color: var(--dark-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .page-btn {
+    background: var(--night-dark);
+    color: var(--night-text);
+    border: 1px solid var(--night-border);
 }
 
 .page-btn.active {
-    background: linear-gradient(
-        to bottom,
-        var(--medium-blue),
-        var(--dark-blue)
-    );
+    background: linear-gradient(to bottom,
+            var(--medium-blue),
+            var(--dark-blue));
     color: var(--white);
     border: none;
+}
+
+.dark-mode .page-btn.active {
+    background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
 }
 
 .page-btn:hover:not(.active) {
     background: var(--light-blue);
 }
 
-.sidebar {
-    position: absolute;
-    left: -290px;
-    top: 176.5px;
-    width: 250px;
-    height: 506px;
-    background: var(--white);
-    border: 1px solid var(--medium-blue);
-    border-radius: 4px;
-    transition: left 0.3s ease;
-    padding: 20px;
-}
-
-.sidebar.active {
-    left: 0;
-}
-
-.sidebar-header {
-    color: var(--darkest-blue);
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid var(--medium-blue);
+.dark-mode .page-btn:hover:not(.active) {
+    background: var(--night-medium);
 }
 
 .year-btn {
@@ -854,18 +1186,32 @@ th {
     transition: all 0.3s;
 }
 
+.dark-mode .year-btn {
+    background: var(--night-dark);
+    color: var(--night-text);
+    border: 1px solid var(--night-border);
+}
+
 .year-btn:hover {
     background: var(--light-blue);
 }
 
+.dark-mode .year-btn:hover {
+    background: var(--night-medium);
+}
+
 .year-btn.active {
-    background: linear-gradient(
-        to bottom,
-        var(--medium-blue),
-        var(--dark-blue)
-    );
+    background: linear-gradient(to bottom,
+            var(--medium-blue),
+            var(--dark-blue));
     color: var(--white);
     border: none;
+}
+
+.dark-mode .year-btn.active {
+    background: linear-gradient(to bottom,
+            var(--night-medium),
+            var(--night-dark));
 }
 
 .year-btn.active .icon {
@@ -900,11 +1246,40 @@ th {
     position: relative;
 }
 
+.dark-mode .semester-btn-sidebar {
+    background: var(--night-dark);
+    color: var(--night-text);
+    border: 1px solid var(--night-border);
+}
+
 .semester-btn-sidebar.active {
     background: var(--light-aqua);
     color: var(--darkest-blue);
     font-weight: bold;
     border-left: 3px solid var(--dark-blue);
+}
+
+.dark-mode .semester-btn-sidebar.active {
+    background: var(--night-medium);
+    color: var(--night-highlight);
+    border-left: 3px solid var(--night-light);
+}
+
+.sidebar {
+    transition: all 0.3s ease;
+}
+
+.dark-mode .sidebar {
+    background: var(--night-dark);
+    color: var(--night-text);
+}
+
+.sidebar-header {
+    transition: all 0.3s ease;
+}
+
+.dark-mode .sidebar-header {
+    color: var(--night-highlight);
 }
 
 @media screen and (max-width: 1440px) {
@@ -948,7 +1323,12 @@ th {
     }
 }
 
+
 /*END OF GRADES PAGE STYLES*/
+
+
+
+
 
 /*START OF BILLS PAGE STYLES*/
 .container-bills {
@@ -974,41 +1354,77 @@ th {
     border: 1px solid var(--medium-blue);
     border-radius: 4px;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .balance-section,
+.dark-mode .history-section,
+.dark-mode .right-section {
+    background: var(--night-dark);
+    border: 1px solid var(--night-light);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
 }
 
 .section-header {
-    background: linear-gradient(
-        to bottom,
-        var(--medium-blue),
-        var(--dark-blue)
-    );
+    background: linear-gradient(to bottom,
+            var(--medium-blue),
+            var(--dark-blue));
     color: var(--white);
     padding: 10px 15px;
     font-weight: bold;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .section-header {
+    background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
+    color: var(--night-text);
 }
 
 .section-content {
     padding: 17px;
     height: calc(100% - 50px);
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .section-content {
+    background: var(--night-darkest);
+    color: var(--night-text);
 }
 
 .balance-card {
     padding: 12px;
     background-color: var(--light-aqua);
     border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .balance-card {
+    background-color: var(--night-medium);
+    border: 1px solid var(--night-light);
 }
 
 .balance-details h4 {
     margin: 15px;
     color: var(--dark-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .balance-details h4 {
+    color: var(--night-text);
+    letter-spacing: 0.7px;
 }
 
 .balance-title {
     font-size: 0.9rem;
     color: var(--dark-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .balance-title {
+    color: var(--night-highlight);
 }
 
 .balance-amount {
@@ -1016,6 +1432,11 @@ th {
     margin: 6px 0;
     font-weight: bold;
     color: var(--dark-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .balance-amount {
+    color: var(--night-highlight);
 }
 
 .history-table {
@@ -1023,6 +1444,7 @@ th {
     border-collapse: separate;
     border-spacing: 0;
     font-size: 15px;
+    transition: all 0.3s ease;
 }
 
 .history-table tr {
@@ -1034,6 +1456,12 @@ th {
     padding: 8px 12px;
     border: 1px solid var(--light-blue);
     height: 18px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .history-table th,
+.dark-mode .history-table td {
+    border: 1px solid var(--night-border);
 }
 
 .history-table th {
@@ -1041,6 +1469,19 @@ th {
     color: var(--darkest-blue);
     font-weight: 600;
     text-align: left;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .history-table th {
+    background: var(--night-medium);
+    color: var(--night-text);
+    font-weight: bold;
+    border-bottom: 1px solid var(--night-accent);
+}
+
+.dark-mode .history-table td {
+    color: var(--night-text);
+    background: var(--night-darkest);
 }
 
 .payment-status {
@@ -1048,16 +1489,29 @@ th {
     border-radius: 4px;
     font-size: 0.8rem;
     font-weight: 500;
+    transition: all 0.3s ease;
 }
 
 .status-paid {
     background: var(--light-aqua);
     color: var(--darkest-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .status-paid {
+    background: var(--night-medium);
+    color: var(--night-text);
 }
 
 .status-pending {
     background: var(--light-blue);
     color: var(--dark-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .status-pending {
+    background: var(--night-medium);
+    color: var(--night-highlight);
 }
 
 .fee-table-container {
@@ -1070,12 +1524,19 @@ th {
     border-spacing: 0;
     margin-bottom: 0;
     border-collapse: collapse;
+    transition: all 0.3s ease;
 }
 
 .fee-details th,
 .fee-details td {
     padding: 8px;
     border: 1px solid var(--medium-blue);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .fee-details th,
+.dark-mode .fee-details td {
+    border: 1px solid var(--night-border);
 }
 
 .fee-details th {
@@ -1084,24 +1545,52 @@ th {
     font-weight: 600;
     text-align: left;
     width: 70%;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .fee-details th {
+    background: var(--night-medium);
+    color: var(--night-highlight);
+    font-weight: bold;
 }
 
 .fee-details td {
     text-align: right;
     font-weight: 500;
     background: var(--white);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .fee-details td {
+    background: var(--night-darkest);
+    color: var(--night-text);
 }
 
 .fee-category {
     background: var(--medium-blue) !important;
     color: var(--white) !important;
     font-weight: bold !important;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .fee-category {
+    background: var(--night-dark) !important;
+    color: var(--night-text) !important;
+    font-weight: 600 !important;
 }
 
 .total-row th,
 .total-row td {
     background: var(--light-blue) !important;
     color: var(--darkest-blue);
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .total-row th,
+.dark-mode .total-row td {
+    background: var(--night-accent) !important;
+    color: var(--night-text) !important;
     font-weight: bold;
 }
 
@@ -1127,6 +1616,11 @@ th {
         border: 1px solid var(--light-blue);
         height: 12.5px;
         font-size: 15px;
+    }
+
+    .dark-mode .history-table th,
+    .dark-mode .history-table td {
+        border: 1px solid var(--night-border);
     }
 }
 
@@ -1156,6 +1650,11 @@ th {
         border: 1px solid var(--light-blue);
         height: 7px;
         font-size: 13.2px;
+    }
+
+    .dark-mode .history-table th,
+    .dark-mode .history-table td {
+        border: 1px solid var(--night-border);
     }
 }
 
@@ -1197,26 +1696,32 @@ th {
 }
 
 @keyframes slideMessages {
+
     0%,
     16% {
         transform: translateY(0);
     }
+
     20%,
     36% {
         transform: translateY(-40px);
     }
+
     40%,
     56% {
         transform: translateY(-80px);
     }
+
     60%,
     76% {
         transform: translateY(-120px);
     }
+
     80%,
     96% {
         transform: translateY(-160px);
     }
+
     100% {
         transform: translateY(0);
     }
@@ -1235,12 +1740,14 @@ th {
         padding: 8px 15px;
     }
 }
+
 .no-grades-message {
     text-align: center;
     padding: 20px;
     color: #666;
     font-style: italic;
 }
+
 /* Idle Timeout Modal Styles */
 .idle-modal-overlay {
     position: fixed;
@@ -1248,11 +1755,14 @@ th {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
-    display: flex; /* Use flex to center content */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent black overlay */
+    display: flex;
+    /* Use flex to center content */
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it's on top */
+    z-index: 1000;
+    /* Ensure it's on top */
     /* display: none; /* Initially hidden - will be controlled by JS */
 }
 
@@ -1263,7 +1773,8 @@ th {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
     max-width: 400px;
-    width: 90%; /* Responsive width */
+    width: 90%;
+    /* Responsive width */
 }
 
 .idle-modal-content h3 {
@@ -1279,8 +1790,10 @@ th {
 
 .idle-modal-buttons {
     display: flex;
-    justify-content: space-around; /* Or space-between */
-    gap: 15px; /* Add some gap between buttons */
+    justify-content: space-around;
+    /* Or space-between */
+    gap: 15px;
+    /* Add some gap between buttons */
 }
 
 .idle-modal-buttons button {
@@ -1289,22 +1802,30 @@ th {
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
-    transition: background-color 0.2s ease; /* Smooth hover effect */
+    transition: background-color 0.2s ease;
+    /* Smooth hover effect */
 }
 
 #idle-confirm-btn {
-    background-color: #28a745; /* Green */
+    background-color: #28a745;
+    /* Green */
     color: white;
 }
+
 #idle-confirm-btn:hover {
-    background-color: #218838; /* Darker green */
+    background-color: #218838;
+    /* Darker green */
 }
 
 #idle-return-btn {
-    background-color: #dc3545; /* Red */
+    background-color: #dc3545;
+    /* Red */
     color: white;
 }
+
 #idle-return-btn:hover {
-    background-color: #c82333; /* Darker red */
+    background-color: #c82333;
+    /* Darker red */
 }
+
 /* End Idle Timeout Modal Styles */

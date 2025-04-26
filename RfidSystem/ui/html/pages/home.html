@@ -3,6 +3,12 @@
 {{define "content"}}
 
 <body>
+    <div class="mode-toggle">
+        <button class="toggle-button" onclick="toggleDarkMode()">
+            <img src="/ui/static/images/cloudy-day.png" height="35" width="35" alt="sun" class="icon">
+        </button>
+        <button class="close-button" onclick="closeExpandedToggle(event)">✕</button>
+    </div>
 
     <div class="navbar" id="main-navbar" style="display: none;">
         <button hx-get="/student-partial" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
@@ -54,6 +60,121 @@
 
     <!-- End Idle Timeout Modal -->
     <script>
+        let isDragging = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0, initialExpandedState = false, hasDragged = false;
+
+        // TRANSFORMS THE BUTTON ELEMENT BASED ON EXPANDED STATE
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate(${el.classList.contains('expanded') ? -120 : 35}%, calc(-50% + ${yPos}px))`;
+        }
+
+        // TOGGLES DARK MODE AND CHANGES THE ICON IMAGE BETWEEN DAY AND NIGHT
+        function toggleDarkMode() {
+            const body = document.body, icon = document.querySelector('.toggle-button .icon');
+            body.classList.toggle('dark-mode');
+            icon.src = body.classList.contains('dark-mode') ? "/ui/static/images/night.png" : "/ui/static/images/cloudy-day.png";
+            icon.alt = body.classList.contains('dark-mode') ? "moon" : "sun";
+        }
+
+        // EXPANDS OR COLLAPSES THE BUTTON BY TOGGLING THE EXPANDED CLASS
+        function toggleExpand() {
+            const toggleBtn = document.querySelector('.mode-toggle');
+            toggleBtn.classList.toggle('expanded');
+            setTranslate(xOffset, yOffset, toggleBtn);
+        }
+
+        // CLOSES THE EXPANDED BUTTON WHEN X IS CLICKED
+        function closeExpandedToggle(event) {
+            event.stopPropagation();
+            const toggleBtn = document.querySelector('.mode-toggle');
+            toggleBtn.classList.remove('expanded');
+            setTranslate(xOffset, yOffset, toggleBtn);
+        }
+
+        // RESETS BUTTON TO DEFAULT POSITION ON RIGHT SIDE OF THE SCREEN
+        function updateButtonPosition() {
+            const toggleBtn = document.querySelector('.mode-toggle');
+            toggleBtn.classList.remove('expanded');
+            toggleBtn.style.right = '0';
+            toggleBtn.style.left = 'auto';
+            xOffset = yOffset = 0;
+            setTranslate(0, 0, toggleBtn);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.querySelector('.mode-toggle');
+
+            // TRACKS INITIAL POSITIONS AND SETS DRAGGING STATE
+            ['touchstart', 'mousedown'].forEach(evt =>
+                toggleBtn.addEventListener(evt, e => {
+                    [initialX, initialY] = [e.type === 'touchstart' ? e.touches[0].clientX : e.clientX,
+                    e.type === 'touchstart' ? e.touches[0].clientY : e.clientY];
+                    initialX -= xOffset; initialY -= yOffset;
+
+                    if (e.target === toggleBtn || toggleBtn.contains(e.target)) {
+                        isDragging = true;
+                        toggleBtn.classList.add('dragging');
+                        e.preventDefault();
+                        initialExpandedState = toggleBtn.classList.contains('expanded');
+                    }
+                }, false)
+            );
+
+            // RESTORES STATE AND UPDATES POSITION
+            ['touchend', 'mouseup'].forEach(evt =>
+                document.addEventListener(evt, e => {
+                    if (!isDragging) return;
+
+                    const hasMoved = Math.abs(currentX - initialX) > 5 || Math.abs(currentY - initialY) > 5;
+                    if (hasMoved) {
+                        initialExpandedState ? toggleBtn.classList.add('expanded') : toggleBtn.classList.remove('expanded');
+                        setTranslate(xOffset, yOffset, toggleBtn);
+                    }
+
+                    [initialX, initialY] = [currentX, currentY];
+                    isDragging = false;
+                    toggleBtn.classList.remove('dragging');
+                }, false)
+            );
+
+            // UPDATES BUTTON POSITION DURING DRAG
+            ['touchmove', 'mousemove'].forEach(evt =>
+                document.addEventListener(evt, e => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+
+                    [currentX, currentY] = [e.type === 'touchmove' ? e.touches[0].clientX - initialX : e.clientX - initialX,
+                    e.type === 'touchmove' ? e.touches[0].clientY - initialY : e.clientY - initialY];
+
+                    if (Math.abs(currentX) > 5 || Math.abs(currentY) > 5) hasDragged = true;
+
+                    const buttonHeight = toggleBtn.offsetHeight, screenHeight = window.innerHeight;
+                    currentY = Math.min(Math.max(currentY, -screenHeight / 2 + buttonHeight / 2), screenHeight / 2 - buttonHeight / 2);
+                    currentX = 0;
+
+                    [xOffset, yOffset] = [currentX, currentY];
+                    setTranslate(currentX, currentY, toggleBtn);
+                }, false)
+            );
+
+            updateButtonPosition();
+        });
+
+        // EXPANDS FIRST, THEN TOGGLES DARK MODE ON SECOND CLICK
+        document.querySelector('.toggle-button').onclick = e => {
+            if (!isDragging && !hasDragged) {
+                const toggleBtn = document.querySelector('.mode-toggle');
+                toggleBtn.classList.contains('expanded') ? toggleDarkMode() : toggleExpand();
+            }
+            hasDragged = false;
+        };
+
+        // COLLAPSES THE EXPANDED TOGGLE
+        document.querySelector('.close-button').onclick = e => {
+            if (!isDragging && !hasDragged) closeExpandedToggle(e);
+            hasDragged = false;
+        };
+
+        
         document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-item')
             let currentIndex = 0
