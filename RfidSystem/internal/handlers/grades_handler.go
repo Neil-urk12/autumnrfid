@@ -3,16 +3,14 @@ package handlers
 import (
 	"fmt"
 	"log"
-	"time"
 	"rfidsystem/internal/model"
-	"rfidsystem/internal/repositories"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 var gradesCache = NewLRUCache(5, time.Hour)
 var semesterGradesCache = NewLRUCache(5, time.Hour)
-
 
 func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 	studentId := ctx.FormValue("rfid")
@@ -42,17 +40,15 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 		}
 	}
 
-	gradesRepo := repositories.NewRFIDRepository(h.db)
-
 	// Get current term to determine which semester to show by default
-	currentTerm, err := gradesRepo.GetCurrentTerm()
+	currentTerm, err := h.RFIDRepository.GetCurrentTerm()
 	if err != nil {
 		log.Printf("Error getting current term: %v", err)
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 
 	// Get grades data
-	gradesData, err := gradesRepo.GetStudentGradesByRFID(studentId)
+	gradesData, err := h.RFIDRepository.GetStudentGradesByRFID(studentId)
 	if err != nil {
 		log.Printf("Error fetching grades for student %s: %v", studentId, err)
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
@@ -107,17 +103,15 @@ func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 		}
 	}
 
-	gradesRepo := repositories.NewRFIDRepository(h.db)
-
 	// Get current term to get the academic year and check semester availability
-	currentTerm, err := gradesRepo.GetCurrentTerm()
+	currentTerm, err := h.RFIDRepository.GetCurrentTerm()
 	if err != nil {
 		log.Printf("Error getting current term: %v", err)
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 
 	// Get grades for the requested semester
-	gradesData, err := gradesRepo.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, semester)
+	gradesData, err := h.RFIDRepository.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, semester)
 	if err != nil {
 		log.Printf("Error fetching grades for student %s semester %s: %v", studentId, semester, err)
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")

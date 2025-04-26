@@ -5,7 +5,6 @@ import (
 	"log"
 	"regexp"
 	"rfidsystem/internal/model"
-	"rfidsystem/internal/repositories"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -73,10 +72,9 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid student ID format. Must be in format ACLC-YYYY-XXX")
 	}
 
-	billsRepo := repositories.NewRFIDRepository(h.db)
 	log.Printf("Created bills repository\n")
 
-	billsData, err := billsRepo.GetStudentBillsByRFID(studentId)
+	billsData, err := h.RFIDRepository.GetStudentBillsByRFID(studentId)
 	log.Printf("GetStudentBillsByRFID result - err: %v, billsData: %+v\n", err, billsData)
 
 	if err != nil {
@@ -93,24 +91,6 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 
 	log.Printf("Successfully retrieved bills data for student ID: %s\n", studentId)
 
-	// assessmentMap := fiber.Map{
-	// 	"ID":        billsData.Assessment.ID,
-	// 	"StudentID": billsData.Assessment.StudentID,
-	// 	"TermID":    billsData.Assessment.TermID,
-
-	// 	// For regular amounts (non-nullable)
-	// 	"TotalFeeAmount":      formatAmount(billsData.Assessment.TotalFeeAmount),
-	// 	"NetAssessmentAmount": formatAmount(billsData.Assessment.NetAssessmentAmount),
-	// 	"InitialPayment":      formatNullableAmount(billsData.Assessment.InitialPayment),
-	// 	"TotalPaymentAmount":  formatAmount(billsData.Assessment.TotalPaymentAmount),
-	// 	"RemainingBalance":    formatAmount(billsData.Assessment.RemainingBalance),
-
-	// 	// For potentially nullable amounts
-	// 	"TotalDiscountAmount": formatAmount(billsData.Assessment.TotalDiscountAmount),
-	// 	"FullPmtIfB4Prelim":   formatNullableAmount(billsData.Assessment.FullPmtIfB4Prelim),
-	// 	"PerExamFee":          formatNullableAmount(billsData.Assessment.PerExamFee),
-	// }
-	//
 	assessmentMap := formatAssessmentForView(billsData.Assessment)
 
 	err = ctx.Render("partials/bills", fiber.Map{

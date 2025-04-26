@@ -146,7 +146,6 @@ func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Get("/error", h.HandleError)
 	app.Get("/student-partial/:rfid", h.HandleStudentInfo)
 	app.Get("/students/v1", h.RetrieveStudentsHandler)
-	app.Get("/students/assessment-term/:termID", h.HandleGetStudentsForAssessmentTerm)
 	app.Get("/students/:id", h.GetStudentById)
 	app.Get("/stream", h.HandleSSE)
 	app.Post("/card-scan", h.HandleCardScan)

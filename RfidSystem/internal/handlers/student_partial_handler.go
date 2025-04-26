@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"rfidsystem/internal/model"
-	"rfidsystem/internal/repositories"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -59,8 +58,7 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 		}
 	}
 
-	rfidRepo := repositories.NewRFIDRepository(h.db)
-	studentInfo, err := rfidRepo.GetStudentSummaryData(studentId)
+	studentInfo, err := h.RFIDRepository.GetStudentSummaryData(studentId)
 	if err != nil {
 		log.Printf("Error getting student info: %v", err)
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to retrieve student information")
@@ -131,8 +129,7 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 func (h *AppHandler) HandleStudentPartial(c *fiber.Ctx) error {
 	rfid := c.Params("rfid")
 
-	rfidRepo := repositories.NewRFIDRepository(h.db)
-	student, err := rfidRepo.GetStudentByRFID(rfid)
+	student, err := h.RFIDRepository.GetStudentByRFID(rfid)
 
 	if err != nil || student == nil {
 		return c.Status(fiber.StatusNotFound).SendString("Student not found")
