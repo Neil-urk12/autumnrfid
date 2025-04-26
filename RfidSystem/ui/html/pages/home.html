@@ -3,11 +3,11 @@
 {{define "content"}}
 
 <body>
-    <div class="mode-toggle">
-        <button class="toggle-button" onclick="toggleDarkMode()">
+    <div class="mode-toggle" style="touch-action: none;">
+        <button class="toggle-button" >
             <img src="/ui/static/images/cloudy-day.png" height="35" width="35" alt="sun" class="icon">
         </button>
-        <button class="close-button" onclick="closeExpandedToggle(event)">✕</button>
+        <button class="close-button" >✕</button>
     </div>
 
     <div class="navbar" id="main-navbar" style="display: none;">
@@ -107,22 +107,6 @@
         // document.addEventListener('DOMContentLoaded', function () {
 
         // });
-
-        // EXPANDS FIRST, THEN TOGGLES DARK MODE ON SECOND CLICK
-        document.querySelector('.toggle-button').onclick = e => {
-            if (!isDragging && !hasDragged) {
-                const toggleBtn = document.querySelector('.mode-toggle');
-                toggleBtn.classList.contains('expanded') ? toggleDarkMode() : toggleExpand();
-            }
-            hasDragged = false;
-        };
-
-        // COLLAPSES THE EXPANDED TOGGLE
-        document.querySelector('.close-button').onclick = e => {
-            if (!isDragging && !hasDragged) closeExpandedToggle(e);
-            hasDragged = false;
-        };
-
 
         document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-item')
@@ -330,61 +314,88 @@
 
 
             const toggleBtn = document.querySelector('.mode-toggle');
+            toggleBtn.style.touchAction = 'none';
+            let moveRAF = false;
 
-            // TRACKS INITIAL POSITIONS AND SETS DRAGGING STATE
-            ['touchstart', 'mousedown'].forEach(evt =>
-                toggleBtn.addEventListener(evt, e => {
-                    [initialX, initialY] = [e.type === 'touchstart' ? e.touches[0].clientX : e.clientX,
-                    e.type === 'touchstart' ? e.touches[0].clientY : e.clientY];
-                    initialX -= xOffset; initialY -= yOffset;
+            // Drag event groups & attachment
+            const dragStartEvents = ['touchstart', 'mousedown'];
+            const dragMoveEvents = ['touchmove', 'mousemove'];
+            const dragEndEvents = ['touchend', 'mouseup'];
+            function addListeners(target, events, handler) {
+                events.forEach(evt => target.addEventListener(evt, handler, false));
+            }
+            addListeners(toggleBtn, dragStartEvents, handleDragStart);
+            addListeners(document, dragMoveEvents, handleDragMove);
+            addListeners(document, dragEndEvents, handleDragEnd);
 
-                    if (e.target === toggleBtn || toggleBtn.contains(e.target)) {
-                        isDragging = true;
-                        toggleBtn.classList.add('dragging');
-                        e.preventDefault();
-                        initialExpandedState = toggleBtn.classList.contains('expanded');
-                    }
-                }, false)
-            );
-
-            // RESTORES STATE AND UPDATES POSITION
-            ['touchend', 'mouseup'].forEach(evt =>
-                document.addEventListener(evt, e => {
-                    if (!isDragging) return;
-
-                    const hasMoved = Math.abs(currentX - initialX) > 5 || Math.abs(currentY - initialY) > 5;
-                    if (hasMoved) {
-                        initialExpandedState ? toggleBtn.classList.add('expanded') : toggleBtn.classList.remove('expanded');
-                        setTranslate(xOffset, yOffset, toggleBtn);
-                    }
-
-                    [initialX, initialY] = [currentX, currentY];
-                    isDragging = false;
-                    toggleBtn.classList.remove('dragging');
-                }, false)
-            );
-
-            // UPDATES BUTTON POSITION DURING DRAG
-            ['touchmove', 'mousemove'].forEach(evt =>
-                document.addEventListener(evt, e => {
-                    if (!isDragging) return;
+            // DRAG EVENT HANDLERS
+            function handleDragStart(e) {
+                const x = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                const y = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                [initialX, initialY] = [x - xOffset, y - yOffset];
+                if (e.target === toggleBtn || toggleBtn.contains(e.target)) {
+                    isDragging = true;
+                    hasDragged = false;
+                    toggleBtn.classList.add('dragging');
+                    initialExpandedState = toggleBtn.classList.contains('expanded');
                     e.preventDefault();
-
-                    [currentX, currentY] = [e.type === 'touchmove' ? e.touches[0].clientX - initialX : e.clientX - initialX,
-                    e.type === 'touchmove' ? e.touches[0].clientY - initialY : e.clientY - initialY];
-
-                    if (Math.abs(currentX) > 5 || Math.abs(currentY) > 5) hasDragged = true;
-
-                    const buttonHeight = toggleBtn.offsetHeight, screenHeight = window.innerHeight;
-                    currentY = Math.min(Math.max(currentY, -screenHeight / 2 + buttonHeight / 2), screenHeight / 2 - buttonHeight / 2);
-                    currentX = 0;
-
-                    [xOffset, yOffset] = [currentX, currentY];
-                    setTranslate(currentX, currentY, toggleBtn);
-                }, false)
-            );
+                }
+            }
+            function handleDragMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                if (!moveRAF) {
+                    moveRAF = true;
+                    window.requestAnimationFrame(() => {
+                        const dx = e.type === 'touchmove' ? e.touches[0].clientX - initialX : e.clientX - initialX;
+                        const dy = e.type === 'touchmove' ? e.touches[0].clientY - initialY : e.clientY - initialY;
+                        currentX = dx; currentY = dy;
+                        if (Math.abs(currentX) > 5 || Math.abs(currentY) > 5) hasDragged = true;
+                        const btnH = toggleBtn.offsetHeight, scrH = window.innerHeight;
+                        currentY = Math.min(Math.max(currentY, -scrH/2 + btnH/2), scrH/2 - btnH/2);
+                        currentX = 0;
+                        [xOffset, yOffset] = [currentX, currentY];
+                        setTranslate(currentX, currentY, toggleBtn);
+                        moveRAF = false;
+                    });
+                }
+            }
+            function handleDragEnd(e) {
+                if (!isDragging) return;
+                const moved = Math.abs(currentX - initialX) > 5 || Math.abs(currentY - initialY) > 5;
+                if (moved) {
+                    initialExpandedState
+                        ? toggleBtn.classList.add('expanded')
+                        : toggleBtn.classList.remove('expanded');
+                    setTranslate(xOffset, yOffset, toggleBtn);
+                }
+                [initialX, initialY] = [currentX, currentY];
+                isDragging = false;
+                toggleBtn.classList.remove('dragging');
+            }
 
             updateButtonPosition();
+
+            // Unified click and drag handling via pointer events
+            toggleBtn.addEventListener('pointerup', e => {
+                if (toggleBtn.releasePointerCapture) toggleBtn.releasePointerCapture(e.pointerId);
+                if (!hasDragged) {
+                    const toggleTarget = e.target.closest('.toggle-button');
+                    const closeTarget = e.target.closest('.close-button');
+                    if (toggleTarget) {
+                        toggleBtn.classList.contains('expanded') ? toggleDarkMode() : toggleExpand();
+                    } else if (closeTarget) {
+                        closeExpandedToggle(e);
+                    }
+                }
+                isDragging = false;
+                hasDragged = false;
+            });
+            toggleBtn.addEventListener('pointercancel', e => {
+                isDragging = false;
+                hasDragged = false;
+                toggleBtn.classList.remove('dragging');
+            });
         })
     </script>
     {{end}}
