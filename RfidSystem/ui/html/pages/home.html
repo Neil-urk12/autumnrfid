@@ -12,9 +12,12 @@
 
     <div class="navbar" id="main-navbar" style="display: none;">
         <input type="hidden" id="current-student-id" name="rfid" value="" />
-        <button hx-post="/student-partial" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
-        <button hx-post="/grades" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
-        <button hx-post="/bills" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
+        <button hx-post="/student-partial" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML"
+            class="rfid">RFID</button>
+        <button hx-post="/grades" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML"
+            class="rfid">Grades</button>
+        <button hx-post="/bills" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML"
+            class="rfid">Bills</button>
     </div>
 
     </div>
@@ -101,64 +104,9 @@
             setTranslate(0, 0, toggleBtn);
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggleBtn = document.querySelector('.mode-toggle');
+        // document.addEventListener('DOMContentLoaded', function () {
 
-            // TRACKS INITIAL POSITIONS AND SETS DRAGGING STATE
-            ['touchstart', 'mousedown'].forEach(evt =>
-                toggleBtn.addEventListener(evt, e => {
-                    [initialX, initialY] = [e.type === 'touchstart' ? e.touches[0].clientX : e.clientX,
-                    e.type === 'touchstart' ? e.touches[0].clientY : e.clientY];
-                    initialX -= xOffset; initialY -= yOffset;
-
-                    if (e.target === toggleBtn || toggleBtn.contains(e.target)) {
-                        isDragging = true;
-                        toggleBtn.classList.add('dragging');
-                        e.preventDefault();
-                        initialExpandedState = toggleBtn.classList.contains('expanded');
-                    }
-                }, false)
-            );
-
-            // RESTORES STATE AND UPDATES POSITION
-            ['touchend', 'mouseup'].forEach(evt =>
-                document.addEventListener(evt, e => {
-                    if (!isDragging) return;
-
-                    const hasMoved = Math.abs(currentX - initialX) > 5 || Math.abs(currentY - initialY) > 5;
-                    if (hasMoved) {
-                        initialExpandedState ? toggleBtn.classList.add('expanded') : toggleBtn.classList.remove('expanded');
-                        setTranslate(xOffset, yOffset, toggleBtn);
-                    }
-
-                    [initialX, initialY] = [currentX, currentY];
-                    isDragging = false;
-                    toggleBtn.classList.remove('dragging');
-                }, false)
-            );
-
-            // UPDATES BUTTON POSITION DURING DRAG
-            ['touchmove', 'mousemove'].forEach(evt =>
-                document.addEventListener(evt, e => {
-                    if (!isDragging) return;
-                    e.preventDefault();
-
-                    [currentX, currentY] = [e.type === 'touchmove' ? e.touches[0].clientX - initialX : e.clientX - initialX,
-                    e.type === 'touchmove' ? e.touches[0].clientY - initialY : e.clientY - initialY];
-
-                    if (Math.abs(currentX) > 5 || Math.abs(currentY) > 5) hasDragged = true;
-
-                    const buttonHeight = toggleBtn.offsetHeight, screenHeight = window.innerHeight;
-                    currentY = Math.min(Math.max(currentY, -screenHeight / 2 + buttonHeight / 2), screenHeight / 2 - buttonHeight / 2);
-                    currentX = 0;
-
-                    [xOffset, yOffset] = [currentX, currentY];
-                    setTranslate(currentX, currentY, toggleBtn);
-                }, false)
-            );
-
-            updateButtonPosition();
-        });
+        // });
 
         // EXPANDS FIRST, THEN TOGGLES DARK MODE ON SECOND CLICK
         document.querySelector('.toggle-button').onclick = e => {
@@ -175,7 +123,7 @@
             hasDragged = false;
         };
 
-        
+
         document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-item')
             let currentIndex = 0
@@ -380,6 +328,63 @@
             }
             // --- End Idle Timeout Event Listeners ---
 
+
+            const toggleBtn = document.querySelector('.mode-toggle');
+
+            // TRACKS INITIAL POSITIONS AND SETS DRAGGING STATE
+            ['touchstart', 'mousedown'].forEach(evt =>
+                toggleBtn.addEventListener(evt, e => {
+                    [initialX, initialY] = [e.type === 'touchstart' ? e.touches[0].clientX : e.clientX,
+                    e.type === 'touchstart' ? e.touches[0].clientY : e.clientY];
+                    initialX -= xOffset; initialY -= yOffset;
+
+                    if (e.target === toggleBtn || toggleBtn.contains(e.target)) {
+                        isDragging = true;
+                        toggleBtn.classList.add('dragging');
+                        e.preventDefault();
+                        initialExpandedState = toggleBtn.classList.contains('expanded');
+                    }
+                }, false)
+            );
+
+            // RESTORES STATE AND UPDATES POSITION
+            ['touchend', 'mouseup'].forEach(evt =>
+                document.addEventListener(evt, e => {
+                    if (!isDragging) return;
+
+                    const hasMoved = Math.abs(currentX - initialX) > 5 || Math.abs(currentY - initialY) > 5;
+                    if (hasMoved) {
+                        initialExpandedState ? toggleBtn.classList.add('expanded') : toggleBtn.classList.remove('expanded');
+                        setTranslate(xOffset, yOffset, toggleBtn);
+                    }
+
+                    [initialX, initialY] = [currentX, currentY];
+                    isDragging = false;
+                    toggleBtn.classList.remove('dragging');
+                }, false)
+            );
+
+            // UPDATES BUTTON POSITION DURING DRAG
+            ['touchmove', 'mousemove'].forEach(evt =>
+                document.addEventListener(evt, e => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+
+                    [currentX, currentY] = [e.type === 'touchmove' ? e.touches[0].clientX - initialX : e.clientX - initialX,
+                    e.type === 'touchmove' ? e.touches[0].clientY - initialY : e.clientY - initialY];
+
+                    if (Math.abs(currentX) > 5 || Math.abs(currentY) > 5) hasDragged = true;
+
+                    const buttonHeight = toggleBtn.offsetHeight, screenHeight = window.innerHeight;
+                    currentY = Math.min(Math.max(currentY, -screenHeight / 2 + buttonHeight / 2), screenHeight / 2 - buttonHeight / 2);
+                    currentX = 0;
+
+                    [xOffset, yOffset] = [currentX, currentY];
+                    setTranslate(currentX, currentY, toggleBtn);
+                }, false)
+            );
+
+            updateButtonPosition();
         })
     </script>
     {{end}}
