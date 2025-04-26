@@ -9,21 +9,7 @@ import (
 
 // Get payment schedules for an assessment
 func (r *RFIDRepository) getPaymentSchedules(assessmentId int64) ([]model.PaymentSchedule, error) {
-	query := `
-    SELECT
-        schedule_id,
-        assessment_number,
-        term_description,
-        due_date,
-        expected_amount,
-        sort_order
-    FROM
-        PaymentSchedule
-    WHERE
-        assessment_number = ?
-    ORDER BY
-        sort_order
-    `
+	query := "CALL getPaymentSchedules(?)"
 
 	rows, err := r.dbClient.DB.Query(query, assessmentId)
 	if err != nil {
@@ -107,24 +93,8 @@ func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*model.Bills, 
 
 func (r *RFIDRepository) getAssessment(studentId string) (*model.Assessment, error) {
 	log.Printf("Getting assessment for student ID: %s\n", studentId)
-	query := `
-	SELECT
-		assessment_Number,
-		student_ID,
-		term_id,
-		total_fee_amount,
-		total_discount_amount,
-		net_assessment_amount,
-		initial_Payment,
-		total_payment_amount,
-		full_pmt_if_b4_prelim,
-		remaining_Balance,
-		per_Exam_Fee
-	FROM Assessment
-	WHERE student_ID = ?
-	ORDER BY assessment_Number DESC
-	LIMIT 1
-	`
+
+	query := "CALL GetAssessment(?)"
 
 	assessment := &model.Assessment{}
 	log.Printf("Executing assessment query with parameters: studentId=%s\n", studentId)
@@ -173,7 +143,13 @@ func (r *RFIDRepository) getFeeBreakdown(assessmentId int64) ([]model.FeeBreakdo
 	ORDER BY ft.category, ft.name
 	`
 
-	rows, err := r.dbClient.DB.Query(query, assessmentId)
+	stmt, err := r.dbClient.DB.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("prepare fee breakdown query: %v", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(assessmentId)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +180,13 @@ func (r *RFIDRepository) getDiscounts(assessmentId int64) ([]model.DiscountRecor
 	WHERE ad.assessment_number = ?
 	`
 
-	rows, err := r.dbClient.DB.Query(query, assessmentId)
+	stmt, err := r.dbClient.DB.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("prepare discounts query: %v", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(assessmentId)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +217,6 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentR
 		payment_date,
 		description,
 		amount,
-		status,
 		payment_method,
 		reference_number
 	FROM Payments
@@ -243,7 +224,13 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentR
 	ORDER BY payment_date DESC
 	`
 
-	rows, err := r.dbClient.DB.Query(query, assessmentId)
+	stmt, err := r.dbClient.DB.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("prepare payment history query: %v", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(assessmentId)
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +243,6 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentR
 			&payment.PaymentDate,
 			&payment.Description,
 			&payment.Amount,
-			&payment.Status,
 			&payment.PaymentMethod,
 			&payment.ReferenceNumber,
 		); err != nil {
