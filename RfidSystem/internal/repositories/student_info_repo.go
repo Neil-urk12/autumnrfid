@@ -6,6 +6,7 @@ import (
 	"log"
 	"rfidsystem/internal/model"
 	"rfidsystem/internal/services"
+	"time"
 )
 
 // Student Related Functions
@@ -20,6 +21,7 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 	log.Printf("Executing query with student ID: %s\n", studentId)
 
 	student := &model.Student{}
+	var firstAccessRaw, lastAccessRaw []byte
 	err := r.dbClient.DB.QueryRow(query, studentId).Scan(
 		&student.StudentID,
 		&student.DepartmentID,
@@ -32,8 +34,8 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 		&student.YearLevel,
 		&student.Program,
 		&student.BlockSection,
-		&student.FirstAccessTimestamp,
-		&student.LastAccessTimestamp,
+		&firstAccessRaw,
+		&lastAccessRaw,
 	)
 
 	if err == sql.ErrNoRows {
@@ -44,6 +46,39 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 	if err != nil {
 		log.Printf("Error querying student: %v\n", err)
 		return nil, fmt.Errorf("error querying student: %v", err)
+	}
+
+	// Parse raw timestamp bytes into *time.Time
+	if len(firstAccessRaw) > 0 {
+		if t, err := time.Parse("2006-01-02 15:04:05", string(firstAccessRaw)); err != nil {
+			log.Printf("Invalid first_access_timestamp for %s: %v", student.StudentID, err)
+		} else {
+			student.FirstAccessTimestamp = &t
+		}
+	}
+	if len(lastAccessRaw) > 0 {
+		if t2, err := time.Parse("2006-01-02 15:04:05", string(lastAccessRaw)); err != nil {
+			log.Printf("Invalid last_access_timestamp for %s: %v", student.StudentID, err)
+		} else {
+			student.LastAccessTimestamp = &t2
+		}
+	}
+
+	// Update access timestamps
+	now := time.Now()
+	updateQuery := `
+	UPDATE Students
+	SET last_access_timestamp = ?,
+		first_access_timestamp = COALESCE(first_access_timestamp, ?)
+	WHERE student_ID = ?
+	`
+	if _, err := r.dbClient.DB.Exec(updateQuery, now, now, student.StudentID); err != nil {
+		log.Printf("Error updating access timestamps for student %s: %v", student.StudentID, err)
+	} else {
+		if student.FirstAccessTimestamp == nil {
+			student.FirstAccessTimestamp = &now
+		}
+		student.LastAccessTimestamp = &now
 	}
 
 	return student, nil

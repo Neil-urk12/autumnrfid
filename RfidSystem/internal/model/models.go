@@ -1,5 +1,11 @@
 package model
 
+import (
+	"encoding/json"
+	"strings"
+	"time"
+)
+
 type StudentInfo struct {
 	Student *Student
 }
@@ -54,22 +60,41 @@ type DiscountType struct {
 }
 
 type Student struct {
-	StudentID     string  `json:"student_id" db:"student_ID"`
-	DepartmentID  *int64  `json:"department_id,omitempty" db:"department_ID"`
-	FirstName     *string `json:"first_name,omitempty" db:"first_Name"`
-	LastName      *string `json:"last_name,omitempty" db:"last_Name"`
-	MiddleName    *string `json:"middle_name,omitempty" db:"middle_Name"`
-	Birthday      *string `json:"birthday,omitempty" db:"birthday"`
-	ContactNumber *string `json:"contact_number,omitempty" db:"contact_number"`
-	Email         *string `json:"email,omitempty" db:"email"`
-	YearLevel     *int    `json:"year_level,omitempty" db:"year_Level"`
-	Program       *string `json:"program,omitempty" db:"program"`
-	BlockSection  *string `json:"block_section,omitempty" db:"block_section"`
-	// FirstAccessTimestamp *time.Time `json:"first_access_timestamp,omitempty" db:"first_access_timestamp"`
-	// LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
-	FirstAccessTimestamp string  `json:"first_access_timestamp" db:"first_access_timestamp"`
-	LastAccessTimestamp  string  `json:"last_access_timestamp" db:"last_access_timestamp"`
-	Status               *string `json:"status,omitempty" db:"status"`
+	StudentID            string     `json:"student_id" db:"student_ID"`
+	DepartmentID         *int64     `json:"department_id,omitempty" db:"department_ID"`
+	FirstName            *string    `json:"first_name,omitempty" db:"first_Name"`
+	LastName             *string    `json:"last_name,omitempty" db:"last_Name"`
+	MiddleName           *string    `json:"middle_name,omitempty" db:"middle_Name"`
+	Birthday             *string    `json:"birthday,omitempty" db:"birthday"`
+	ContactNumber        *string    `json:"contact_number,omitempty" db:"contact_number"`
+	Email                *string    `json:"email,omitempty" db:"email"`
+	YearLevel            *int       `json:"year_level,omitempty" db:"year_Level"`
+	Program              *string    `json:"program,omitempty" db:"program"`
+	BlockSection         *string    `json:"block_section,omitempty" db:"block_section"`
+	FirstAccessTimestamp *time.Time `json:"first_access_timestamp,omitempty" db:"first_access_timestamp"`
+	LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
+	// FirstAccessTimestamp string  `json:"first_access_timestamp" db:"first_access_timestamp"`
+	// LastAccessTimestamp  string  `json:"last_access_timestamp" db:"last_access_timestamp"`
+	Status *string `json:"status,omitempty" db:"status"`
+}
+
+// MarshalJSON customizes Student JSON to format timestamps as "YYYY-MM-DD hh:mm am/pm" without seconds
+func (s *Student) MarshalJSON() ([]byte, error) {
+	type Alias Student
+	aux := &struct {
+		*Alias
+		FirstAccessTimestamp string `json:"first_access_timestamp,omitempty"`
+		LastAccessTimestamp  string `json:"last_access_timestamp,omitempty"`
+	}{
+		Alias: (*Alias)(s),
+	}
+	if s.FirstAccessTimestamp != nil {
+		aux.FirstAccessTimestamp = strings.ToLower(s.FirstAccessTimestamp.Format("2006-01-02 03:04 PM"))
+	}
+	if s.LastAccessTimestamp != nil {
+		aux.LastAccessTimestamp = strings.ToLower(s.LastAccessTimestamp.Format("2006-01-02 03:04 PM"))
+	}
+	return json.Marshal(aux)
 }
 
 type Assessment struct {

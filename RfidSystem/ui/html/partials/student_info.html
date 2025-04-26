@@ -84,15 +84,13 @@
                     <tr>
                         <th>Last Access</th>
                         <td>
-                            {{if
-                            .Student}}{{.Student.LastAccessTimestamp}}{{end}}
+                            {{if .Student}}{{formatTime .Student.LastAccessTimestamp}}{{end}}
                         </td>
                     </tr>
                     <tr>
                         <th>First Access</th>
                         <td>
-                            {{if
-                            .Student}}{{.Student.FirstAccessTimestamp}}{{end}}
+                            {{if .Student}}{{formatTime .Student.FirstAccessTimestamp}}{{end}}
                         </td>
                     </tr>
                 </table>

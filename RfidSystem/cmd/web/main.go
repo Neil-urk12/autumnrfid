@@ -85,6 +85,13 @@ func initViewEngine() *html.Engine {
 		}
 		return filtered
 	})
+	// Format time as "YYYY-MM-DD hh:mm am/pm" without seconds
+	engine.AddFunc("formatTime", func(t *time.Time) string {
+		if t == nil {
+			return ""
+		}
+		return strings.ToLower(t.Format("2006-01-02 03:04 PM"))
+	})
 	return engine
 }
 
