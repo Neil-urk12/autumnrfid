@@ -59,7 +59,7 @@ func (h *AppHandler) RetrieveStudentsHandler(ctx *fiber.Ctx) error {
 	page := ctx.QueryInt("page", 1)
 	cacheKey := strconv.Itoa(page)
 	if cached, found := studentsPageCache.Get(cacheKey); found {
-		students, ok := cached.([]interface{})
+		students, ok := cached.([]any)
 		if ok && students != nil {
 			log.Printf("[CACHE HIT] Students page %d", page)
 			return ctx.JSON(students)

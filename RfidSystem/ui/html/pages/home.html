@@ -11,9 +11,9 @@
     </div>
 
     <div class="navbar" id="main-navbar" style="display: none;">
-        <button hx-get="/student-partial" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
-        <button hx-get="/grades" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
-        <button hx-get="/bills" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
+        <button hx-post="/student-partial" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
+        <button hx-post="/grades" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
+        <button hx-post="/bills" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
     </div>
 
     </div>
@@ -312,26 +312,26 @@
                         console.log('Current student ID found:', currentStudentIdValue);
 
                         // Update RFID Button
-                        const rfidButton = navbar.querySelector('button[hx-get^="/student-partial"]');
+                        const rfidButton = navbar.querySelector('button[hx-post^="/student-partial"]');
                         if (rfidButton) {
-                            rfidButton.setAttribute('hx-get', `/student-partial/${currentStudentIdValue}`);
-                            console.log('Updated RFID button hx-get:', rfidButton.getAttribute('hx-get'));
+                            rfidButton.setAttribute('hx-post', `/student-partial`);
+                            console.log('Updated RFID button hx-post:', rfidButton.getAttribute('hx-post'));
                             htmx.process(rfidButton);
                         }
 
                         // Update Grades Button
-                        const gradesButton = navbar.querySelector('button[hx-get^="/grades"]');
+                        const gradesButton = navbar.querySelector('button[hx-post^="/grades"]');
                         if (gradesButton) {
-                            gradesButton.setAttribute('hx-get', `/grades?student-id=${currentStudentIdValue}`);
-                            console.log('Updated Grades button hx-get:', gradesButton.getAttribute('hx-get'));
+                            gradesButton.setAttribute('hx-post', `/grades`);
+                            console.log('Updated Grades button hx-post:', gradesButton.getAttribute('hx-post'));
                             htmx.process(gradesButton);
                         }
 
                         // Update Bills Button
-                        const billsButton = navbar.querySelector('button[hx-get^="/bills"]');
+                        const billsButton = navbar.querySelector('button[hx-post^="/bills"]');
                         if (billsButton) {
-                            billsButton.setAttribute('hx-get', `/bills?student-id=${currentStudentIdValue}`);
-                            console.log('Updated Bills button hx-get:', billsButton.getAttribute('hx-get'));
+                            billsButton.setAttribute('hx-post', `/bills`);
+                            console.log('Updated Bills button hx-post:', billsButton.getAttribute('hx-post'));
                             htmx.process(billsButton);
                         }
                     } else {
