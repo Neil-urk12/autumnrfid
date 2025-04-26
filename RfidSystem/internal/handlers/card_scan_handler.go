@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"rfidsystem/internal/model"
-	"rfidsystem/internal/repositories"
 	"sync"
 	"time"
 
@@ -51,9 +50,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		}
 	}
 
-	rfidRepo := repositories.NewRFIDRepository(h.db)
-	// student, err := rfidRepo.GetStudentByRFID(rfid)
-	student, err := rfidRepo.GetStudentSummaryData(rfid)
+	student, err := h.RFIDRepository.GetStudentSummaryData(rfid)
 
 	if err != nil {
 		GetBroadcaster().Broadcast("error", fmt.Sprintf(`{"message": "Database error: %v"}`, err))

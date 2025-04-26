@@ -5,6 +5,7 @@
 <body>
 
     <div class="navbar" id="main-navbar" style="display: none;">
+        <input type="hidden" id="current-student-id" name="rfid" value="" />
         <button hx-post="/student-partial" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">RFID</button>
         <button hx-post="/grades" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">Grades</button>
         <button hx-post="/bills" hx-include="#current-student-id" hx-target="#main" hx-swap="innerHTML" class="rfid">Bills</button>
@@ -182,60 +183,25 @@
                 // --- End Idle Timer Logic ---
 
 
-                // --- Existing Logic (Student ID & Navbar) ---
-                // Check if we can find the student ID (only relevant if navbar exists)
-                if (navbar) {
-                    const studentIdElement = document.getElementById('current-student-id');
-                    if (studentIdElement && studentIdElement.value) {
-                        const currentStudentIdValue = studentIdElement.value; // Use a different variable name
-                        console.log('Current student ID found:', currentStudentIdValue);
+                // --- Existing Logic (Navbar) ---
+                // Handle navbar visibility based on the same path check
+                if (requestPath) {
+                    const showNav = requestPath.startsWith('/student-partial/') ||
+                        requestPath === '/grades' ||
+                        requestPath === '/bills';
+                    const hideNav = requestPath === '/' || requestPath === '/error';
 
-                        // Update RFID Button
-                        const rfidButton = navbar.querySelector('button[hx-post^="/student-partial"]');
-                        if (rfidButton) {
-                            rfidButton.setAttribute('hx-post', `/student-partial`);
-                            console.log('Updated RFID button hx-post:', rfidButton.getAttribute('hx-post'));
-                            htmx.process(rfidButton);
-                        }
-
-                        // Update Grades Button
-                        const gradesButton = navbar.querySelector('button[hx-post^="/grades"]');
-                        if (gradesButton) {
-                            gradesButton.setAttribute('hx-post', `/grades`);
-                            console.log('Updated Grades button hx-post:', gradesButton.getAttribute('hx-post'));
-                            htmx.process(gradesButton);
-                        }
-
-                        // Update Bills Button
-                        const billsButton = navbar.querySelector('button[hx-post^="/bills"]');
-                        if (billsButton) {
-                            billsButton.setAttribute('hx-post', `/bills`);
-                            console.log('Updated Bills button hx-post:', billsButton.getAttribute('hx-post'));
-                            htmx.process(billsButton);
-                        }
-                    } else {
-                        console.log('Current student ID element not found or has no value in this swap.');
+                    // Determine final display state
+                    let finalDisplay = navbar.style.display; // Keep current state by default
+                    if (showNav) {
+                        finalDisplay = 'flex';
+                    } else if (hideNav) {
+                        finalDisplay = 'none';
                     }
-
-                    // Handle navbar visibility based on the same path check
-                    if (requestPath) {
-                        const showNav = requestPath.startsWith('/student-partial/') ||
-                            requestPath === '/grades' ||
-                            requestPath === '/bills';
-                        const hideNav = requestPath === '/' || requestPath === '/error';
-
-                        // Determine final display state
-                        let finalDisplay = navbar.style.display; // Keep current state by default
-                        if (showNav) {
-                            finalDisplay = 'flex';
-                        } else if (hideNav) {
-                            finalDisplay = 'none';
-                        }
-                        // Only update if the state needs changing or is initially unset
-                        if (navbar.style.display !== finalDisplay) {
-                            navbar.style.display = finalDisplay;
-                            console.log('Navbar display set to:', finalDisplay);
-                        }
+                    // Only update if the state needs changing or is initially unset
+                    if (navbar.style.display !== finalDisplay) {
+                        navbar.style.display = finalDisplay;
+                        console.log('Navbar display set to:', finalDisplay);
                     }
                 }
                 // --- End Existing Logic ---
