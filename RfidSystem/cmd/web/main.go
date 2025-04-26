@@ -141,6 +141,7 @@ func configureApp(engine *html.Engine) *fiber.App {
 // registerRoutes maps URL paths to their handler functions.
 func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Get("/", h.HandleGetIndex)
+	app.Get("/docs", h.HandleDocs)
 	app.Get("/grades", h.HandleGrades)
 	app.Get("/grades/semester/:studentId", h.HandleSemesterGrades)
 	app.Get("/error", h.HandleError)
