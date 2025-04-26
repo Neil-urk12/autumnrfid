@@ -7,7 +7,7 @@ import (
 )
 
 type AppHandler struct {
-	db *repositories.DatabaseClient
+	db             *repositories.DatabaseClient
 	RFIDRepository *repositories.RFIDRepository
 }
 
