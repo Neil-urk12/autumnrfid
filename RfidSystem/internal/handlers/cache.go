@@ -37,19 +37,20 @@ func NewLRUCache(capacity int, ttl time.Duration) *LRUCache {
 func (c *LRUCache) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if elem, ok := c.items[key]; ok {
-		item := elem.Value.(*cacheItem)
-		if time.Now().After(item.expiresAt) {
-			// Expired, remove
-			c.order.Remove(elem)
-			delete(c.items, key)
-			return nil, false
-		}
-		// Move to front
-		c.order.MoveToFront(elem)
-		return item.value, true
+	elem, ok := c.items[key]
+	if !ok {
+		return nil, false
 	}
-	return nil, false
+	item := elem.Value.(*cacheItem)
+	if time.Now().After(item.expiresAt) {
+		// Expired, remove
+		c.order.Remove(elem)
+		delete(c.items, key)
+		return nil, false
+	}
+	// Move to front
+	c.order.MoveToFront(elem)
+	return item.value, true
 }
 
 func (c *LRUCache) Set(key string, value interface{}) {

@@ -5,17 +5,13 @@ import (
 	"fmt"
 	"log"
 	"rfidsystem/internal/model"
-	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 )
 
-var (
-	cardScanCache = NewLRUCache(5, time.Hour)
-	cacheMutex    = &sync.RWMutex{}
-)
+var cardScanCache = NewLRUCache(5, time.Hour)
 
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	var req struct {
@@ -32,9 +28,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 
 	// Try cache first
-	cacheMutex.RLock()
 	cached, found := cardScanCache.Get(rfid)
-	cacheMutex.RUnlock()
 	if found {
 		// Type assertion to view model
 		defer func() {
@@ -64,9 +58,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 
 	// Store in cache
-	cacheMutex.Lock()
 	cardScanCache.Set(rfid, student)
-	cacheMutex.Unlock()
 
 	htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 
@@ -107,9 +99,7 @@ func (h *AppHandler) HandleCardScanWS(c *websocket.Conn) {
 			continue
 		}
 		// Try cache first
-		cacheMutex.RLock()
 		cached, found := cardScanCache.Get(rfid)
-		cacheMutex.RUnlock()
 		if found {
 			if s, ok := cached.(*model.StudentInfoViewModel); ok && s != nil {
 				htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
@@ -132,9 +122,7 @@ func (h *AppHandler) HandleCardScanWS(c *websocket.Conn) {
 			continue
 		}
 		// Store in cache
-		cacheMutex.Lock()
 		cardScanCache.Set(rfid, student)
-		cacheMutex.Unlock()
 		htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 		GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 		c.WriteMessage(websocket.TextMessage, []byte(htmxInstruction))
