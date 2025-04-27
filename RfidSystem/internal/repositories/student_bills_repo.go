@@ -235,7 +235,6 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentR
 		payment_date,
 		description,
 		amount,
-		status,
 		payment_method,
 		reference_number
 	FROM Payments
@@ -256,7 +255,6 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentR
 			&payment.PaymentDate,
 			&payment.Description,
 			&payment.Amount,
-			&payment.Status,
 			&payment.PaymentMethod,
 			&payment.ReferenceNumber,
 		); err != nil {

@@ -1,8 +1,37 @@
-<div id="error-page" class="error-container hidden">
+<div id="error-page" class="error-container">
     <div class="error-code">404</div>
     <div class="error-message">Student Not Found</div>
     <div class="error-details">
         The student ID you're looking for doesn't exist in our
         database.
     </div>
+    
+    <script>
+        // HIDE MODALS AND BUTTONS
+        function hideThemeElements() {
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (themeToggle) {
+                themeToggle.style.display = 'none';
+                themeToggle.style.visibility = 'hidden';
+            }
+            
+            const modeToggle = document.querySelector('.mode-toggle');
+            if (modeToggle) {
+                modeToggle.style.display = 'none';
+                modeToggle.style.visibility = 'hidden';
+            }
+            
+            const themeModal = document.getElementById('themeModal');
+            if (themeModal) {
+                themeModal.style.display = 'none';
+                themeModal.style.visibility = 'hidden';
+
+            }
+        }
+
+        hideThemeElements();
+        document.addEventListener('DOMContentLoaded', hideThemeElements);
+        setTimeout(hideThemeElements, 100);
+        setTimeout(hideThemeElements, 500);
+    </script>
 </div>
