@@ -858,15 +858,6 @@
                 console.error('SSE Error:', e)
             }
             // --- Idle Timeout Event Listeners ---
-            document.addEventListener('click', resetIdleTimer);
-            document.addEventListener('touchstart', resetIdleTimer);
-            document.addEventListener('keydown', resetIdleTimer);
-            document.addEventListener('mousemove', function() {
-                // Only reset on significant mouse movement to prevent constant resetting
-                if (isUserInfoActive && idleTimeoutModal.style.display !== 'flex') {
-                    resetIdleTimer();
-                }
-            });
 
             if (idleConfirmBtn) {
                 idleConfirmBtn.addEventListener('click', () => {
