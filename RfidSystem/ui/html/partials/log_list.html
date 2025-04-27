@@ -1,0 +1,47 @@
+{{define "partials/log_list"}}
+<div id="log-container" hx-get="/log/partial" hx-trigger="every 5s" hx-swap="outerHTML" class="log-container h-[500px] overflow-y-auto p-4 space-y-3">
+    {{ $total := len .Logs }}
+    <div class="flex justify-end mb-2 px-2 text-sm text-slate-200">
+        <span id="visible-logs">{{$total}}</span> of <span id="total-logs-2">{{$total}}</span> logs displayed
+    </div>
+    {{ range .Logs }}
+    <div class="flex items-start bg-slate-700 rounded-md px-4 py-3 mb-2 shadow log-entry relative">
+        <!-- Icon by status/event_type -->
+        <div class="flex-shrink-0 pt-1">
+            {{ if eq .Status "error" }}
+                <i class="fas fa-circle-exclamation text-red-400 text-lg mr-3"></i>
+            {{ else if or (eq .Status "warn") (eq .Status "warning") }}
+                <i class="fas fa-triangle-exclamation text-yellow-400 text-lg mr-3"></i>
+            {{ else if eq .Status "info" }}
+                <i class="fas fa-info-circle text-blue-400 text-lg mr-3"></i>
+            {{ else if eq .Status "success" }}
+                <i class="fas fa-check-circle text-emerald-400 text-lg mr-3"></i>
+            {{ else }}
+                <i class="fas fa-dot-circle text-slate-400 text-lg mr-3"></i>
+            {{ end }}
+        </div>
+        <!-- Main log content -->
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-400 font-mono">{{ .Timestamp.Format "3:04:05 PM" }}</span>
+                <span class="ml-2 inline-block px-2 py-0.5 rounded text-xs bg-slate-600 text-slate-200 font-semibold">
+                    {{ .EventType }}
+                </span>
+            </div>
+            <div class="mt-1 text-slate-200 break-all">
+                {{ .Message }}
+            </div>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                {{ if .CardID }}
+                <span class="inline-block text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Card: {{ .CardID }}</span>
+                {{ end }}
+                {{ if .StudentID.Valid }}
+                <span class="inline-block text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Student: {{ .StudentID.String }}</span>
+                {{ end }}
+                <span class="inline-block text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Status: {{ .Status }}</span>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+</div>
+{{end}}

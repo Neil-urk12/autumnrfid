@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"rfidsystem/internal/model"
 	"time"
@@ -17,6 +18,9 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	}
 	if err := ctx.BodyParser(&req); err != nil {
 		log.Printf("Error parsing request body: %v", err)
+		if err2 := h.db.LogScanEvent(req.RFID, nil, "student_info_error", fmt.Sprintf("Error parsing request body: %v", err), "", "failure"); err2 != nil {
+			log.Printf("Failed to log student_info_error: %v", err2)
+		}
 		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid request body")
 	}
 	studentId := req.RFID
@@ -25,6 +29,7 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	}
 	if studentId == "" {
 		log.Printf("Student ID is required")
+		_ = h.db.LogScanEvent("", nil, "student_info_error", "Student ID is required", "", "failure")
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student ID is required")
 	}
 
@@ -61,15 +66,18 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	studentInfo, err := h.RFIDRepository.GetStudentSummaryData(studentId)
 	if err != nil {
 		log.Printf("Error getting student info: %v", err)
+		_ = h.db.LogScanEvent(studentId, nil, "db_error", fmt.Sprintf("Error getting student info: %v", err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to retrieve student information")
 	}
 
 	if studentInfo == nil || studentInfo.Student == nil {
+		_ = h.db.LogScanEvent(studentId, nil, "student_not_found", fmt.Sprintf("Student not found: %s", studentId), "", "failure")
 		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 	}
 	log.Printf("Student info retrieved successfully")
 	// Store in cache
 	studentInfoCache.Set(studentId, studentInfo)
+	_ = h.db.LogScanEvent(studentId, &studentInfo.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed info for student ID %s", studentId), "", "success")
 
 	// Log grades summary for debugging
 	if studentInfo.GradesSummary != nil {

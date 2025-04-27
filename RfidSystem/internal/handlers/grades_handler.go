@@ -44,6 +44,7 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 	currentTerm, err := h.RFIDRepository.GetCurrentTerm()
 	if err != nil {
 		log.Printf("Error getting current term: %v", err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error getting current term: %v", err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 
@@ -51,10 +52,12 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 	gradesData, err := h.RFIDRepository.GetStudentGradesByRFID(studentId)
 	if err != nil {
 		log.Printf("Error fetching grades for student %s: %v", studentId, err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error fetching grades for student %s: %v", studentId, err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 	if gradesData == nil {
 		log.Printf("Student %s not found", studentId)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_not_found", fmt.Sprintf("Grades not found for student %s", studentId), "", "failure")
 		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 	}
 	// Store in cache
@@ -65,6 +68,7 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 
 	// Process grades and calculate GWA
 	preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+	_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_success", fmt.Sprintf("Fetched %d grades", len(preparedGrades)), "", "success")
 
 	return ctx.Render("partials/grades", fiber.Map{
 		"Title":                     "Student Grades",
@@ -107,6 +111,7 @@ func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 	currentTerm, err := h.RFIDRepository.GetCurrentTerm()
 	if err != nil {
 		log.Printf("Error getting current term: %v", err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error getting current term: %v", err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 
@@ -114,6 +119,7 @@ func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 	gradesData, err := h.RFIDRepository.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, semester)
 	if err != nil {
 		log.Printf("Error fetching grades for student %s semester %s: %v", studentId, semester, err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error fetching grades for student %s semester %s: %v", studentId, semester, err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 	// Store in cache
@@ -124,6 +130,7 @@ func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 
 	// Process grades and calculate GWA
 	preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+	_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_success", fmt.Sprintf("Fetched %d grades", len(preparedGrades)), "", "success")
 
 	// Render only the grades table container
 	return ctx.Render("partials/grades-table", fiber.Map{

@@ -19,18 +19,26 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	}
 	if err := ctx.BodyParser(&req); err != nil {
 		log.Printf("Error parsing request body: %v", err)
+		if err2 := h.db.LogScanEvent(req.RFID, nil, "card_read_error", fmt.Sprintf("Error parsing request body: %v", err), "", "failure"); err2 != nil {
+			log.Printf("Failed to log event: %v", err2)
+		}
 		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid request body")
 	}
 	rfid := req.RFID
 	log.Println(rfid, "RfID")
+	if rfid != "" {
+		if err2 := h.db.LogScanEvent(rfid, nil, "scan", fmt.Sprintf("Card scanned: %s", rfid), "", "info"); err2 != nil {
+			log.Printf("Failed to log scan event: %v", err2)
+		}
+	}
 	if rfid == "" {
+		_ = h.db.LogScanEvent("", nil, "card_read_error", "RFID is required", "", "failure")
 		return ctx.Status(fiber.StatusBadRequest).SendString("RFID is required")
 	}
 
 	// Try cache first
 	cached, found := cardScanCache.Get(rfid)
 	if found {
-		// Type assertion to view model
 		defer func() {
 			if r := recover(); r != nil {
 				log.Printf("Cache type assertion failed: %v", r)
@@ -38,6 +46,8 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		}()
 		student, ok := cached.(*model.StudentInfoViewModel)
 		if ok && student != nil {
+			// Log cache hit event
+			_ = h.db.LogScanEvent(rfid, &student.Student.StudentID, "scan_cache_hit", fmt.Sprintf("Cache hit for student %s", student.Student.StudentID), "", "info")
 			htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 			GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 			return ctx.SendString("Processing (cache)")
@@ -47,11 +57,13 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	student, err := h.RFIDRepository.GetStudentSummaryData(rfid)
 
 	if err != nil {
+		_ = h.db.LogScanEvent(rfid, nil, "db_error", fmt.Sprintf("Database error: %v", err), "", "failure")
 		GetBroadcaster().Broadcast("error", fmt.Sprintf(`{"message": "Database error: %v"}`, err))
 		return ctx.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("Database error: %v", err))
 	}
 
 	if student == nil {
+		_ = h.db.LogScanEvent(rfid, nil, "student_not_found", fmt.Sprintf("Student not found: %s", rfid), "", "failure")
 		htmxInstruction := `<div hx-get="/error" hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`
 		GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 		return ctx.Status(fiber.StatusNotFound).SendString(fmt.Sprintf("Student not found: %s", rfid))
@@ -63,6 +75,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 
 	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
+	_ = h.db.LogScanEvent(rfid, &student.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed info for student ID %s", student.Student.StudentID), "", "success")
 	return ctx.SendString("Processing")
 }
 

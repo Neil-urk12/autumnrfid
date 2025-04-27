@@ -124,9 +124,10 @@ func configureApp(engine *html.Engine) *fiber.App {
 		ExposeHeaders:    "Content-Type, Content-Length, Content-Disposition",
 	}))
 
-	// Logger middleware
+	// Logger middleware (basic HTTP logging)
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+		Output: os.Stdout,
 	}))
 
 	// Serve static assets and ensure images directory exists
@@ -149,6 +150,12 @@ func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Get("/students/v1", h.RetrieveStudentsHandler)
 	app.Get("/students/:id", h.GetStudentById)
 	app.Get("/stream", h.HandleSSE)
+	app.Get("/log", h.HandleLog)
+	app.Get("/logs", h.HandleLog)
+	// HTMX polling endpoint for log container
+	app.Get("/log/partial", h.HandleLogPartial)
+	// HTMX polling endpoint for stats cards
+	app.Get("/stats/partial", h.HandleStatsPartial)
 	app.Post("/card-scan", h.HandleCardScan)
 	app.Get("/card-scan-ws", websocket.New(h.HandleCardScanWS))
 	app.Get("/ping", func(c *fiber.Ctx) error { return c.SendString("Fiber Web Server is running") })
