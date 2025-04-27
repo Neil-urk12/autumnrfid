@@ -3,11 +3,23 @@
 {{define "content"}}
 
 <body>
-    <div class="mode-toggle" style="touch-action: none;">
-        <button class="toggle-button" >
+    <!-- DAY AND NIGHT FROM PARTIALS -->
+    <div class="mode-toggle" style="display: none;">
+        <button class="toggle-button">
             <img src="/ui/static/images/cloudy-day.png" height="35" width="35" alt="sun" class="icon">
         </button>
-        <button class="close-button" >✕</button>
+        <button class="close-button">✕</button>
+    </div>
+
+    <!-- DAY AND NIGHT FROM WALLPAPER DISPLAY -->
+    <div class="theme-toggle">
+        <label class="toggle-switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider">
+                <i class="sun-icon fas fa-sun"></i>
+                <i class="moon-icon fas fa-moon"></i>
+            </span>
+        </label>
     </div>
 
     <div class="navbar" id="main-navbar" style="display: none;">
@@ -22,30 +34,123 @@
 
     </div>
 
+    <!-- DAY/NIGHT MODAL -->
+    <div class="modal-overlay" id="themeModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); z-index: 1000;">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Display Theme</h2>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Choose your preferred display theme for optimal viewing experience</p>
+
+                <div class="theme-options">
+                    <div class="theme-option active" id="dayOption">
+                        <div class="theme-icon-container day-icon">
+                            <i class="theme-icon fas fa-sun"></i>
+
+                        </div>
+                        <div class="theme-label">Day Mode</div>
+                    </div>
+                    <div class="theme-option" id="nightOption">
+                        <div class="theme-icon-container night-icon">
+                            <i class="theme-icon fas fa-moon"></i>
+                        </div>
+                        <div class="theme-label">Night Mode</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" id="closeModal">Apply Theme</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ERROR MODAL -->
+    <div class="modal-overlay" id="rfidErrorModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Access Denied</h2>
+            </div>
+            <div class="modal-body">
+                <div class="status-icon error-icon">
+                    <i class="fas fa-times"></i>
+                </div>
+                <p class="modal-message">Your RFID card could not be recognized</p>
+                <p class="modal-submessage">Please ensure your card is properly registered in the system</p>
+            </div>
+        </div>
+    </div>
+
+
     <main id="main" hx-ext="sse" sse-connect="/stream" sse-swap="studentcallback">
 
         <div class="container-home" id="student-data-container">
 
-            <div id="welcome-section" class="welcome-wrapper">
-                <div class="welcome-content">
-                    <h1>Welcome to RFID</h1>
-                    <p>Please scan your RFID card to view your student information.</p>
+            <div class="wallpaper-display">
+                <!-- BACKGROUND -->
+                <img src="/ui/static/images/bg10.jfif" alt="Canteen" class="wallpaper">
+                <img src="/ui/static/images/bg9.jfif" alt="Canteen" class="wallpaper">
+                <img src="/ui/static/images/bg6.jpg" alt="School" class="wallpaper">
+                <img src="/ui/static/images/bg11.jpg" alt="Court" class="wallpaper">
+                <img src="/ui/static/images/bg7.jfif" alt="School" class="wallpaper">
+                <img src="/ui/static/images/bg8.jfif" alt="Court" class="wallpaper">
+
+                <img src="/ui/static/images/nm1.jfif" alt="Canteen" class="nightwallpaper">
+                <img src="/ui/static/images/nm10.jpg" alt="Canteen" class="nightwallpaper">
+
+                <div class="gradient-overlay"></div>
+
+                <div class="logo-container">
+                    <img src="/ui/static/images/logo3.png" alt="Logo" class="logo-image" height="80" width="80"
+                        style="border-radius: 50%;">
+                </div>
+
+                <!-- QR CODE -->
+                <div class="qr-code-container">
                     <i class="scan-icon fas fa-qrcode"></i>
+                    <div class="qr-text">Scan Your RFID</div>
+                    <div class="qr-subtext">Place your RFID card near the scanner</div>
                 </div>
-            </div>
 
-            <div id="alternating-messages" class="message-wrapper">
-                <div class="message-content">
-                    <p class="message-item">View your current semester grades and academic progress</p>
-                    <p class="message-item">Check your class schedule and room assignments</p>
-                    <p class="message-item">Monitor your attendance and participation records</p>
-                    <p class="message-item">Access your tuition balance and payment deadlines</p>
-                    <p class="message-item">Stay updated with school announcements and events</p>
-                    <p class="message-item">Track your academic requirements and prerequisites</p>
+                <!-- TIME AND WEATHER -->
+                <div class="time-container">
+                    <div class="time pulse" id="time">00:00</div>
+                    <div class="date" id="date">Monday, January 1</div>
+
+                    <div class="weather-container">
+                        <div class="weather-icon" id="weather-icon">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div class="weather-info">
+                            <div class="temperature" id="temperature">32°C</div>
+                            <div class="weather-condition" id="weather">Sunny</div>
+                            <div class="location">Cebu, Philippines</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-        </div>
+                <div id="welcome-section" class="welcome-wrapper" style="display: none;">
+                    <div class="welcome-content">
+                        <h1>Welcome to RFID</h1>
+                        <p>Please scan your RFID card to view your student information.</p>
+                        <i class="scan-icon fas fa-qrcode"></i>
+                    </div>
+                </div>
+
+                <div id="alternating-messages" class="message-wrapper" style="display: none;">
+                    <div class="message-content">
+                        <p class="message-item">View your current semester grades and academic progress</p>
+                        <p class="message-item">Check your class schedule and room assignments</p>
+                        <p class="message-item">Monitor your attendance and participation records</p>
+                        <p class="message-item">Access your tuition balance and payment deadlines</p>
+                        <p class="message-item">Stay updated with school announcements and events</p>
+                        <p class="message-item">Track your academic requirements and prerequisites</p>
+                    </div>
+                </div>
+
+            </div>
 
     </main>
     <!-- <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p> -->
@@ -65,43 +170,216 @@
     <!-- End Idle Timeout Modal -->
     <script>
         let isDragging = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0, initialExpandedState = false, hasDragged = false;
+        let isNightMode = false;
+        let currentWallpaper = 0;
+
+        // UPDATE WALLPAPERS BASED ON CURRENT THEME
+        function updateWallpapers(toNightMode) {
+            isNightMode = toNightMode;
+            currentWallpaper = 0;
+            initWallpaper();
+        }
+
+
+        // APPLIES THEME STYLING TO THE APPLICATION BASED ON DARK/LIGHT MODE PREFERENCE
+        function applyTheme(isDarkMode) {
+            document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeColor) {
+                metaThemeColor.setAttribute('content', isDarkMode ? '#121212' : '#ffffff');
+            }
+
+            const themeToggleElement = document.querySelector('.theme-toggle');
+            if (themeToggleElement) {
+                const moonIcon = themeToggleElement.querySelector('.moon-icon');
+                const sunIcon = themeToggleElement.querySelector('.sun-icon');
+
+                if (moonIcon && sunIcon) {
+                    moonIcon.style.display = isDarkMode ? 'none' : 'inline-block';
+                    sunIcon.style.display = isDarkMode ? 'inline-block' : 'none';
+                }
+            }
+
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+
+            const toggleBtnIcon = document.querySelector('.toggle-button .icon');
+            if (toggleBtnIcon) {
+                toggleBtnIcon.src = isDarkMode ? "/ui/static/images/night.png" : "/ui/static/images/cloudy-day.png";
+                toggleBtnIcon.alt = isDarkMode ? "moon" : "sun";
+            }
+
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.checked = isDarkMode;
+            }
+
+            updateWallpapers(isDarkMode);
+
+            const containers = [
+                '.container-home',
+                '.qr-code-container',
+                '.weather-container',
+                '.time-container',
+                '.logo-container',
+                '.modal',
+                '.modal-header',
+                '.modal-body',
+                '.modal-footer'
+            ];
+
+            containers.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    el.classList.toggle('night-mode', isDarkMode);
+                });
+            });
+
+        }
+
+        function initWallpaper() {
+            const dayWallpapers = document.querySelectorAll('.wallpaper');
+            const nightWallpapers = document.querySelectorAll('.nightwallpaper');
+            [...dayWallpapers, ...nightWallpapers].forEach(w => w.classList.remove('active'));
+
+            const wallpapers = isNightMode ? nightWallpapers : dayWallpapers;
+            if (wallpapers.length > 0) {
+                wallpapers[0].classList.add('active');
+                console.log('Wallpaper initialized');
+            }
+        }
+
+        try {
+            initWallpaper();
+            console.log('Initial wallpaper setup complete');
+        } catch (e) {
+            console.error('Error during initial wallpaper setup:', e);
+        }
+
+
+        // CHANGE WALLPAPER PERIODICALLY
+        function changeWallpaper() {
+            const dayWallpapers = document.querySelectorAll('.wallpaper');
+            const nightWallpapers = document.querySelectorAll('.nightwallpaper');
+            const wallpapers = isNightMode ? nightWallpapers : dayWallpapers;
+
+            if (wallpapers.length === 0) return;
+
+            wallpapers[currentWallpaper].classList.remove('active');
+            currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
+            wallpapers[currentWallpaper].classList.add('active');
+        }
+
+        // UPDATES THE CLOCK AND DATE DISPLAY WITH CURRENT TIME
+        function updateDateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+
+            const timeElement = document.getElementById('time');
+            const dateElement = document.getElementById('date');
+
+            if (timeElement) {
+                timeElement.textContent = `${hours}:${minutes}`;
+            }
+
+            if (dateElement) {
+                const options = { weekday: 'long', month: 'long', day: 'numeric' };
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // RANDOMLY SELECTS WEATHER CONDITIONS AND UPDATES THE WEATHER DISPLAY
+        function updateWeather() {
+            const weatherConditions = [
+                { type: "Sunny", icon: "fa-sun", temp: [30, 35] },
+                { type: "Partly Cloudy", icon: "fa-cloud-sun", temp: [28, 32] },
+                { type: "Cloudy", icon: "fa-cloud", temp: [26, 30] },
+                { type: "Rainy", icon: "fa-cloud-rain", temp: [24, 28] },
+                { type: "Thunderstorm", icon: "fa-bolt", temp: [23, 27] }
+            ];
+
+            const condition = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+            const temp = Math.floor(Math.random() * (condition.temp[1] - condition.temp[0] + 1)) + condition.temp[0];
+
+            const temperatureElement = document.getElementById('temperature');
+            const weatherElement = document.getElementById('weather');
+            const weatherIconElement = document.getElementById('weather-icon');
+
+            if (temperatureElement) {
+                temperatureElement.textContent = `${temp}°C`;
+            }
+
+            if (weatherElement) {
+                weatherElement.textContent = condition.type;
+            }
+
+            if (weatherIconElement) {
+                weatherIconElement.innerHTML = `<i class="fas ${condition.icon}"></i>`;
+            }
+        }
+
+        updateWeather();
+        setInterval(updateWeather, 3600000);
+
 
         // TRANSFORMS THE BUTTON ELEMENT BASED ON EXPANDED STATE
         function setTranslate(xPos, yPos, el) {
-            el.style.transform = `translate(${el.classList.contains('expanded') ? -120 : 35}%, calc(-50% + ${yPos}px))`;
+            el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
         }
 
         // TOGGLES DARK MODE AND CHANGES THE ICON IMAGE BETWEEN DAY AND NIGHT
         function toggleDarkMode() {
-            const body = document.body, icon = document.querySelector('.toggle-button .icon');
-            body.classList.toggle('dark-mode');
-            icon.src = body.classList.contains('dark-mode') ? "/ui/static/images/night.png" : "/ui/static/images/cloudy-day.png";
-            icon.alt = body.classList.contains('dark-mode') ? "moon" : "sun";
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            applyTheme(isDarkMode);
         }
 
         // EXPANDS OR COLLAPSES THE BUTTON BY TOGGLING THE EXPANDED CLASS
         function toggleExpand() {
-            const toggleBtn = document.querySelector('.mode-toggle');
             toggleBtn.classList.toggle('expanded');
-            setTranslate(xOffset, yOffset, toggleBtn);
+            btnPos = 'center-right';
         }
 
         // CLOSES THE EXPANDED BUTTON WHEN X IS CLICKED
-        function closeExpandedToggle(event) {
-            event.stopPropagation();
-            const toggleBtn = document.querySelector('.mode-toggle');
+        function closeExpandedToggle(e) {
+            e.stopPropagation();
             toggleBtn.classList.remove('expanded');
-            setTranslate(xOffset, yOffset, toggleBtn);
         }
 
         // RESETS BUTTON TO DEFAULT POSITION ON RIGHT SIDE OF THE SCREEN
         function updateButtonPosition() {
-            const toggleBtn = document.querySelector('.mode-toggle');
-            toggleBtn.classList.remove('expanded');
-            toggleBtn.style.right = '0';
-            toggleBtn.style.left = 'auto';
-            xOffset = yOffset = 0;
-            setTranslate(0, 0, toggleBtn);
+            const btn = document.querySelector('.mode-toggle');
+            if (!btn) return;
+            const y = initialY + yOffset;
+            setTranslate(0, y, btn);
+        }
+
+        function showModal(modal, autoClose = 0) {
+            // SHOW MODAL WITH AUTO-CLOSE OPTION
+            modal.style.display = 'flex';
+
+            setTimeout(() => {
+                modal.classList.add('active');
+
+                if (autoClose > 0) {
+                    setTimeout(() => {
+                        modal.classList.add('closing');
+                        setTimeout(() => {
+                            modal.classList.remove('active', 'closing');
+                            modal.style.display = 'none';
+                        }, 600);
+                    }, autoClose);
+                }
+            }, 20);
         }
 
         // document.addEventListener('DOMContentLoaded', function () {
@@ -111,34 +389,178 @@
         document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-item')
             let currentIndex = 0
-            // Idle Timeout Variables
             let idleTimeoutId = null;
             let modalCountdownIntervalId = null;
             let modalCountdownValue = 10; // seconds for modal countdown
             let isUserInfoActive = false; // Track if student/bills/grades view is active
             const idleTimeoutDuration = 30000; // 30 seconds idle time
 
-            // Modal Element References
-            const idleTimeoutModal = document.getElementById('idle-timeout-modal');
-            const idleCountdownSpan = document.getElementById('idle-countdown');
-            const idleConfirmBtn = document.getElementById('idle-confirm-btn');
-            const idleReturnBtn = document.getElementById('idle-return-btn');
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeModal = document.getElementById('themeModal');
+            const dayOption = document.getElementById('dayOption');
+            const nightOption = document.getElementById('nightOption');
+            const closeModalBtn = document.getElementById('closeModal');
 
             function showNextMessage() {
                 messages.forEach(msg => msg.classList.remove('active'))
                 messages[currentIndex].classList.add('active')
                 currentIndex = (currentIndex + 1) % messages.length
             }
-            // --- Idle Timeout Functions ---
 
+            const rfidErrorModal = document.getElementById('rfidErrorModal');
+
+            // ERROR MODAL FOR DEMO (CALL showRfidErrorModal() IN CONSOLE TO DISPLAY OUTPUT)
+            function showRfidErrorModal() {
+                if (rfidErrorModal) {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    const errorModalElements = rfidErrorModal.querySelectorAll('.modal, .modal-header, .modal-body, .modal-footer');
+                    errorModalElements.forEach(el => {
+                        el.classList.toggle('night-mode', isDarkMode);
+                    });
+
+                    rfidErrorModal.style.display = 'flex';
+                    setTimeout(() => {
+                        rfidErrorModal.classList.add('active');
+
+                        setTimeout(() => {
+                            rfidErrorModal.classList.remove('active');
+                            rfidErrorModal.classList.add('closing');
+                            setTimeout(() => {
+                                rfidErrorModal.classList.remove('closing');
+                                rfidErrorModal.style.display = 'none';
+                            }, 600);
+                        }, 3000);
+                    }, 10);
+                }
+            }
+
+            window.showErrorModalDemo = function () {
+                showRfidErrorModal();
+            }
+
+            const idleTimeoutModal = document.getElementById('idle-timeout-modal');
+            const idleCountdownSpan = document.getElementById('idle-countdown');
+            const idleConfirmBtn = document.getElementById('idle-confirm-btn');
+            const idleReturnBtn = document.getElementById('idle-return-btn');
+
+            // DEBUGGING
+            console.log('Idle modal elements:', {
+                modal: idleTimeoutModal ? 'found' : 'not found',
+                countdown: idleCountdownSpan ? 'found' : 'not found',
+                confirmBtn: idleConfirmBtn ? 'found' : 'not found',
+                returnBtn: idleReturnBtn ? 'found' : 'not found'
+            });
+
+            if (dayOption) {
+                dayOption.addEventListener('click', function () {
+                    dayOption.classList.add('active');
+                    nightOption.classList.remove('active');
+
+                    document.body.classList.remove('dark-mode');
+                    document.body.classList.remove('night-mode');
+
+                    const previewContainers = [
+                        '.container-home',
+                        '.qr-code-container',
+                        '.weather-container',
+                        '.time-container',
+                        '.logo-container',
+                        '.modal',
+                        '.modal-header',
+                        '.modal-body',
+                        '.modal-footer'
+                    ];
+
+                    previewContainers.forEach(selector => {
+                        const elements = document.querySelectorAll(selector);
+                        elements.forEach(el => {
+                            el.classList.remove('night-mode');
+                        });
+                    });
+
+                });
+            }
+
+            if (nightOption) {
+                nightOption.addEventListener('click', function () {
+                    nightOption.classList.add('active');
+                    dayOption.classList.remove('active');
+
+                    document.body.classList.add('dark-mode');
+                    document.body.classList.add('night-mode');
+
+                    const previewContainers = [
+                        '.container-home',
+                        '.qr-code-container',
+                        '.weather-container',
+                        '.time-container',
+                        '.logo-container',
+                        '.modal',
+                        '.modal-header',
+                        '.modal-body',
+                        '.modal-footer'
+                    ];
+
+                    previewContainers.forEach(selector => {
+                        const elements = document.querySelectorAll(selector);
+                        elements.forEach(el => {
+                            el.classList.add('night-mode');
+                        });
+                    });
+
+                    const qrContainer = document.querySelector('.qr-code-container');
+                    if (qrContainer) {
+                        qrContainer.style.backgroundColor = 'rgba(26, 46, 69, 0.9)';
+                        qrContainer.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3)';
+                    }
+                });
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', function () {
+                    const isDarkMode = nightOption.classList.contains('active');
+                    applyTheme(isDarkMode);
+
+                    themeModal.classList.add('closing');
+                    setTimeout(() => {
+                        themeModal.classList.remove('active', 'closing');
+                        themeModal.style.display = 'none';
+                    }, 600);
+                });
+            }
+
+            // THEME TOGGLE SWITCH 
+            if (themeToggle) {
+                themeToggle.addEventListener('change', function () {
+                    const isDarkMode = themeToggle.checked;
+                    applyTheme(isDarkMode);
+                });
+            }
+
+            const isHomePage = document.querySelector('.container-home .wallpaper') !== null;
+
+            if (isHomePage) {
+                setInterval(changeWallpaper, 6000);
+
+                if (messages.length > 0) {
+                    showNextMessage();
+                    setInterval(showNextMessage, 4000);
+                }
+            }
+
+            // --- Idle Timeout Functions ---
             function resetIdleTimer() {
                 console.log('Resetting idle timer. isUserInfoActive:', isUserInfoActive);
+
+                const isModalShowing = idleTimeoutModal && idleTimeoutModal.style.display === 'flex';
+
                 clearTimeout(idleTimeoutId);
-                if (isUserInfoActive) {
+
+                if (isUserInfoActive && !isModalShowing) {
                     idleTimeoutId = setTimeout(showIdleModal, idleTimeoutDuration);
-                    console.log('Idle timer started/reset. Timeout ID:', idleTimeoutId);
+                    console.log('Idle timer started/reset. Timeout ID:', idleTimeoutId, 'Duration:', idleTimeoutDuration, 'ms');
                 } else {
-                    console.log('Idle timer not started (user info not active).');
+                    console.log('Idle timer not started. User info active:', isUserInfoActive, 'Modal showing:', isModalShowing);
                 }
             }
 
@@ -146,7 +568,13 @@
                 console.log('Idle timeout reached. Showing modal.');
                 modalCountdownValue = 10;
                 if (idleCountdownSpan) idleCountdownSpan.textContent = modalCountdownValue;
-                if (idleTimeoutModal) idleTimeoutModal.style.display = 'flex';
+
+                if (idleTimeoutModal) {
+                    idleTimeoutModal.style.display = 'flex';
+                    console.log('Setting idle modal display to flex');
+                } else {
+                    console.error('Could not find idle timeout modal element');
+                }
 
                 clearTimeout(idleTimeoutId); // Stop the main idle timer once modal is shown
                 clearInterval(modalCountdownIntervalId); // Clear any previous countdown interval
@@ -163,9 +591,15 @@
             }
 
             function hideIdleModal() {
+                // HIDES THE IDLE TIMEOUT MODAL AND CLEANS UP COUNTDOWN TIMER
                 console.log('Hiding idle modal.');
                 if (idleTimeoutModal) idleTimeoutModal.style.display = 'none';
                 clearInterval(modalCountdownIntervalId);
+
+                if (isUserInfoActive) {
+                    console.log('Still on student page, restarting idle timer after modal closed');
+                    setTimeout(resetIdleTimer, 500);
+                }
             }
 
             function returnToHome() {
@@ -175,6 +609,42 @@
                 isUserInfoActive = false;
 
                 htmx.ajax("GET", "/");
+
+                console.log('Resetting system state for next scan');
+            }
+
+
+            // DISPLAYS THE THEME SELECTION MODAL AFTER SUCCESSFUL RFID SCAN
+            function showThemeModal() {
+                console.log('Preparing to show theme modal');
+                if (!themeModal) {
+                    console.error('Theme modal element not found');
+                    return;
+                }
+
+                themeModal.classList.remove('active', 'closing');
+                themeModal.style.display = 'none';
+
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                if (dayOption && nightOption) {
+                    if (isDarkMode) {
+                        dayOption.classList.remove('active');
+                        nightOption.classList.add('active');
+                    } else {
+                        dayOption.classList.add('active');
+                        nightOption.classList.remove('active');
+                    }
+                }
+
+                applyTheme(isDarkMode);
+
+                setTimeout(() => {
+                    themeModal.style.display = 'flex';
+                    void themeModal.offsetWidth;
+
+                    themeModal.classList.add('active');
+                    console.log('Theme modal displayed after scan');
+                }, 300);
             }
 
             // --- End Idle Timeout Functions ---
@@ -186,6 +656,7 @@
             const sseSource = new EventSource('/stream')
 
             sseSource.addEventListener('ping', function (e) {
+                // LOGS SERVER PING EVENTS TO VERIFY SSE CONNECTION IS ACTIVE
                 console.log('SSE Ping received:', JSON.parse(e.data))
             })
 
@@ -204,45 +675,83 @@
                 const requestPath = event.detail.pathInfo ? event.detail.pathInfo.requestPath : null;
                 console.log("htmx:afterSwap - Request Path:", requestPath);
 
-                // --- Idle Timer Logic ---
-                if (requestPath) {
-                    const isNowUserInfoActive = requestPath.startsWith('/student-partial/') ||
-                        requestPath === '/grades' ||
-                        requestPath === '/bills';
+                const wallpaperContainer = document.querySelector('.container-home');
+                const isWallpaperView = wallpaperContainer && wallpaperContainer.querySelector('.wallpaper');
 
-                    if (isNowUserInfoActive) {
-                        console.log('User info view loaded. Activating idle timer.');
-                        isUserInfoActive = true;
-                        resetIdleTimer(); // Start or reset the timer
+                const isStudentPage = requestPath && (
+                    requestPath.startsWith('/student-partial/') ||
+                    requestPath === '/grades' ||
+                    requestPath === '/bills' ||
+                    requestPath === '/student-partial'  
+                );
+
+                // Also check by looking for student-related content in the swapped HTML
+                const hasStudentContent =
+                    document.querySelector('.profile-header') !== null ||
+                    document.querySelector('.grades-table') !== null ||
+                    document.querySelector('.bills-section') !== null ||
+                    document.querySelector('.summary') !== null;
+
+                const isReturningHome = requestPath === '/';
+
+                console.log('Page state check:', {
+                    isStudentPage,
+                    hasStudentContent,
+                    isReturningHome
+                });
+
+                // --- Theme Toggle Visibility Logic ---
+                const themeToggleElement = document.querySelector('.theme-toggle');
+
+                if (themeToggleElement) {
+                    if (isWallpaperView || isReturningHome) {
+                        themeToggleElement.style.display = 'block';
+                        console.log('Showing theme toggle - on wallpaper view or returning home');
                     } else {
-                        // Check if navigating away from user info (e.g., back to home, or error)
-                        const isReturningHome = requestPath === '/' || requestPath === '/error'; // Add other non-user paths if needed
-                        if (isReturningHome) {
-                            console.log('Navigated away from user info. Deactivating idle timer.');
-                            isUserInfoActive = false;
-                            clearTimeout(idleTimeoutId);
-                            hideIdleModal(); // Ensure modal is hidden
-                        }
-                        // If navigating between non-user-info pages, do nothing with the timer state
+                        themeToggleElement.style.display = 'none';
+                        console.log('Hiding theme toggle - not on wallpaper view');
                     }
-                } else {
-                    console.log('htmx:afterSwap - No requestPath found in event details.');
-                    // Potentially deactivate timer if path is unknown? Or maintain state?
-                    // Let's deactivate for safety.
+                }
+
+                const modeToggleElement = document.querySelector('.mode-toggle');
+
+                if (modeToggleElement) {
+                    if (isWallpaperView || isReturningHome) {
+                        modeToggleElement.style.display = 'none';
+                        console.log('Hiding mode toggle - on wallpaper view or returning home');
+                    } else {
+                        modeToggleElement.style.display = 'block';
+                        console.log('Showing mode toggle - not on wallpaper view');
+                    }
+                }
+
+                // --- Idle Timer Logic ---
+                // Set student page flag if EITHER the path OR the content indicates student info
+                const isNowUserInfoActive = isStudentPage || hasStudentContent;
+
+                if (isNowUserInfoActive) {
+                    console.log('User info view detected. Activating idle timer.');
+                    isUserInfoActive = true;
+                    resetIdleTimer(); // Start or reset the timer
+
+                    // Show theme modal when navigating to student pages via buttons
+                    if (requestPath && (requestPath === '/grades' || requestPath === '/bills' || requestPath.includes('/student-partial'))) {
+                        console.log('Navigated to student page, showing theme modal');
+                        showThemeModal();
+                    }
+                } else if (isReturningHome) {
+                    console.log('Navigated to home. Deactivating idle timer.');
                     isUserInfoActive = false;
                     clearTimeout(idleTimeoutId);
-                    hideIdleModal();
+                    hideIdleModal(); // Ensure modal is hidden
                 }
                 // --- End Idle Timer Logic ---
-
 
                 // --- Existing Logic (Navbar) ---
                 // Handle navbar visibility based on the same path check
                 if (requestPath) {
-                    const showNav = requestPath.startsWith('/student-partial/') ||
-                        requestPath === '/grades' ||
-                        requestPath === '/bills';
-                    const hideNav = requestPath === '/' || requestPath === '/error';
+                    const showNav = isStudentPage;
+                    const hideNav = isReturningHome || requestPath === '/error';
 
                     // Determine final display state
                     let finalDisplay = navbar.style.display; // Keep current state by default
@@ -266,8 +775,26 @@
 
             sseSource.addEventListener('studentcallback', function (e) {
                 console.log('Received studentcallback event:', e.data);
+
+                if (e.data.includes('<script>') && e.data.includes('rfidErrorModal')) {
+                    showRfidErrorModal();
+                    return;
+                }
+
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = e.data;
+
+                const isStudentData =
+                    e.data.includes('student-info') ||
+                    e.data.includes('profile-header') ||
+                    e.data.includes('profile-info') ||
+                    e.data.includes('grades-table') ||
+                    e.data.includes('bills-section') ||
+                    e.data.includes('summary-content') ||
+                    e.data.includes('info-table');
+
+                console.log('SSE student data check:', isStudentData);
+
                 document.body.appendChild(tempDiv);
                 htmx.process(tempDiv);
 
@@ -282,6 +809,15 @@
                 if (welcomeSection) {
                     welcomeSection.style.display = 'none';
                 }
+
+                console.log('Showing theme modal after successful RFID scan');
+                showThemeModal();
+
+                if (isStudentData) {
+                    console.log('Student data detected via SSE, activating idle timer');
+                    isUserInfoActive = true;
+                    resetIdleTimer();
+                }
             })
 
             sseSource.onerror = function (e) {
@@ -289,14 +825,22 @@
             }
             // --- Idle Timeout Event Listeners ---
             document.addEventListener('click', resetIdleTimer);
-            // document.addEventListener('mousemove', throttledResetIdleTimer); // Removed mousemove listener
-            document.addEventListener('keypress', resetIdleTimer); // Keep keypress listener
+            document.addEventListener('touchstart', resetIdleTimer);
+            document.addEventListener('keydown', resetIdleTimer);
+            document.addEventListener('mousemove', function () {
+                // Only reset on significant mouse movement to prevent constant resetting
+                if (isUserInfoActive && idleTimeoutModal.style.display !== 'flex') {
+                    resetIdleTimer();
+                }
+            });
 
             if (idleConfirmBtn) {
                 idleConfirmBtn.addEventListener('click', () => {
                     console.log('Idle modal "Yes" clicked.');
                     hideIdleModal();
-                    resetIdleTimer(); // User is active, reset the main timer
+                    // Explicitly force a reset of the idle timer
+                    isUserInfoActive = true; // Ensure this is set properly
+                    setTimeout(resetIdleTimer, 500);
                 });
             } else {
                 console.error("Could not find #idle-confirm-btn");
@@ -352,7 +896,7 @@
                         currentX = dx; currentY = dy;
                         if (Math.abs(currentX) > 5 || Math.abs(currentY) > 5) hasDragged = true;
                         const btnH = toggleBtn.offsetHeight, scrH = window.innerHeight;
-                        currentY = Math.min(Math.max(currentY, -scrH/2 + btnH/2), scrH/2 - btnH/2);
+                        currentY = Math.min(Math.max(currentY, -scrH / 2 + btnH / 2), scrH / 2 - btnH / 2);
                         currentX = 0;
                         [xOffset, yOffset] = [currentX, currentY];
                         setTranslate(currentX, currentY, toggleBtn);
