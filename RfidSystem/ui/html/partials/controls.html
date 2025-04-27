@@ -37,4 +37,34 @@
         </div>
     </div>
 </div>
+<script>
+(function() {
+  let isPollingPaused = false;
+  function fetchStats() {
+    if (!isPollingPaused) {
+      htmx.ajax('GET', '/stats/partial', {target: '#stats-container', swap: 'outerHTML'});
+    }
+  }
+  function fetchLogs() {
+    if (!isPollingPaused) {
+      htmx.ajax('GET', '/log/partial', {target: '#log-container', swap: 'outerHTML'});
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchLogs();
+    fetchStats();
+    setInterval(fetchLogs, 5000);
+    setInterval(fetchStats, 5000);
+    const pauseBtn = document.getElementById('pause-logs');
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', function() {
+        isPollingPaused = !isPollingPaused;
+        this.innerHTML = isPollingPaused
+          ? '<i class="fas fa-play mr-1"></i> Resume'
+          : '<i class="fas fa-pause mr-1"></i> Pause';
+      });
+    }
+  });
+})();
+</script>
 {{end}}

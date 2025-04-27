@@ -1,5 +1,5 @@
 {{define "partials/log_list"}}
-<div id="log-container" hx-get="/log/partial" hx-trigger="every 5s" hx-swap="outerHTML" class="log-container h-[500px] overflow-y-auto p-4 space-y-3">
+<div id="log-container" hx-get="/log/partial" hx-swap="outerHTML" class="log-container h-[500px] overflow-y-auto p-4 space-y-3">
     {{ $total := len .Logs }}
     <div class="flex justify-end mb-2 px-2 text-sm text-slate-200">
         <span id="visible-logs">{{$total}}</span> of <span id="total-logs-2">{{$total}}</span> logs displayed
