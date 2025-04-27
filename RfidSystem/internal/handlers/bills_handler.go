@@ -24,6 +24,20 @@ func formatNullableAmount(amount *float64) string {
 }
 
 func formatAssessmentForView(assessment *model.Assessment) model.AssessmentViewModel {
+	// Handle nil assessment to prevent nil pointer dereference
+	if assessment == nil {
+		return model.AssessmentViewModel{
+			TotalFeeAmount:      "0.00",
+			NetAssessmentAmount: "0.00",
+			InitialPayment:      "0.00",
+			TotalPaymentAmount:  "0.00",
+			RemainingBalance:    "0.00",
+			TotalDiscountAmount: "0.00",
+			FullPmtIfB4Prelim:   "0.00",
+			PerExamFee:          "0.00",
+		}
+	}
+
 	return model.AssessmentViewModel{
 		ID:                  assessment.ID,
 		StudentID:           assessment.StudentID,
@@ -52,14 +66,22 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 		billsData, ok := cached.(*model.Bills)
 		if ok && billsData != nil {
 			log.Printf("[CACHE HIT] Bills for %s", studentId)
-			assessmentMap := formatAssessmentForView(billsData.Assessment)
-			return ctx.Render("partials/bills", fiber.Map{
-				"Title":          "Student Bills",
-				"Bills":          assessmentMap,
-				"FeeBreakdown":   billsData.FeeBreakdown,
-				"Discounts":      billsData.Discounts,
-				"PaymentHistory": billsData.PaymentHistory,
-			})
+
+			// Check if Assessment is nil before formatting
+			if billsData.Assessment == nil {
+				log.Printf("[WARNING] Cached bills data for %s has nil Assessment", studentId)
+				// Remove invalid cache entry
+				billsCache.Delete(studentId)
+			} else {
+				assessmentMap := formatAssessmentForView(billsData.Assessment)
+				return ctx.Render("partials/bills", fiber.Map{
+					"Title":          "Student Bills",
+					"Bills":          assessmentMap,
+					"FeeBreakdown":   billsData.FeeBreakdown,
+					"Discounts":      billsData.Discounts,
+					"PaymentHistory": billsData.PaymentHistory,
+				})
+			}
 		}
 	}
 
@@ -86,6 +108,13 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 		log.Printf("No bills data found for student ID: %s\n", studentId)
 		return ctx.Status(fiber.StatusNotFound).SendString("No bills data found for this student")
 	}
+
+	// Check if Assessment is nil
+	if billsData.Assessment == nil {
+		log.Printf("Assessment is nil for student ID: %s\n", studentId)
+		return ctx.Status(fiber.StatusNotFound).SendString("No assessment data found for this student")
+	}
+
 	// Store in cache
 	billsCache.Set(studentId, billsData)
 

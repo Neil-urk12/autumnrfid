@@ -60,6 +60,7 @@ func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*model.Bills, 
 		return nil, fmt.Errorf("error getting assessment: %v", err)
 	}
 	if assessment == nil {
+		log.Printf("No assessment found for student ID: %s", studentId)
 		return nil, nil
 	}
 
