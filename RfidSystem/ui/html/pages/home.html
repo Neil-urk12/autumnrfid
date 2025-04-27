@@ -858,6 +858,7 @@
                 console.error('SSE Error:', e)
             }
             // --- Idle Timeout Event Listeners ---
+            document.addEventListener('click', resetIdleTimer);
 
             if (idleConfirmBtn) {
                 idleConfirmBtn.addEventListener('click', () => {
