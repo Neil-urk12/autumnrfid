@@ -763,12 +763,6 @@
                     console.log('User info view detected. Activating idle timer.');
                     isUserInfoActive = true;
                     resetIdleTimer(); // Start or reset the timer
-                    
-                    // Show theme modal when navigating to student pages via buttons
-                    if (requestPath && (requestPath === '/grades' || requestPath === '/bills' || requestPath.includes('/student-partial'))) {
-                        console.log('Navigated to student page, showing theme modal');
-                        showThemeModal();
-                    }
                 } else if (isReturningHome) {
                     console.log('Navigated to home. Deactivating idle timer.');
                     isUserInfoActive = false;
