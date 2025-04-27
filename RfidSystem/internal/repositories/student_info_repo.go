@@ -220,11 +220,10 @@ func (r *RFIDRepository) getStudentGradesSummary(studentId string) ([]model.Year
 	log.Printf("Query executed successfully, processing rows")
 
 	// Create the year summary with empty grades
-	emptyStr := "0.00"
 	yearSummary := &model.YearGradeSummary{
 		YearName:  currentTerm.AcademicYear,
-		FirstSem:  &emptyStr,
-		SecondSem: &emptyStr,
+		FirstSem:  nil,
+		SecondSem: nil,
 	}
 
 	log.Printf("Created year summary with empty grades: %+v", yearSummary)

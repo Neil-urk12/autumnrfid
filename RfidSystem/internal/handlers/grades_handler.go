@@ -186,7 +186,7 @@ func (h *AppHandler) prepareGradesAndGWA(grades []model.GradesRecord) ([]fiber.M
 //   - "-" when the grade is nil (grade not yet available/recorded)
 //   - formatted string with 2 decimal places for actual grade values
 func formatGrade(grade *float64) string {
-	if grade == nil {
+	if grade == nil || *grade == 0 {
 		// Return a dash placeholder for nil grades
 		// This indicates that the grade is not yet available or has not been recorded
 		return "-"
