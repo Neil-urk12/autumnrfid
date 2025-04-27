@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -82,12 +85,19 @@ func (h *AppHandler) HandleLog(c *fiber.Ctx) error {
 	return nil
 }
 
-// HandleLogPartial renders only the log container for HTMX auto-refresh
+// HandleLogPartial renders only the log container for HTMX auto-refresh with filters
 func (h *AppHandler) HandleLogPartial(c *fiber.Ctx) error {
-	rows, err := h.db.DB.Query(
-		`SELECT id, timestamp, card_id, student_ID, event_type, message, details, status
-		 FROM scan_logs
-		 ORDER BY timestamp DESC`)
+	// Fetch with search and level filter
+	search := strings.TrimSpace(c.Query("search", ""))
+	level  := c.Query("level", "all")
+	query := `SELECT id, timestamp, card_id, student_ID, event_type, message, details, status
+       FROM scan_logs
+       WHERE (? = '' OR message LIKE ? OR event_type LIKE ?)
+         AND (? = 'all' OR status = ?)
+       ORDER BY timestamp DESC`
+	rows, err := h.db.DB.Query(query,
+		search, "%"+search+"%", "%"+search+"%",
+		level, level)
 	if err != nil {
 		log.Printf("HandleLogPartial Query error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).
@@ -170,4 +180,85 @@ func (h *AppHandler) HandleStatsPartial(c *fiber.Ctx) error {
 		"WarnLogs":  warns,
 		"LogRate":   rate,
 	})
+}
+
+// HandleClearLogs transfers all scan_logs to archived_logs and deletes them
+func (h *AppHandler) HandleClearLogs(c *fiber.Ctx) error {
+	tx, err := h.db.DB.Begin()
+	if err != nil {
+		log.Printf("HandleClearLogs Begin error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).
+			SendString(fmt.Sprintf("Failed to begin transaction: %v", err))
+	}
+
+	// Archive logs to archived_logs table
+	_, err = tx.Exec(`INSERT INTO archived_logs (id, timestamp, card_id, student_ID, event_type, message, details, status)
+       SELECT id, timestamp, card_id, student_ID, event_type, message, details, status FROM scan_logs`)
+	if err != nil {
+		tx.Rollback()
+		log.Printf("HandleClearLogs archive error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).
+			SendString(fmt.Sprintf("Failed to archive logs: %v", err))
+	}
+
+	// Delete original logs
+	_, err = tx.Exec("DELETE FROM scan_logs")
+	if err != nil {
+		tx.Rollback()
+		log.Printf("HandleClearLogs delete error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).
+			SendString(fmt.Sprintf("Failed to delete logs: %v", err))
+	}
+
+	if err = tx.Commit(); err != nil {
+		tx.Rollback()
+		log.Printf("HandleClearLogs commit error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).
+			SendString(fmt.Sprintf("Failed to commit transaction: %v", err))
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
+// HandleExportLogs returns all logs as CSV download
+func (h *AppHandler) HandleExportLogs(c *fiber.Ctx) error {
+	rows, err := h.db.DB.Query(`SELECT id, timestamp, card_id, student_ID, event_type, message, details, status
+       FROM scan_logs ORDER BY timestamp DESC`)
+	if err != nil {
+		log.Printf("HandleExportLogs Query error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).
+			SendString(fmt.Sprintf("Failed to query logs for export: %v", err))
+	}
+	defer rows.Close()
+	c.Set("Content-Type", "text/csv")
+	c.Set("Content-Disposition", "attachment; filename=logs.csv")
+	writer := csv.NewWriter(c)
+	defer writer.Flush()
+	// header
+	writer.Write([]string{"ID","Timestamp","CardID","StudentID","EventType","Message","Details","Status"})
+	for rows.Next() {
+		var id int
+		var ts time.Time
+		var cardID string
+		var student sql.NullString
+		var eventType, message string
+		var details sql.NullString
+		var status string
+		if err := rows.Scan(&id, &ts, &cardID, &student, &eventType, &message, &details, &status); err != nil {
+			log.Printf("HandleExportLogs ScanRow error: %v", err)
+			continue
+		}
+		record := []string{
+			strconv.Itoa(id),
+			ts.Format(time.RFC3339),
+			cardID,
+			student.String,
+			eventType,
+			message,
+			details.String,
+			status,
+		}
+		writer.Write(record)
+	}
+	return nil
 }

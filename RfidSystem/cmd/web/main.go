@@ -156,6 +156,9 @@ func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Get("/log/partial", h.HandleLogPartial)
 	// HTMX polling endpoint for stats cards
 	app.Get("/stats/partial", h.HandleStatsPartial)
+	// Endpoints for log controls
+	app.Post("/log/clear", h.HandleClearLogs)
+	app.Get("/log/export", h.HandleExportLogs)
 	app.Post("/card-scan", h.HandleCardScan)
 	app.Get("/card-scan-ws", websocket.New(h.HandleCardScanWS))
 	app.Get("/ping", func(c *fiber.Ctx) error { return c.SendString("Fiber Web Server is running") })
