@@ -1,0 +1,17 @@
+{{define "partials/header"}}
+<header class="flex justify-between items-center mb-6">
+    <div class="flex items-center space-x-3">
+        <i class="fas fa-terminal text-3xl text-emerald-400"></i>
+        <h1 class="text-2xl font-bold text-emerald-400">RFID <span class="text-white">Log Monitoring System</span></h1>
+    </div>
+    <div class="flex items-center space-x-4">
+        <div class="flex items-center">
+            <span class="real-time-blink h-3 w-3 rounded-full bg-emerald-400 mr-2"></span>
+            <span class="text-sm">Live</span>
+        </div>
+        <button id="settings-btn" class="p-2 rounded-full hover:bg-slate-700 transition">
+            <i class="fas fa-cog text-slate-400"></i>
+        </button>
+    </div>
+</header>
+{{end}}

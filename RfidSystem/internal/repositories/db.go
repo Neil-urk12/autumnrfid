@@ -3,7 +3,9 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"rfidsystem/internal/config"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -13,8 +15,9 @@ type DatabaseClient struct {
 }
 
 func NewDatabaseClient(config config.DatabaseConfig) (*DatabaseClient, error) {
+	// Enable parsing of MySQL TIMESTAMP fields into time.Time
 	connStr := fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s",
+		"%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local",
 		config.Username, config.Password, config.Host, config.Port, config.DatabaseName,
 	)
 
@@ -97,3 +100,30 @@ func (c *DatabaseClient) Close() error {
 
 // 	return grades, nil
 // }
+
+// LogScanEvent inserts a new log entry into the scan_logs table.
+func (c *DatabaseClient) LogScanEvent(cardID string, studentID *string, eventType, message, details, status string) error {
+	log.Printf("[LogScanEvent] called with cardID=%s studentID=%v eventType=%s message=%q status=%s", cardID, studentID, eventType, message, status)
+	ts := time.Now().UTC()
+	var detailsParam interface{}
+	if details == "" {
+		detailsParam = nil
+	} else {
+		detailsParam = details
+	}
+	res, err := c.DB.Exec(
+		`INSERT INTO scan_logs (timestamp, card_id, student_ID, event_type, message, details, status)
+		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		ts, cardID, studentID, eventType, message, detailsParam, status,
+	)
+	if err != nil {
+		log.Printf("LogScanEvent SQL error: %v", err)
+		return err
+	}
+	if affected, err2 := res.RowsAffected(); err2 != nil {
+		log.Printf("LogScanEvent RowsAffected error: %v", err2)
+	} else {
+		log.Printf("LogScanEvent inserted rows: %d", affected)
+	}
+	return nil
+}

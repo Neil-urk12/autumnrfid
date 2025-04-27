@@ -40,7 +40,13 @@ func (r *RFIDRepository) GetStudentGradesByRFIDAndSemester(studentId, academicYe
     WHERE academic_year = ? AND semester = ?
     LIMIT 1`
 
-	err = r.dbClient.DB.QueryRow(termQuery, academicYear, semesterName).Scan(&termId)
+	stmtTerm, err := r.dbClient.DB.Prepare(termQuery)
+	if err != nil {
+		return nil, fmt.Errorf("prepare term query: %v", err)
+	}
+	defer stmtTerm.Close()
+
+	err = stmtTerm.QueryRow(academicYear, semesterName).Scan(&termId)
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("no term found for academic year %s and semester %s", academicYear, semesterName)
 	}
@@ -65,7 +71,13 @@ func (r *RFIDRepository) GetStudentGradesByRFIDAndSemester(studentId, academicYe
         AND at.semester = ?
     ORDER BY s.subject_code`
 
-	rows, err := r.dbClient.DB.Query(query, studentId, academicYear, semesterName)
+	stmt, err := r.dbClient.DB.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("prepare grades query: %v", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(studentId, academicYear, semesterName)
 	if err != nil {
 		return nil, fmt.Errorf("error querying grades: %v", err)
 	}
@@ -115,8 +127,15 @@ func (r *RFIDRepository) GetCurrentTerm() (*model.AcademicTerm, error) {
 	LIMIT 1
 	`
 
+	stmtCur, err := r.dbClient.DB.Prepare(query)
+	if err != nil {
+		log.Printf("Error preparing current term query: %v", err)
+		return nil, err
+	}
+	defer stmtCur.Close()
+
 	term := &model.AcademicTerm{}
-	err := r.dbClient.DB.QueryRow(query).Scan(
+	err = stmtCur.QueryRow().Scan(
 		&term.ID,
 		&term.AcademicYear,
 		&term.Semester,

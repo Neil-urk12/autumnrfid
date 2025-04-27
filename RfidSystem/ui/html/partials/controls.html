@@ -1,0 +1,40 @@
+{{define "partials/controls"}}
+<div class="bg-slate-800 rounded-lg p-4 mb-6 shadow-lg">
+    <div class="flex flex-wrap items-center gap-4">
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-sm font-medium mb-1">Search logs</label>
+            <div class="relative">
+                <input type="text" id="search-input" placeholder="Filter logs..."
+                    class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <i class="fas fa-search absolute right-3 top-3 text-slate-400"></i>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1">Log level</label>
+            <div class="flex space-x-2">
+                <button data-level="all" class="log-level-btn active px-3 py-1 rounded-md bg-emerald-600 text-white">All</button>
+                <button data-level="error" class="log-level-btn px-3 py-1 rounded-md bg-red-500 text-white">Error</button>
+                <button data-level="warn" class="log-level-btn px-3 py-1 rounded-md bg-yellow-500 text-white">Warn</button>
+                <button data-level="info" class="log-level-btn px-3 py-1 rounded-md bg-blue-500 text-white">Info</button>
+                <button data-level="debug" class="log-level-btn px-3 py-1 rounded-md bg-slate-500 text-white">Debug</button>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1">Actions</label>
+            <div class="flex space-x-2">
+                <button id="clear-logs" class="px-3 py-1 rounded-md bg-slate-700 hover:bg-slate-600 transition">
+                    <i class="fas fa-trash mr-1"></i> Clear
+                </button>
+                <button id="pause-logs" class="px-3 py-1 rounded-md bg-slate-700 hover:bg-slate-600 transition">
+                    <i class="fas fa-pause mr-1"></i> Pause
+                </button>
+                <button id="export-logs" class="px-3 py-1 rounded-md bg-slate-700 hover:bg-slate-600 transition">
+                    <i class="fas fa-download mr-1"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

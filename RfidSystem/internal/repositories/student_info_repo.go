@@ -22,7 +22,13 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 
 	student := &model.Student{}
 	var firstAccessRaw, lastAccessRaw []byte
-	err := r.dbClient.DB.QueryRow(query, studentId).Scan(
+	stmt, err := r.dbClient.DB.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("prepare student query: %v", err)
+	}
+	defer stmt.Close()
+	row := stmt.QueryRow(studentId)
+	err = row.Scan(
 		&student.StudentID,
 		&student.DepartmentID,
 		&student.FirstName,
@@ -72,13 +78,19 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 		first_access_timestamp = COALESCE(first_access_timestamp, ?)
 	WHERE student_ID = ?
 	`
-	if _, err := r.dbClient.DB.Exec(updateQuery, now, now, student.StudentID); err != nil {
-		log.Printf("Error updating access timestamps for student %s: %v", student.StudentID, err)
+	stmtUpd, err := r.dbClient.DB.Prepare(updateQuery)
+	if err != nil {
+		log.Printf("Error preparing update query: %v", err)
 	} else {
-		if student.FirstAccessTimestamp == nil {
-			student.FirstAccessTimestamp = &now
+		defer stmtUpd.Close()
+		if _, err := stmtUpd.Exec(now, now, student.StudentID); err != nil {
+			log.Printf("Error updating access timestamps for student %s: %v", student.StudentID, err)
+		} else {
+			if student.FirstAccessTimestamp == nil {
+				student.FirstAccessTimestamp = &now
+			}
+			student.LastAccessTimestamp = &now
 		}
-		student.LastAccessTimestamp = &now
 	}
 
 	return student, nil
@@ -192,7 +204,13 @@ func (r *RFIDRepository) getStudentGradesSummary(studentId string) ([]model.Year
         at.semester
     `
 
-	rows, err := r.dbClient.DB.Query(query, studentId, currentTerm.AcademicYear)
+	stmt2, err := r.dbClient.DB.Prepare(query)
+	if err != nil {
+		log.Printf("Error preparing grades summary query: %v", err)
+		return nil, err
+	}
+	defer stmt2.Close()
+	rows, err := stmt2.Query(studentId, currentTerm.AcademicYear)
 	if err != nil {
 		log.Printf("Error querying grades summary: %v", err)
 		return nil, err
