@@ -1,20 +1,17 @@
 <!-- Student Information -->
 <div class="container-home tar" id="student-info-container">
     <script>
-      (function() {
-        const id = "{{if .Student}}{{.Student.StudentID}}{{end}}";
-        const navInput = document.getElementById("current-student-id");
-        if (navInput) { navInput.value = id; }
-      })();
+        (function () {
+            const id = "{{if .Student}}{{.Student.StudentID}}{{end}}";
+            const navInput = document.getElementById("current-student-id");
+            if (navInput) { navInput.value = id; }
+        })();
     </script>
     <div class="profile">
         <div class="summary-header">Student Information</div>
         <div class="summary-content">
             <div class="profile-header">
-                <img
-                    src="/ui/static/images/mlemlody.png"
-                    alt="Profile Picture"
-                />
+                <img src="/ui/static/images/mlemlody.png" alt="Profile Picture" />
                 <div class="profile-info">
                     <h3 id="student-name">
                         {{if .Student}}{{.Student.FirstName}}

@@ -37,10 +37,20 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	if cached, found := studentInfoCache.Get(studentId); found {
 		studentInfo, ok := cached.(*model.StudentInfoViewModel)
 		if ok && studentInfo != nil && studentInfo.Student != nil {
-			// Format payment schedules for view
+			// Update last access timestamp directly
+			now := time.Now()
+			updateQuery := `
+			UPDATE Students
+			SET last_access_timestamp = ?
+			WHERE student_ID = ?`
+
+			if _, err := h.db.DB.Exec(updateQuery, now, studentId); err != nil {
+				log.Printf("Error updating access timestamps for student %s: %v", studentId, err)
+			}
+			// Update last access timestamp even for cached data
 			var formattedSchedules []model.PaymentScheduleViewModel
 			for _, schedule := range studentInfo.PaymentSchedules {
-				if schedule.TermDescription == "Initial" {
+				if schedule.TermDescription == "Initial Payment" {
 					continue
 				}
 				formattedSchedules = append(formattedSchedules, model.PaymentScheduleViewModel{
@@ -53,6 +63,7 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 					SortOrder:               schedule.SortOrder,
 				})
 			}
+			_ = h.db.LogScanEvent(studentId, &studentInfo.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed cached info for student ID %s", studentId), "", "success")
 			return ctx.Render("partials/student_info", fiber.Map{
 				"Student":          studentInfo.Student,
 				"YearLevel":        studentInfo.YearLevel,
@@ -107,7 +118,7 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	// Format payment schedules
 	var formattedSchedules []model.PaymentScheduleViewModel
 	for _, schedule := range studentInfo.PaymentSchedules {
-		if schedule.TermDescription == "Initial" {
+		if schedule.TermDescription == "Initial Payment" {
 			continue
 		}
 
@@ -132,18 +143,4 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 		"Assessment":       formattedAssessment,
 		"PaymentSchedules": formattedSchedules,
 	})
-}
-
-func (h *AppHandler) HandleStudentPartial(c *fiber.Ctx) error {
-	rfid := c.Params("rfid")
-
-	student, err := h.RFIDRepository.GetStudentByRFID(rfid)
-
-	if err != nil || student == nil {
-		return c.Status(fiber.StatusNotFound).SendString("Student not found")
-	}
-
-	return c.Render("partials/student_info", fiber.Map{
-		"Student": student,
-	}, "")
 }

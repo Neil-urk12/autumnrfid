@@ -56,14 +56,14 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 
 	// Parse raw timestamp bytes into *time.Time
 	if len(firstAccessRaw) > 0 {
-		if t, err := time.Parse("2006-01-02 15:04:05", string(firstAccessRaw)); err != nil {
+		if t, err := time.Parse(time.RFC3339, string(firstAccessRaw)); err != nil {
 			log.Printf("Invalid first_access_timestamp for %s: %v", student.StudentID, err)
 		} else {
 			student.FirstAccessTimestamp = &t
 		}
 	}
 	if len(lastAccessRaw) > 0 {
-		if t2, err := time.Parse("2006-01-02 15:04:05", string(lastAccessRaw)); err != nil {
+		if t2, err := time.Parse(time.RFC3339, string(lastAccessRaw)); err != nil {
 			log.Printf("Invalid last_access_timestamp for %s: %v", student.StudentID, err)
 		} else {
 			student.LastAccessTimestamp = &t2
@@ -92,8 +92,7 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 	now := time.Now()
 	updateQuery := `
 	UPDATE Students
-	SET last_access_timestamp = ?,
-		first_access_timestamp = COALESCE(first_access_timestamp, ?)
+	SET last_access_timestamp = ?
 	WHERE student_ID = ?
 	`
 	stmtUpd, err := r.dbClient.DB.Prepare(updateQuery)
@@ -101,7 +100,7 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 		log.Printf("Error preparing update query: %v", err)
 	} else {
 		defer stmtUpd.Close()
-		if _, err := stmtUpd.Exec(now, now, student.StudentID); err != nil {
+		if _, err := stmtUpd.Exec(now, student.StudentID); err != nil {
 			log.Printf("Error updating access timestamps for student %s: %v", student.StudentID, err)
 		} else {
 			if student.FirstAccessTimestamp == nil {
