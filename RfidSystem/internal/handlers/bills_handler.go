@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"rfidsystem/internal/model"
 	"time"
 
@@ -85,14 +84,15 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 		}
 	}
 
-	match, err := regexp.MatchString(`^ACLC-\d{4}-\d{3}$`, studentId)
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).SendString("Error validating student ID")
-	}
+	// update to follow this format C23-2Number-4Number-MAN121
+	// match, err := regexp.MatchString(`^ACLC-\d{4}-\d{3}$`, studentId)
+	// if err != nil {
+	// 	return ctx.Status(fiber.StatusInternalServerError).SendString("Error validating student ID")
+	// }
 
-	if !match {
-		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid student ID format. Must be in format ACLC-YYYY-XXX")
-	}
+	// if !match {
+	// 	return ctx.Status(fiber.StatusBadRequest).SendString("Invalid student ID format. Must be in format ACLC-YYYY-XXX")
+	// }
 
 	log.Printf("Created bills repository\n")
 
@@ -119,6 +119,7 @@ func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 	billsCache.Set(studentId, billsData)
 
 	log.Printf("Successfully retrieved bills data for student ID: %s\n", studentId)
+	fmt.Println("why", billsData)
 
 	assessmentMap := formatAssessmentForView(billsData.Assessment)
 

@@ -13,7 +13,7 @@
                     <h4>Payment Summary</h4>
                     <table class="fee-details">
                         <tr>
-                            <th>Total Assessment</th>
+                            <th>Total Fees </th>
                             <td>₱{{.Bills.TotalFeeAmount}}</td>
                         </tr>
                         <tr>
@@ -92,7 +92,7 @@
                     </tr>
                     {{ end }}
                     <tr class="total-row">
-                        <th>Total Assessment</th>
+                        <th>Total Fee Amount</th>
                         <td>₱{{.Bills.TotalFeeAmount}}</td>
                     </tr>
                     {{/* Display Discounts */}} {{ range .Discounts }}
@@ -104,10 +104,10 @@
                         <td>-₱{{ .AppliedAmount }}</td>
                     </tr>
                     {{ end }}
-                    <tr class="total-row">
+                    <!-- <tr class="total-row">
                         <th>Total Amount</th>
                         <td>₱{{.Bills.NetAssessmentAmount}}</td>
-                    </tr>
+                    </tr> -->
                     <tr>
                         <th>Full Payment (paid before exam)</th>
                         <td>₱{{.Bills.FullPmtIfB4Prelim}}</td>
