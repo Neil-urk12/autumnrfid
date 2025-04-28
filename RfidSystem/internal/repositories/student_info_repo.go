@@ -70,6 +70,24 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 		}
 	}
 
+	// Format birthday as MM-DD-YYYY
+	if student.Birthday != nil {
+		var t time.Time
+		var err error
+		// Try parsing full RFC3339 timestamp
+		t, err = time.Parse(time.RFC3339, *student.Birthday)
+		if err != nil {
+			// Fallback to date-only format
+			t, err = time.Parse("2006-01-02", *student.Birthday)
+		}
+		if err != nil {
+			log.Printf("Invalid birthday format for %s: %v", student.StudentID, err)
+		} else {
+			formatted := t.Format("01-02-2006")
+			student.Birthday = &formatted
+		}
+	}
+
 	// Update access timestamps
 	now := time.Now()
 	updateQuery := `
@@ -156,6 +174,22 @@ func (r *RFIDRepository) GetStudentSummaryData(studentId string) (*model.Student
 	log.Printf("Payment Schedules Length: %d", len(paymentSchedules))
 	log.Printf("Payment Schedules Type: %T", paymentSchedules)
 	// log.Printf("Payment Schedules First Element Type: %T", paymentSchedules[0])
+
+	// Format due_date in payment schedules to MM-DD-YYYY
+	for i, ps := range paymentSchedules {
+		var t time.Time
+		var err error
+		t, err = time.Parse(time.RFC3339, ps.DueDate)
+		if err != nil {
+			// Fallback to date-only
+			t, err = time.Parse("2006-01-02", ps.DueDate)
+		}
+		if err != nil {
+			log.Printf("Invalid due_date format for schedule ID %d: %v", ps.ID, err)
+		} else {
+			paymentSchedules[i].DueDate = t.Format("01-02-2006")
+		}
+	}
 
 	return &model.StudentInfoViewModel{
 		Student:          student,
