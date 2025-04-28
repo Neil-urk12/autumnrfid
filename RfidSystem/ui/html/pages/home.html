@@ -626,8 +626,8 @@
                 isUserInfoActive = false;
 
                 // Request the homepage content
-                htmx.ajax("GET", "/");
-
+                // htmx.ajax("GET", "/");
+                window.location.reload()
                 // Reset all flags to ensure theme modal will appear on next scan
                 console.log('Resetting system state for next scan');
             }
