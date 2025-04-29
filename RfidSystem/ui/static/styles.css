@@ -857,12 +857,6 @@ th {
     line-height: 1.6;
 }
 
-.scan-icon {
-    font-size: 5rem;
-    color: var(--aqua);
-    margin-bottom: 1rem;
-}
-
 /* Message styles */
 .message-wrapper {
     position: fixed;
@@ -2727,7 +2721,8 @@ input:checked+.slider:before {
         margin-top: 25px;
     }
 
-    .info-table th, .info-table td {
+    .info-table th,
+    .info-table td {
         padding: 10px 15px;
         font-size: 23px;
     }
@@ -2736,7 +2731,8 @@ input:checked+.slider:before {
         min-height: 350px;
     }
 
-    .grades-table-home th, .grades-table-home td {
+    .grades-table-home th,
+    .grades-table-home td {
         padding: 10px 15px;
         font-size: 23px;
     }
@@ -2744,6 +2740,7 @@ input:checked+.slider:before {
     .bill-summary {
         gap: 20px;
     }
+
     .bill-amount {
         margin: 15px 0;
         font-size: 1.9em;
@@ -2777,6 +2774,7 @@ input:checked+.slider:before {
     .button-section {
         padding-bottom: 25px;
     }
+
     .grades-content {
         padding: 25px;
     }
@@ -2790,78 +2788,141 @@ input:checked+.slider:before {
         font-size: 24.1px;
     }
 
-    .grades-table-grades th, .grades-table-grades td {
+    .grades-table-grades th,
+    .grades-table-grades td {
         padding: 12px 15px;
         font-size: 23px;
     }
 
-   /* BILLS */ 
-   .container-bills {
-    min-height: calc(100vh - 130px);
-    padding: 25px;
-    font-size: 23px;
-   }
+    /* BILLS */
+    .container-bills {
+        min-height: calc(100vh - 130px);
+        padding: 25px;
+        font-size: 23px;
+    }
 
-   .section-header {
-    padding: 15px 20px;
-   }
+    .section-header {
+        padding: 15px 20px;
+    }
 
-   .section-content {
-    padding: 25px;
-   }
+    .section-content {
+        padding: 25px;
+    }
 
-   .left-section {
-    gap: 25px;
-   }
-.balance-card {
-    padding: 20px;
-}
-   .balance-title {
-    font-size: 1.5rem;
-   }
-   .balance-details h4 {
-    padding: 25px;  
-    font-size: 25px;
-}
-   .balance-amount {
-    font-size: 3rem;
-    margin-top: 14px;
-   }
+    .left-section {
+        gap: 25px;
+    }
 
-   .history-section {
-    min-height: 400px;
-   }
-   .history-table th, .history-table td {
-    padding: 10px 15px; 
-    font-size: 23px;
-   }
+    .balance-card {
+        padding: 20px;
+    }
 
-   .fee-table-container {
-    margin-bottom: 25px;
-   }
-    .fee-details th, .fee-details td {
+    .balance-title {
+        font-size: 1.5rem;
+    }
+
+    .balance-details h4 {
+        padding: 25px;
+        font-size: 25px;
+    }
+
+    .balance-amount {
+        font-size: 3rem;
+        margin-top: 14px;
+    }
+
+    .history-section {
+        min-height: 400px;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 10px 15px;
+        font-size: 23px;
+    }
+
+    .fee-table-container {
+        margin-bottom: 25px;
+    }
+
+    .fee-details th,
+    .fee-details td {
         padding: 10.9px 15px
     }
 
-    /* IDLE DISPLAY
-    .toggle-button {
-        height: 85px;
-        width: 85px;
+    /* IDLE DISPLAY*/
+    .theme-toggle {
+        padding: 8px;
+    }
+
+    .toggle-switch {
+        width: 100px;
+        height: 50px;
+
+    }
+
+    .slider:before {
+        height: 42px;
+        width: 42px;
+    }
+
+    .sun-icon,
+    .moon-icon {
+        font-size: 25px;
+    }
+
+    .qr-code-container {
+        padding: 55px;
+    }
+
+    .scan-icon {
+        font-size: 250px;
+    }
+
+    .qr-text {
+        font-size: 2.3rem;
         
     }
 
-    .toggle-button img {
-        height: 40px;
-        width: 40px;
-        right: 10px;
+    .qr-subtext {        
+        font-size: 1.3rem;
+        max-width: 330px;
     }
 
-    .close-button {
-        margin-left: 40px;
-        width: 65px;
-        height: 65px;
-        right: -70px;
-    } */
+    .logo-container img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .time {
+        font-size: 7.5rem;
+    }
+
+    .date {
+        font-size: 2.3rem;
+    }
+
+    .weather-container {
+        padding: 30px 35px;
+    }
+
+    .temperature {
+        font-size: 2.9rem;
+    }
+
+    .weather-icon {
+        font-size: 3.5rem;
+    }
+
+    .weather-condition {
+        font-size: 1.6rem;
+    }
+
+    .location {
+        font-size: 1.5rem;
+    }
+
+
 }
 
 
@@ -2908,7 +2969,8 @@ input:checked+.slider:before {
         min-height: 277px;
     }
 
-    .grades-table-home th, .grades-table-home td {
+    .grades-table-home th,
+    .grades-table-home td {
         font-size: 17.5px;
     }
 
@@ -2929,7 +2991,7 @@ input:checked+.slider:before {
     }
 
     .payment-item {
-         padding: 15px 6px;
+        padding: 15px 6px;
     }
 
     .payment-date {
@@ -2937,21 +2999,24 @@ input:checked+.slider:before {
         margin-top: 9px;
     }
 
-    /* GRADES (maximum 11 subs) */ 
+    /* GRADES (maximum 11 subs) */
     .container-grades {
         font-size: 17.5px;
     }
- .semester-info {
-    padding: 11.5px 0;
- }
 
- .grades-table-grades th, .grades-table-grades td {
-    font-size: 17.5px;
- }
+    .semester-info {
+        padding: 11.5px 0;
+    }
 
- .grades-table-grades th:nth-child(n + 3), .grades-table-grades td:nth-child(n + 3) {
-    padding: 11.3px;
- }
+    .grades-table-grades th,
+    .grades-table-grades td {
+        font-size: 17.5px;
+    }
+
+    .grades-table-grades th:nth-child(n + 3),
+    .grades-table-grades td:nth-child(n + 3) {
+        padding: 11.3px;
+    }
 
     /* BILLS */
     .container-bills {
@@ -2981,17 +3046,87 @@ input:checked+.slider:before {
         font-size: 21px;
     }
 
-    .fee-details th, .fee-details td {
+    .fee-details th,
+    .fee-details td {
         padding: 8.9px 10px;
     }
 
     .history-section {
         min-height: 325px;
     }
-    .history-table th, .history-table td {
+
+    .history-table th,
+    .history-table td {
         font-size: 17.5px;
     }
 
+    /* IDLE DISPLAY*/
+    .theme-toggle {
+        padding: 8px;
+    }
+
+    .toggle-switch {
+        width: 80px;
+        height: 40px;
+
+    }
+
+    .slider:before {
+        height: 32px;
+        width: 32px;
+    }
+
+    .sun-icon,
+    .moon-icon {
+        font-size: 20px;
+    }
+
+    .qr-code-container {
+        padding: 40px;
+    }
+
+    .scan-icon {
+        font-size: 190px;
+    }
+
+    .qr-text {
+        font-size: 1.8rem;
+    }
+
+    .qr-subtext {
+        font-size: 1rem;
+        max-width: 290px;
+        margin-top: 15px;
+    }
+
+    .logo-container img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .time {
+        font-size: 5.8rem;
+    }
+
+    .date {
+        font-size: 1.8rem;
+    }
+
+    .weather-icon {
+        font-size: 2.7rem;
+    }
+
+    .temperature {
+        font-size: 2.3rem;
+    }
+
+    .weather-condition {
+        font-size: 1.3rem;
+    }
+
+    .location {
+        font-size: 1.2rem;
+    }
 
 
 }
@@ -3089,7 +3224,8 @@ input:checked+.slider:before {
     }
 
     /* GRADES (Max 11 subs) */
-    .grades-table-grades th:nth-child(n + 3), .grades-table-grades td:nth-child(n + 3) {
+    .grades-table-grades th:nth-child(n + 3),
+    .grades-table-grades td:nth-child(n + 3) {
         padding: 9.9px;
     }
 
@@ -3115,27 +3251,28 @@ input:checked+.slider:before {
         min-height: 290px;
     }
 
-    .fee-details th, .fee-details td {
+    .fee-details th,
+    .fee-details td {
         padding: 7.5px 10px;
     }
 
-  
+
 
 }
 
 
 @media (max-width: 1366px) and (max-height: 607px) {
-   .navbar button {
-    height: 70px;
-   }
+    .navbar button {
+        height: 70px;
+    }
 
-   .container-home {
-    min-height: 100px;
-    grid-template-columns: 1.1fr 2fr;
-    padding: 15px 0;
-    width: calc(100% - 30px);
-    gap: 15px;
-}
+    .container-home {
+        min-height: 100px;
+        grid-template-columns: 1.1fr 2fr;
+        padding: 15px 0;
+        width: calc(100% - 30px);
+        gap: 15px;
+    }
 }
 
 
@@ -3224,4 +3361,3 @@ input:checked+.slider:before {
         font-size: 4rem;
     }
 }
-
