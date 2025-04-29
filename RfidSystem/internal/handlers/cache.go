@@ -17,6 +17,8 @@ type cacheItem struct {
 	expiresAt time.Time
 }
 
+// LRUCache represents an LRU cache with a time-to-live (TTL) for cache items.
+// It is safe for concurrent use since I embedded a Mutex in it.
 type LRUCache struct {
 	capacity int
 	ttl      time.Duration
@@ -25,6 +27,7 @@ type LRUCache struct {
 	order    *list.List // Front is most recent
 }
 
+// NewLRUCache creates a new LRUCache with the specified capacity and time-to-live (TTL).
 func NewLRUCache(capacity int, ttl time.Duration) *LRUCache {
 	return &LRUCache{
 		capacity: capacity,
@@ -34,6 +37,8 @@ func NewLRUCache(capacity int, ttl time.Duration) *LRUCache {
 	}
 }
 
+// Get retrieves a value from the cache for a given key.
+// It returns the value and a boolean indicating if the key was found and the item was not expired.
 func (c *LRUCache) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -53,6 +58,8 @@ func (c *LRUCache) Get(key string) (interface{}, bool) {
 	return item.value, true
 }
 
+// Set adds or updates a key-value pair in the cache.
+// If the cache exceeds its capacity, the least recently used item is removed.
 func (c *LRUCache) Set(key string, value interface{}) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -84,6 +91,7 @@ func (c *LRUCache) Set(key string, value interface{}) {
 }
 
 // Optional: Delete key
+// Delete removes a key-value pair from the cache.
 func (c *LRUCache) Delete(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -93,7 +101,7 @@ func (c *LRUCache) Delete(key string) {
 	}
 }
 
-// Optional: Purge all expired items
+// PurgeExpired removes all expired items from the cache.
 func (c *LRUCache) PurgeExpired() {
 	c.mu.Lock()
 	defer c.mu.Unlock()

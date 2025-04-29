@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"rfidsystem/internal/model"
+	"time"
 )
 
 // Get payment schedules for an assessment
@@ -47,6 +48,9 @@ func (r *RFIDRepository) getPaymentSchedules(assessmentId int64) ([]model.Paymen
 // Bills Related Functions
 // ------------------------------------------------------------------
 
+// GetStudentBillsByRFID retrieves all billing-related data for a student by their RFID.
+// This includes their assessment, fee breakdown, discounts, and payment history.
+// It returns a Bills struct containing all this information or an error.
 func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*model.Bills, error) {
 	// Test database connection
 	if err := r.dbClient.DB.Ping(); err != nil {
@@ -249,6 +253,20 @@ func (r *RFIDRepository) getPaymentHistory(assessmentId int64) ([]model.PaymentR
 		); err != nil {
 			return nil, err
 		}
+		// Format payment date to MM-DD-YYYY
+		var t time.Time
+		var err error
+		t, err = time.Parse(time.RFC3339, payment.PaymentDate)
+		if err != nil {
+			// Fallback to date-only
+			t, err = time.Parse("01-02-2006", payment.PaymentDate)
+		}
+		if err != nil {
+			log.Printf("Invalid Payment Date format for payment: %v", err)
+		} else {
+			payment.PaymentDate = t.Format("01-02-2006")
+		}
+
 		payments = append(payments, payment)
 	}
 

@@ -8,8 +8,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Deprecated
+
 var studentsPageCache = NewLRUCache(5, time.Hour)
 
+// GetStudentById handles HTTP requests to retrieve detailed information for a specific student by their ID.
+// It expects the student ID as a path parameter.
 func (h *AppHandler) GetStudentById(ctx *fiber.Ctx) error {
 	studentID := ctx.Params("id")
 	log.Printf("Received request to get student with ID: %s\n", studentID)
@@ -32,6 +36,8 @@ func (h *AppHandler) GetStudentById(ctx *fiber.Ctx) error {
 	return ctx.JSON(student)
 }
 
+// GetGrades handles HTTP requests to retrieve grades for a specific student by their ID.
+// It expects the student ID as a path parameter.
 func (h *AppHandler) GetGrades(ctx *fiber.Ctx) error {
 	studentID := ctx.Params("id")
 	log.Printf("Received request to get grades for student with ID: %s\n", studentID)
@@ -55,6 +61,8 @@ func (h *AppHandler) GetGrades(ctx *fiber.Ctx) error {
 	return ctx.JSON(grades)
 }
 
+// RetrieveStudentsHandler handles HTTP requests to retrieve a paginated list of students.
+// It expects the page number as a query parameter.
 func (h *AppHandler) RetrieveStudentsHandler(ctx *fiber.Ctx) error {
 	page := ctx.QueryInt("page", 1)
 	cacheKey := strconv.Itoa(page)

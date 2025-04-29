@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// ScanLog represents a single scan log entry.
 type ScanLog struct {
 	ID        int
 	Timestamp time.Time
@@ -23,7 +24,8 @@ type ScanLog struct {
 	Status    string
 }
 
-// HandleLog renders the LogMonitor page
+// HandleLog handles HTTP requests to render the log monitoring page.
+// It fetches all scan logs from the database and computes basic statistics.
 func (h *AppHandler) HandleLog(c *fiber.Ctx) error {
 	// Fetch logs from database
 	rows, err := h.db.DB.Query(
@@ -85,7 +87,8 @@ func (h *AppHandler) HandleLog(c *fiber.Ctx) error {
 	return nil
 }
 
-// HandleLogPartial renders only the log container for HTMX auto-refresh with filters
+// HandleLogPartial handles HTMX requests to render the log list partial.
+// It supports filtering logs by search query and status level.
 func (h *AppHandler) HandleLogPartial(c *fiber.Ctx) error {
 	// Fetch with search and level filter
 	search := strings.TrimSpace(c.Query("search", ""))
@@ -123,7 +126,8 @@ func (h *AppHandler) HandleLogPartial(c *fiber.Ctx) error {
 	return c.Render("partials/log_list", fiber.Map{"Logs": logs})
 }
 
-// HandleStatsPartial renders only the stats cards for HTMX auto-refresh
+// HandleStatsPartial handles HTMX requests to render the stats cards partial.
+// It fetches log timestamps and statuses to compute total logs, errors, warnings, and log rate.
 func (h *AppHandler) HandleStatsPartial(c *fiber.Ctx) error {
 	// Fetch logs from database
 	rows, err := h.db.DB.Query(
@@ -182,7 +186,9 @@ func (h *AppHandler) HandleStatsPartial(c *fiber.Ctx) error {
 	})
 }
 
-// HandleClearLogs transfers all scan_logs to archived_logs and deletes them
+// HandleClearLogs handles HTTP requests to archive and clear all scan logs.
+// It transfers all entries from the scan_logs table to the archived_logs table
+// within a transaction and then deletes them from scan_logs.
 func (h *AppHandler) HandleClearLogs(c *fiber.Ctx) error {
 	tx, err := h.db.DB.Begin()
 	if err != nil {
@@ -220,7 +226,8 @@ func (h *AppHandler) HandleClearLogs(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-// HandleExportLogs returns all logs as CSV download
+// HandleExportLogs handles HTTP requests to export all scan logs as a CSV file.
+// It queries all logs from the database and writes them to the response writer in CSV format.
 func (h *AppHandler) HandleExportLogs(c *fiber.Ctx) error {
 	rows, err := h.db.DB.Query(`SELECT id, timestamp, card_id, student_ID, event_type, message, details, status
        FROM scan_logs ORDER BY timestamp DESC`)

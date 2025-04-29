@@ -10,7 +10,8 @@ import (
 // Grades Related Functions
 // ------------------------------------------------------------------
 
-// GetStudentGradesByRFID retrieves grades for the current term
+// GetStudentGradesByRFID retrieves grades for a student for the current academic term.
+// It uses the current date to determine the current term.
 func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*model.Grades, error) {
 	currentTerm, err := r.GetCurrentTerm()
 	if err != nil {
@@ -20,7 +21,8 @@ func (r *RFIDRepository) GetStudentGradesByRFID(studentId string) (*model.Grades
 	return r.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, currentTerm.Semester)
 }
 
-// GetStudentGradesByRFIDAndSemester retrieves grades for a specific semester in the given academic year
+// GetStudentGradesByRFIDAndSemester retrieves grades for a student for a specific academic year and semester.
+// It returns a Grades struct containing student information, the term, and a list of grade records.
 func (r *RFIDRepository) GetStudentGradesByRFIDAndSemester(studentId, academicYear, semesterName string) (*model.Grades, error) {
 	student, err := r.GetStudentByRFID(studentId)
 	if err != nil {
@@ -114,6 +116,8 @@ func (r *RFIDRepository) GetStudentGradesByRFIDAndSemester(studentId, academicYe
 	}, nil
 }
 
+// GetCurrentTerm retrieves the current academic term based on the current date.
+// It queries the AcademicTerms table to find the term whose date range includes the current date.
 func (r *RFIDRepository) GetCurrentTerm() (*model.AcademicTerm, error) {
 	query := `
 	SELECT

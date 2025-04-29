@@ -9,12 +9,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// billsCache is an LRU cache for storing student bills data.
+// It has a capacity of 5 items and a time-to-live of 1 hour.
 var billsCache = NewLRUCache(5, time.Hour)
 
+// formatAmount formats a float64 amount to a string with two decimal places.
 func formatAmount(amount float64) string {
 	return fmt.Sprintf("%.2f", amount)
 }
 
+// formatNullableAmount formats a nullable float64 amount to a string with two decimal places. It returns "0.00" if the amount is nil.
 func formatNullableAmount(amount *float64) string {
 	if amount == nil {
 		return "0.00"
@@ -22,6 +26,8 @@ func formatNullableAmount(amount *float64) string {
 	return fmt.Sprintf("%.2f", *amount)
 }
 
+// formatAssessmentForView formats a model.Assessment into a model.AssessmentViewModel
+// for display purposes, handling nil assessments and formatting amounts.
 func formatAssessmentForView(assessment *model.Assessment) model.AssessmentViewModel {
 	// Handle nil assessment to prevent nil pointer dereference
 	if assessment == nil {
@@ -52,6 +58,9 @@ func formatAssessmentForView(assessment *model.Assessment) model.AssessmentViewM
 	}
 }
 
+// HandleBills handles HTTP requests to retrieve and display student bills.
+// It first checks the cache, then fetches data from the repository if not found.
+// It expects a student ID via form value "rfid" or query parameter "student-id".
 func (h *AppHandler) HandleBills(ctx *fiber.Ctx) error {
 	studentId := ctx.FormValue("rfid")
 	if studentId == "" {

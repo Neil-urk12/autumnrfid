@@ -1,9 +1,12 @@
 package repositories
 
+// RFIDRepository represents a repository for interacting with RFID-related data in the database.
+// It encapsulates database operations related to students, bills, grades but
 type RFIDRepository struct {
 	dbClient *DatabaseClient
 }
 
+// NewRFIDRepository creates a new RFIDRepository with the provided DatabaseClient.
 func NewRFIDRepository(dbClient *DatabaseClient) *RFIDRepository {
 	return &RFIDRepository{dbClient: dbClient}
 }

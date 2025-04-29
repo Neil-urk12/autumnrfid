@@ -12,6 +12,10 @@ import (
 var gradesCache = NewLRUCache(5, time.Hour)
 var semesterGradesCache = NewLRUCache(5, time.Hour)
 
+// HandleGrades handles HTTP requests to retrieve and display student grades for the current term.
+// It expects a student ID via form value "rfid" or query parameter "student-id".
+// It checks the cache, fetches data from the repository if not found,
+// and renders the grades partial.
 func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 	studentId := ctx.FormValue("rfid")
 	if studentId == "" {
@@ -81,7 +85,10 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 	})
 }
 
-// HandleSemesterGrades handles HTMX requests for grades of a specific semester
+// HandleSemesterGrades handles HTMX requests to retrieve and display student grades for a specific semester.
+// It expects the student ID as a path parameter and the semester as a query parameter.
+// It checks the cache, fetches data from the repository if not found,
+// and renders the grades table partial.
 func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 	studentId := ctx.Params("studentId")
 	semester := ctx.Query("semester")
