@@ -11,6 +11,9 @@ import (
 
 // Student Related Functions
 // ------------------------------------------------------------------
+// GetStudentByRFID retrieves basic student information by their RFID.
+// It queries the Students table and returns a Student pointer or an error.
+// It returns nil if no student is found with the given RFID.
 func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, error) {
 	query := `
 	SELECT student_ID, department_ID, first_Name, last_Name, middle_Name, birthday, contact_number, email, year_Level, program, block_section, first_access_timestamp, last_access_timestamp
@@ -113,6 +116,10 @@ func (r *RFIDRepository) GetStudentByRFID(studentId string) (*model.Student, err
 	return student, nil
 }
 
+// GetStudentSummaryData retrieves comprehensive summary data for a student by their RFID.
+// This includes basic student information, grades summary, assessment details, and payment schedules.
+// It returns a StudentInfoViewModel struct or an error.
+// It returns nil if no student is found with the given RFID.
 func (r *RFIDRepository) GetStudentSummaryData(studentId string) (*model.StudentInfoViewModel, error) {
 	student, err := r.GetStudentByRFID(studentId)
 	if err != nil {

@@ -11,6 +11,10 @@ import (
 
 var studentInfoCache = NewLRUCache(5, time.Hour)
 
+// HandleStudentInfo handles HTTP requests to render the student information partial.
+// It supports receiving the student ID via POST body or GET path parameter.
+// It checks the cache, fetches student summary data from the repository if necessary,
+// stores the data in the cache, and renders the student info partial.
 func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	// Support POST body or GET path parameter
 	var req struct {

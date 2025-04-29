@@ -7,6 +7,10 @@ import (
 	"rfidsystem/internal/model"
 )
 
+// DEPRECATED
+
+// GetAllStudents retrieves a paginated list of all students from the database.
+// It returns a slice of Student pointers and an error if the query fails.
 func (r *RFIDRepository) GetAllStudents(page int) ([]*model.Student, error) {
 	var students []*model.Student
 	limit := 5
@@ -63,6 +67,10 @@ func (r *RFIDRepository) GetAllStudents(page int) ([]*model.Student, error) {
 	return students, nil
 }
 
+// GetStudentsForAssessmentTerm retrieves a paginated list of students for a specific assessment term.
+// It returns a slice of StudentAssessmentSummary pointers, the total count of students for the term, and an error.
+//
+// Deprecated
 func (r *RFIDRepository) GetStudentsForAssessmentTerm(termID int64, page, limit int) ([]*model.StudentAssessmentSummary, int, error) {
 	var students []*model.StudentAssessmentSummary
 	var totalStudents int
@@ -144,6 +152,7 @@ func (r *RFIDRepository) GetStudentsForAssessmentTerm(termID int64, page, limit 
 	return students, totalStudents, nil
 }
 
+// Deprecated
 func (r *RFIDRepository) GetStudentGradesByID(studentId string) (*model.GradesRecord, error) {
 	// grades := &model.GradesRecord{}
 
@@ -165,7 +174,9 @@ func (r *RFIDRepository) GetStudentGradesByID(studentId string) (*model.GradesRe
 }
 
 // GetStudentInfo retrieves detailed information for a specific student by their ID.
-func (r *RFIDRepository) GetStudentInfo(studentID string) (*model.Student, error) { // Changed parameter type to string
+// It queries the Students table and returns a Student pointer or an error.
+// It returns sql.ErrNoRows if no student is found.
+func (r *RFIDRepository) GetStudentInfo(studentID string) (*model.Student, error) {
 	student := &model.Student{}
 
 	query := `

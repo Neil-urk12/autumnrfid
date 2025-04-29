@@ -10,10 +10,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// DatabaseClient represents a client for interacting with the database.
 type DatabaseClient struct {
 	DB *sql.DB
 }
 
+// NewDatabaseClient creates a new DatabaseClient and establishes a database connection
+// using the provided database configuration. It returns a pointer to the client and an error.
 func NewDatabaseClient(config config.DatabaseConfig) (*DatabaseClient, error) {
 	// Enable parsing of MySQL TIMESTAMP fields into time.Time
 	connStr := fmt.Sprintf(
@@ -33,75 +36,14 @@ func NewDatabaseClient(config config.DatabaseConfig) (*DatabaseClient, error) {
 	return &DatabaseClient{DB: db}, nil
 }
 
-// Close closes the database connection
+// Close closes the database connection held by the DatabaseClient.
 func (c *DatabaseClient) Close() error {
 	return c.DB.Close()
 }
 
-// type Test struct {
-// 	StudentId    string
-// 	DepartmentID int
-// 	FirstName    string
-// 	LastName     string
-// 	MiddleName   string
-// 	YearLevel    int
-// 	Program      string
-// }
-
-// func (c *DatabaseClient) GetStudentByRFID(studentId string) (*Test, error) {
-// 	query := `
-// 		SELECT *
-// 		FROM Students
-// 		WHERE student_ID = ?
-// 	`
-
-// 	student := &Test{}
-// 	err := c.DB.QueryRow(query, studentId).Scan(
-// 		&student.StudentId,
-// 		&student.DepartmentID,
-// 		&student.FirstName,
-// 		&student.LastName,
-// 		&student.MiddleName,
-// 		&student.YearLevel,
-// 		&student.Program,
-// 	)
-
-// 	if err == sql.ErrNoRows {
-// 		return nil, nil
-// 	}
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error querying student: %v", err)
-// 	}
-
-// 	return student, nil
-// }
-
-// func (c *DatabaseClient) GetStudentGrades(studentID int) ([]Grade, error) {
-// 	query := `
-// 		SELECT
-// 		FROM Enrollments
-// 		WHERE student_id = ?
-// 	`
-
-// 	rows, err := c.DB.Query(query, studentID)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error querying grades: %v", err)
-// 	}
-// 	defer rows.Close()
-
-// 	var grades []Grade
-// 	for rows.Next() {
-// 		var g Grade
-// 		if err := rows.Scan(&g.SubjectCode, &g.SubjectName, &g.Grade); err != nil {
-// 			return nil, fmt.Errorf("error scanning grade row: %v", err)
-// 		}
-// 		grades = append(grades, g)
-// 	}
-
-// 	return grades, nil
-// }
-
 // LogScanEvent inserts a new log entry into the scan_logs table.
+// It records details about a scan event, including the card ID, optional student ID,
+// event type, message, optional details, and status.
 func (c *DatabaseClient) LogScanEvent(cardID string, studentID *string, eventType, message, details, status string) error {
 	log.Printf("[LogScanEvent] called with cardID=%s studentID=%v eventType=%s message=%q status=%s", cardID, studentID, eventType, message, status)
 	ts := time.Now().UTC()

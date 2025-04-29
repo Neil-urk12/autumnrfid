@@ -48,6 +48,9 @@ func (r *RFIDRepository) getPaymentSchedules(assessmentId int64) ([]model.Paymen
 // Bills Related Functions
 // ------------------------------------------------------------------
 
+// GetStudentBillsByRFID retrieves all billing-related data for a student by their RFID.
+// This includes their assessment, fee breakdown, discounts, and payment history.
+// It returns a Bills struct containing all this information or an error.
 func (r *RFIDRepository) GetStudentBillsByRFID(studentId string) (*model.Bills, error) {
 	// Test database connection
 	if err := r.dbClient.DB.Ping(); err != nil {

@@ -11,8 +11,13 @@ import (
 	"github.com/gofiber/websocket/v2"
 )
 
+// LRU Cache for card scans
 var cardScanCache = NewLRUCache(5, time.Hour)
 
+// HandleCardScan handles HTTP POST requests for RFID card scans.
+// It processes the RFID from the request body or form, logs the event,
+// checks the cache, fetches student data from the repository if necessary,
+// stores the data in the cache, and broadcasts an HTMX instruction via SSE.
 func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	var req struct {
 		RFID string `json:"rfid" form:"rfid"`
@@ -79,7 +84,10 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	return ctx.SendString("Processing")
 }
 
-// HandleCardScanWS handles websocket card scan requests with bidirectional communication.
+// HandleCardScanWS handles websocket connections for real-time RFID card scans.
+// It reads messages from the WebSocket, processes the card ID,
+// checks the cache, fetches student data if needed, stores in cache,
+// broadcasts an HTMX instruction via SSE, and sends the instruction back over the WebSocket.
 func (h *AppHandler) HandleCardScanWS(c *websocket.Conn) {
 	defer c.Close()
 	for {
