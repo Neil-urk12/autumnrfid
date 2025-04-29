@@ -1,18 +1,17 @@
 <!-- Student Information -->
 <div class="container-home tar" id="student-info-container">
-    <input
-        type="hidden"
-        id="current-student-id"
-        value="{{if .Student}}{{.Student.StudentID}}{{end}}"
-    />
+    <script>
+        (function () {
+            const id = "{{if .Student}}{{.Student.StudentID}}{{end}}";
+            const navInput = document.getElementById("current-student-id");
+            if (navInput) { navInput.value = id; }
+        })();
+    </script>
     <div class="profile">
         <div class="summary-header">Student Information</div>
         <div class="summary-content">
             <div class="profile-header">
-                <img
-                    src="/ui/static/images/mlemlody.png"
-                    alt="Profile Picture"
-                />
+                <img src="/ui/static/images/mlemlody.png" alt="Profile Picture" />
                 <div class="profile-info">
                     <h3 id="student-name">
                         {{if .Student}}{{.Student.FirstName}}
@@ -53,7 +52,7 @@
                     </tr>
                 </table>
 
-                <table class="info-table" style="margin-top: 15px">
+                <table class="info-table">
                     <tr>
                         <th colspan="2">Academic Information</th>
                     </tr>
@@ -75,22 +74,20 @@
                     </tr>
                 </table>
 
-                <table class="info-table" style="margin-top: 15px">
+                <table class="info-table">
                     <tr>
                         <th colspan="2">System Access</th>
                     </tr>
                     <tr>
                         <th>Last Access</th>
                         <td>
-                            {{if
-                            .Student}}{{.Student.LastAccessTimestamp}}{{end}}
+                            {{if .Student}}{{formatTime .Student.LastAccessTimestamp}}{{end}}
                         </td>
                     </tr>
                     <tr>
                         <th>First Access</th>
                         <td>
-                            {{if
-                            .Student}}{{.Student.FirstAccessTimestamp}}{{end}}
+                            {{if .Student}}{{formatTime .Student.FirstAccessTimestamp}}{{end}}
                         </td>
                     </tr>
                 </table>

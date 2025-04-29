@@ -9,6 +9,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// HandleSSE handles HTTP requests to establish a Server-Sent Events (SSE) connection.
+// It sets the appropriate headers and registers the client with the Broadcaster.
+// It sends an initial "connected" message and periodic "ping" messages.
 func (h *AppHandler) HandleSSE(c *fiber.Ctx) error {
 	c.Set("Content-Type", "text/event-stream")
 	c.Set("Cache-Control", "no-cache")

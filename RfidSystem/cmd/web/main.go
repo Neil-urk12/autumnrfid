@@ -1,3 +1,4 @@
+// Package main implements the web server for the RFID system.
 package main
 
 import (
@@ -6,54 +7,82 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
+	"time"
+
 	"rfidsystem/internal/config"
 	"rfidsystem/internal/handlers"
 	"rfidsystem/internal/model"
 	"rfidsystem/internal/repositories"
-	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/html/v2"
+	"github.com/gofiber/websocket/v2"
 )
 
+// main initializes and runs the RFID web server.
+// It sets up the database, view engine, Fiber app, handlers, and routes,
+// and starts the server. It also handles graceful shutdown.
 func main() {
 	// Load db config
+	dbClient, err := initDatabase()
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer dbClient.Close()
+
+	// Handle graceful shutdown on interrupt signal
+	go handleShutdown(dbClient)
+
+	// Initialize view engine and Fiber app
+	engine := initViewEngine()
+	app := configureApp(engine)
+
+	// Create handler with repository
+	rfidRepo := repositories.NewRFIDRepository(dbClient)
+	handler := handlers.NewHandler(dbClient, rfidRepo)
+
+	// Register all routes
+	registerRoutes(app, handler)
+
+	// Start server
+	log.Fatal(app.Listen(":8080"))
+}
+
+// initDatabase loads the database configuration, connects to the database,
+// and verifies connectivity by pinging the database and running a test query.
+// It returns a DatabaseClient pointer and an error if initialization fails.
+func initDatabase() (*repositories.DatabaseClient, error) {
 	dbConfig, err := config.LoadDatabaseConfig()
 	if err != nil {
-		log.Fatalf("Failed to load database config: %v", err)
+		return nil, fmt.Errorf("load database config: %v", err)
 	}
 
-	// init db toma
-	db, err := repositories.NewDatabaseClient(dbConfig)
+	dbClient, err := repositories.NewDatabaseClient(dbConfig)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		return nil, fmt.Errorf("connect to database: %v", err)
 	}
-	// Test the database connection
-	if err := testDBConnection(db.DB); err != nil {
-		log.Fatalf("Database connection test failed: %v", err)
+
+	if err := testDBConnection(dbClient.DB); err != nil {
+		return nil, fmt.Errorf("test database connection: %v", err)
 	}
+
 	log.Println("Database connection test successful.")
+	return dbClient, nil
+}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		<-c
-		log.Println("Shutting down...")
-		db.Close()
-		os.Exit(0)
-	}()
-	defer db.Close()
+// initViewEngine sets up the HTML template engine using the html/v2 engine.
+// It configures the engine to load templates from "./ui/html" with the ".html" extension,
+// enables reload and debug modes, and adds custom template functions.
+func initViewEngine() *html.Engine {
+	engine := html.New("./ui/html", ".html")
+	engine.Reload(true)
+	engine.Debug(true)
 
-	viewsEngine := html.New("./ui/html", ".html")
-	viewsEngine.Reload(true) // Enable template reloading for development
-	viewsEngine.Debug(true)  // Enable debug mode for better error messages
-
-	// Register template functions
-	viewsEngine.AddFunc("lower", strings.ToLower)
-	viewsEngine.AddFunc("feesByCategory", func(fees []model.FeeBreakdown, category string) []model.FeeBreakdown {
+	engine.AddFunc("lower", strings.ToLower)
+	engine.AddFunc("feesByCategory", func(fees []model.FeeBreakdown, category string) []model.FeeBreakdown {
 		var filtered []model.FeeBreakdown
 		for _, fee := range fees {
 			if fee.Category == category {
@@ -62,13 +91,26 @@ func main() {
 		}
 		return filtered
 	})
+	// Format time as "YYYY-MM-DD hh:mm am/pm" without seconds
+	engine.AddFunc("formatTime", func(t *time.Time) string {
+		if t == nil {
+			return ""
+		}
+		return strings.ToLower(t.Format("2006-01-02 03:04 PM"))
+	})
+	return engine
+}
 
+// configureApp creates a new Fiber application instance.
+// It configures the app with the provided view engine, applies necessary middleware
+// such as CORS and logger, and sets up static file serving.
+func configureApp(engine *html.Engine) *fiber.App {
 	app := fiber.New(fiber.Config{
-		Views:                 viewsEngine,
+		Views:                 engine,
 		DisableStartupMessage: false,
 		IdleTimeout:           time.Hour * 24,
 		ReadTimeout:           time.Second * 60,
-		WriteTimeout:          time.Second * 60,
+		WriteTimeout:          0,
 		ColorScheme: fiber.Colors{
 			Black:   "\u001b[93m",
 			Red:     "\u001b[91m",
@@ -79,69 +121,84 @@ func main() {
 			Cyan:    "\u001b[96m",
 			White:   "\u001b[97m",
 			Reset:   "\u001b[0m",
-		}, // Custom colors for better visibility
+		},
 	})
 
-	// Configure middleware with enhanced CORS settings for SSE
+	// CORS configuration
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:8080", // Specify exact origins instead of wildcard
+		AllowOrigins:     "http://localhost:8080",
 		AllowHeaders:     "Origin, Content-Type, Accept, Cache-Control",
-		AllowCredentials: true, // Keep credentials enabled for cookies/auth
+		AllowCredentials: true,
 		ExposeHeaders:    "Content-Type, Content-Length, Content-Disposition",
 	}))
 
+	// Logger middleware (basic HTTP logging)
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+		Output: os.Stdout,
 	}))
 
-	// Serve static files
+	// Serve static assets and ensure images directory exists
 	app.Static("/ui/static", "./ui/static")
-
-	// Create static folder for profile images if it doesn't exist
 	if _, err := os.Stat("./ui/static/images"); os.IsNotExist(err) {
 		os.MkdirAll("./ui/static/images", 0755)
 	}
 
-	// Pass the database client to the handler
-	appHandler := handlers.NewHandler(db)
-
-	// Routes
-	app.Get("/", appHandler.HandleGetIndex)
-	app.Get("/grades", appHandler.HandleGrades)
-	app.Get("/grades/semester/:studentId", appHandler.HandleSemesterGrades)
-	app.Get("/error", appHandler.HandleError)
-	// app.Get("/student-partial/:rfid", appHandler.GetStudentPartial)
-	app.Get("/student-partial/:rfid", appHandler.HandleStudentInfo)
-	app.Get("/students/v1", appHandler.RetrieveStudentsHandler)
-	// SSE endpoint - crucial for real-time updates
-	app.Get("/stream", appHandler.HandleSSE)
-
-	// Card scan endpoint - receives data from Arduino
-	app.Post("/card-scan", appHandler.HandleCardScan)
-
-	app.Get("/ping", func(c *fiber.Ctx) error {
-		return c.SendString("Fiber Web Server is running")
-	})
-
-	// Bills route using query parameter
-	app.Get("/bills", appHandler.HandleBills)
-
-	log.Fatal(app.Listen(":8080"))
+	return app
 }
 
+// registerRoutes maps URL paths to their corresponding handler functions
+// on the provided Fiber application instance.
+func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
+	app.Get("/", h.HandleGetIndex)
+	app.Get("/docs", h.HandleDocs)
+	app.Get("/grades", h.HandleGrades)
+	app.Get("/grades/semester/:studentId", h.HandleSemesterGrades)
+	app.Get("/error", h.HandleError)
+	app.Get("/student-partial/:rfid", h.HandleStudentInfo)
+	app.Get("/students/v1", h.RetrieveStudentsHandler)
+	app.Get("/students/:id", h.GetStudentById)
+	app.Get("/stream", h.HandleSSE)
+	app.Get("/log", h.HandleLog)
+	app.Get("/logs", h.HandleLog)
+	// HTMX polling endpoint for log container
+	app.Get("/log/partial", h.HandleLogPartial)
+	// HTMX polling endpoint for stats cards
+	app.Get("/stats/partial", h.HandleStatsPartial)
+	// Endpoints for log controls
+	app.Post("/log/clear", h.HandleClearLogs)
+	app.Get("/log/export", h.HandleExportLogs)
+	app.Post("/card-scan", h.HandleCardScan)
+	app.Get("/card-scan-ws", websocket.New(h.HandleCardScanWS))
+	app.Get("/ping", func(c *fiber.Ctx) error { return c.SendString("Fiber Web Server is running") })
+	app.Get("/bills", h.HandleBills)
+	// support HTMX POST navigation with hidden RFID
+	app.Post("/student-partial", h.HandleStudentInfo)
+	app.Post("/grades", h.HandleGrades)
+	app.Post("/bills", h.HandleBills)
+}
+
+// handleShutdown listens for interrupt signals (like Ctrl+C) to gracefully shut down the application.
+// It closes the database connection and exits the program.
+func handleShutdown(dbClient *repositories.DatabaseClient) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+	log.Println("Shutting down...")
+	dbClient.Close()
+	os.Exit(0)
+}
+
+// testDBConnection pings the database and runs a simple query
+// to verify that the database connection is working correctly.
 func testDBConnection(db *sql.DB) error {
-	// Ping the database
 	if err := db.Ping(); err != nil {
 		return fmt.Errorf("ping failed: %v", err)
 	}
-
-	// Try a simple query
 	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM Students").Scan(&count)
-	if err != nil {
+	if err := db.QueryRow("SELECT COUNT(*) FROM Students").Scan(&count); err != nil {
 		return fmt.Errorf("test query failed: %v", err)
 	}
 	fmt.Printf("Found %d students in database\n", count)
-
 	return nil
 }

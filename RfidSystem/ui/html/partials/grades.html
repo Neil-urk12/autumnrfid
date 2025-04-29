@@ -1,22 +1,15 @@
 <div class="container-grades tar">
     <div class="button-section">
         <div class="button-left">
-            <button class="sidebar-btn">
-                <i class="fas fa-bars"></i>
-            </button>
-            <button id="sem1-btn"
-                    class="semester-btn {{if eq .SelectedSemester "First Semester"}}active{{end}}"
-                    hx-get="/grades/semester/{{.Student.StudentID}}?semester=First%20Semester"
-                    hx-target="#grades-table-container"
-                    hx-swap="outerHTML">
+            <button id="sem1-btn" class="semester-btn {{if eq .SelectedSemester "First Semester"}}active{{end}}"
+                hx-get="/grades/semester/{{.Student.StudentID}}?semester=First%20Semester"
+                hx-target="#grades-table-container" hx-swap="outerHTML">
                 First Semester
             </button>
-            <button id="sem2-btn"
-                    class="semester-btn {{if eq .SelectedSemester "Second Semester"}}active{{end}}"
-                    hx-get="/grades/semester/{{.Student.StudentID}}?semester=Second%20Semester"
-                    hx-target="#grades-table-container"
-                    hx-swap="outerHTML"
-                    {{if not .IsSecondSemesterAvailable}}disabled{{end}}>
+            <button id="sem2-btn" class="semester-btn {{if eq .SelectedSemester "Second Semester"}}active{{end}}"
+                hx-get="/grades/semester/{{.Student.StudentID}}?semester=Second%20Semester"
+                hx-target="#grades-table-container" hx-swap="outerHTML" {{if not
+                .IsSecondSemesterAvailable}}disabled{{end}}>
                 Second Semester
             </button>
         </div>
@@ -25,70 +18,9 @@
             <span>{{if .Term}}SY {{.Term.AcademicYear}}{{end}}</span>
         </div>
     </div>
-<div class="grades-section">
-    <div class="grades-content">
-        {{template "partials/grades-table" .}}
-    </div>
-</div>
-    </div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">Year and Semester</div>
-        <div class="year-section">
-            <button class="year-btn active" data-year="1">
-                First Year
-                <span class="icon">▼</span>
-            </button>
-            <div class="semester-container show" data-year="1">
-                <button
-                    class="semester-btn-sidebar active"
-                    data-semester="first"
-                >
-                    First Semester
-                </button>
-                <button class="semester-btn-sidebar" data-semester="second">
-                    Second Semester
-                </button>
-            </div>
-
-            <button class="year-btn" data-year="2">
-                Second Year
-                <span class="icon">▼</span>
-            </button>
-            <div class="semester-container" data-year="2">
-                <button class="semester-btn-sidebar" data-semester="first">
-                    First Semester
-                </button>
-                <button class="semester-btn-sidebar" data-semester="second">
-                    Second Semester
-                </button>
-            </div>
-
-            <button class="year-btn" data-year="3">
-                Third Year
-                <span class="icon">▼</span>
-            </button>
-            <div class="semester-container" data-year="3">
-                <button class="semester-btn-sidebar" data-semester="first">
-                    First Semester
-                </button>
-                <button class="semester-btn-sidebar" data-semester="second">
-                    Second Semester
-                </button>
-            </div>
-
-            <button class="year-btn" data-year="4">
-                Fourth Year
-                <span class="icon">▼</span>
-            </button>
-            <div class="semester-container" data-year="4">
-                <button class="semester-btn-sidebar" data-semester="first">
-                    First Semester
-                </button>
-                <button class="semester-btn-sidebar" data-semester="second">
-                    Second Semester
-                </button>
-            </div>
+    <div class="grades-section">
+        <div class="grades-content">
+            {{template "partials/grades-table" .}}
         </div>
     </div>
 </div>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID System - Log Monitoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.8.4"></script>
+    <style>
+        .log-container::-webkit-scrollbar { width: 8px; }
+        .log-container::-webkit-scrollbar-track { background: #1e293b; }
+        .log-container::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .log-container::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .log-entry { animation: fadeIn 0.3s ease-out; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .real-time-blink { animation: blink 2s infinite; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        {{ template "partials/header" . }}
+        {{ template "partials/controls" . }}
+        {{ template "partials/stats" . }}
+        {{ template "partials/log_container" . }}
+        {{ template "partials/settings_modal" . }}
+    </div>
+</body>
+</html>

@@ -3,9 +3,8 @@ package handlers
 import (
 	"fmt"
 	"log"
-	"time"
 	"rfidsystem/internal/model"
-	"rfidsystem/internal/repositories"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -13,9 +12,15 @@ import (
 var gradesCache = NewLRUCache(5, time.Hour)
 var semesterGradesCache = NewLRUCache(5, time.Hour)
 
-
+// HandleGrades handles HTTP requests to retrieve and display student grades for the current term.
+// It expects a student ID via form value "rfid" or query parameter "student-id".
+// It checks the cache, fetches data from the repository if not found,
+// and renders the grades partial.
 func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
-	studentId := ctx.Query("student-id")
+	studentId := ctx.FormValue("rfid")
+	if studentId == "" {
+		studentId = ctx.Query("student-id")
+	}
 	if studentId == "" {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Student Id is required")
 	}
@@ -39,23 +44,24 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 		}
 	}
 
-	gradesRepo := repositories.NewRFIDRepository(h.db)
-
 	// Get current term to determine which semester to show by default
-	currentTerm, err := gradesRepo.GetCurrentTerm()
+	currentTerm, err := h.RFIDRepository.GetCurrentTerm()
 	if err != nil {
 		log.Printf("Error getting current term: %v", err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error getting current term: %v", err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 
 	// Get grades data
-	gradesData, err := gradesRepo.GetStudentGradesByRFID(studentId)
+	gradesData, err := h.RFIDRepository.GetStudentGradesByRFID(studentId)
 	if err != nil {
 		log.Printf("Error fetching grades for student %s: %v", studentId, err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error fetching grades for student %s: %v", studentId, err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 	if gradesData == nil {
 		log.Printf("Student %s not found", studentId)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_not_found", fmt.Sprintf("Grades not found for student %s", studentId), "", "failure")
 		return ctx.Status(fiber.StatusNotFound).SendString("Student not found")
 	}
 	// Store in cache
@@ -66,6 +72,7 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 
 	// Process grades and calculate GWA
 	preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+	_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_success", fmt.Sprintf("Fetched %d grades", len(preparedGrades)), "", "success")
 
 	return ctx.Render("partials/grades", fiber.Map{
 		"Title":                     "Student Grades",
@@ -78,7 +85,10 @@ func (h *AppHandler) HandleGrades(ctx *fiber.Ctx) error {
 	})
 }
 
-// HandleSemesterGrades handles HTMX requests for grades of a specific semester
+// HandleSemesterGrades handles HTMX requests to retrieve and display student grades for a specific semester.
+// It expects the student ID as a path parameter and the semester as a query parameter.
+// It checks the cache, fetches data from the repository if not found,
+// and renders the grades table partial.
 func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 	studentId := ctx.Params("studentId")
 	semester := ctx.Query("semester")
@@ -104,19 +114,19 @@ func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 		}
 	}
 
-	gradesRepo := repositories.NewRFIDRepository(h.db)
-
 	// Get current term to get the academic year and check semester availability
-	currentTerm, err := gradesRepo.GetCurrentTerm()
+	currentTerm, err := h.RFIDRepository.GetCurrentTerm()
 	if err != nil {
 		log.Printf("Error getting current term: %v", err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error getting current term: %v", err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 
 	// Get grades for the requested semester
-	gradesData, err := gradesRepo.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, semester)
+	gradesData, err := h.RFIDRepository.GetStudentGradesByRFIDAndSemester(studentId, currentTerm.AcademicYear, semester)
 	if err != nil {
 		log.Printf("Error fetching grades for student %s semester %s: %v", studentId, semester, err)
+		_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_error", fmt.Sprintf("Error fetching grades for student %s semester %s: %v", studentId, semester, err), "", "failure")
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 	}
 	// Store in cache
@@ -127,6 +137,7 @@ func (h *AppHandler) HandleSemesterGrades(ctx *fiber.Ctx) error {
 
 	// Process grades and calculate GWA
 	preparedGrades, gwaString := h.prepareGradesAndGWA(gradesData.Grades)
+	_ = h.db.LogScanEvent(studentId, &studentId, "grade_fetch_success", fmt.Sprintf("Fetched %d grades", len(preparedGrades)), "", "success")
 
 	// Render only the grades table container
 	return ctx.Render("partials/grades-table", fiber.Map{
@@ -182,7 +193,7 @@ func (h *AppHandler) prepareGradesAndGWA(grades []model.GradesRecord) ([]fiber.M
 //   - "-" when the grade is nil (grade not yet available/recorded)
 //   - formatted string with 2 decimal places for actual grade values
 func formatGrade(grade *float64) string {
-	if grade == nil {
+	if grade == nil || *grade == 0 {
 		// Return a dash placeholder for nil grades
 		// This indicates that the grade is not yet available or has not been recorded
 		return "-"

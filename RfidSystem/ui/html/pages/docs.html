@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RFID System - Handlers & API Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e90ff;
+      --secondary: #f7f9fc;
+      --background: #ffffff;
+      --text: #333333;
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--secondary);
+      color: var(--text);
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    aside {
+      position: sticky;
+      top: 1rem;
+      align-self: start;
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Make the inner nav stick within the aside */
+    aside nav {
+      position: sticky;
+      top: 2rem;
+    }
+
+    nav ul {
+      list-style: none;
+    }
+
+    nav li {
+      margin: 0.5rem 0;
+    }
+
+    nav a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      margin-top: 1.5rem;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th,
+    td {
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+    }
+
+    th {
+      background: var(--secondary);
+      text-align: left;
+    }
+
+    code {
+      background: #f4f4f4;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-size: 0.95em;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+
+    footer {
+      text-align: center;
+      margin: 2rem 0;
+      font-size: 0.875rem;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>RFID System Documentation</h1>
+    <p><strong>Last updated:</strong> 2025-04-29</p>
+  </header>
+  <div class="container">
+    <aside>
+      <nav>
+        <h2>Contents</h2>
+        <ul>
+          <li><a href="#overview">Overview & Flow</a></li>
+          <li><a href="#initialization">Initialization</a></li>
+          <li><a href="#routes">API Endpoints</a></li>
+          <li><a href="#handlers">Handler Details</a></li>
+          <li><a href="#middleware">Middleware & Utilities</a></li>
+          <li><a href="#shutdown">Graceful Shutdown</a></li>
+          <li><a href="#deprecated">Deprecated Components</a></li>
+          <li><a href="#frontend">Frontend (HTMX)</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <main>
+      <h2 id="overview">Overview & Request Flow</h2>
+      <p>The web server is built on the <code>Fiber</code> framework and follows this sequence:</p>
+      <ol>
+        <li><code>initDatabase</code>: load config, connect to DB, test connectivity</li>
+        <li><code>initViewEngine</code>: configure HTML template engine and helper funcs</li>
+        <li><code>configureApp</code>: instantiate <code>fiber.App</code>, apply middleware, serve static assets</li>
+        <li><code>registerRoutes</code>: map HTTP paths to handler methods on <code>AppHandler</code></li>
+        <li>Start listening on port <code>8080</code></li>
+        <li><code>handleShutdown</code>: capture <code>SIGINT</code> and close resources</li>
+      </ol>
+
+      <h2 id="initialization">Initialization Functions</h2>
+      <h3>initDatabase()</h3>
+      <p>Loads database credentials (<code>config.LoadDatabaseConfig</code>), opens a <code>sql.DB</code> connection via
+        <code>repositories.NewDatabaseClient</code>, and verifies connectivity with <code>Ping()</code> and a simple
+        query against the <code>Students</code> table.
+      </p>
+
+      <h3>initViewEngine()</h3>
+      <p>Creates an <code>html.Engine</code> pointing at <code>ui/html</code> templates. Enables <code>Reload</code> and
+        <code>Debug</code> modes, and registers template helpers:
+      </p>
+      <ul>
+        <li><code>lower</code>: <code>strings.ToLower</code></li>
+        <li><code>feesByCategory</code>: filters <code>[]model.FeeBreakdown</code> by category</li>
+        <li><code>formatTime</code>: formats <code>*time.Time</code> to <code>YYYY-MM-DD hh:mm am/pm</code></li>
+      </ul>
+
+      <h3>configureApp(engine *html.Engine)</h3>
+      <ul>
+        <li>Instantiates <code>fiber.New</code> with timeouts and custom color scheme</li>
+        <li>Applies CORS (allow <code>http://localhost:8080</code>)</li>
+        <li>Applies request logging via <code>logger.New</code></li>
+        <li>Serves static files under <code>/ui/static</code> and ensures <code>images</code> folder exists</li>
+      </ul>
+
+      <h2 id="routes">API Endpoints</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GET</td>
+            <td>/</td>
+            <td>Render homepage</td>
+          </tr>
+          <tr>
+            <td>GET, POST</td>
+            <td>/grades</td>
+            <td>Display or submit student grades</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/grades/semester/:studentId</td>
+            <td>Fetch semester-specific grades (JSON)</td>
+          </tr>
+          <tr>
+            <td>GET, POST</td>
+            <td>/bills</td>
+            <td>View billing assessment and payment history</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/students/v1</td>
+            <td>JSON list of students (autocomplete)</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/students/:id</td>
+            <td>Get student by ID (JSON)</td>
+          </tr>
+          <tr>
+            <td>GET, POST</td>
+            <td>/student-partial</td>
+            <td>Render student info partial (HTMX)</td>
+          </tr>
+          <tr>
+            <td>POST</td>
+            <td>/card-scan</td>
+            <td>Process RFID scan via form</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/card-scan-ws</td>
+            <td>WebSocket endpoint for real-time scans</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/stream</td>
+            <td>Server-Sent Events (SSE) stream</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/ping</td>
+            <td>Health check (plain text)</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/error</td>
+            <td>Render error page</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/docs</td>
+            <td>Render API documentation page</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/log</td>
+            <td>Render scan logs monitor page</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/logs</td>
+            <td>Alias for <code>/log</code> monitor page</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/log/partial</td>
+            <td>Fetch log list HTML partial (HTMX)</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/stats/partial</td>
+            <td>Fetch stats HTML partial (HTMX)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="handlers">Handler Details</h2>
+      <p>All request handlers live under <code>internal/handlers</code> and attach to <code>AppHandler</code>.</p>
+
+      <h3>HomeHandler</h3>
+      <ul>
+        <li><code>HandleGetIndex(c *fiber.Ctx)</code>: Renders <code>index.html</code> with initial data and search
+          form.</li>
+      </ul>
+
+      <h3>GradesHandler</h3>
+      <ul>
+        <li><code>HandleGrades(c *fiber.Ctx)</code>: Reads <code>rfid</code> from query or form, validates, checks
+          <code>gradesCache</code>, fetches via <code>RFIDRepository.GetGradesByRFID</code>, maps to
+          <code>model.GradesViewModel</code>, renders <code>partials/grades</code>.
+        </li>
+        <li><code>HandleSemesterGrades(c *fiber.Ctx)</code>: Returns JSON list of semester grades for given
+          <code>:studentId</code>.
+        </li>
+      </ul>
+
+      <h3>BillsHandler</h3>
+      <ul>
+        <li><code>HandleBills(c *fiber.Ctx)</code>: Retrieves <code>rfid</code>, validates format against regexp
+          <code>^ACLC-\d{4}-\d{3}$</code>, checks <code>billsCache</code>, loads via
+          <code>RFIDRepository.GetStudentBillsByRFID</code>, transforms <code>model.Assessment</code> to
+          <code>AssessmentViewModel</code>, renders <code>partials/bills</code>.
+        </li>
+      </ul>
+
+      <h3>RetrieveStudentsHandler</h3>
+      <p>Handlers for retrieving student information:</p>
+      <ul>
+        <li><code>GetStudentById(c *fiber.Ctx)</code>: Retrieves detailed information for a specific student by their ID
+          (JSON).</li>
+        <li><code>GetGrades(c *fiber.Ctx)</code>: Retrieves grades for a specific student by their ID (JSON).</li>
+        <li><code>RetrieveStudentsHandler(c *fiber.Ctx)</code>: Returns JSON array of students for autocomplete
+          (<code>SchoolYear</code>, <code>Name</code>, etc.).</li>
+      </ul>
+      <h3>StudentPartialHandler</h3>
+      <ul>
+        <li><code>HandleStudentInfo(c *fiber.Ctx)</code>: Renders a HTML snippet with student details (used by HTMX
+          inserts).</li>
+      </ul>
+
+      <h3>CardScanHandler</h3>
+      <ul>
+        <li><code>HandleCardScan(c *fiber.Ctx)</code>: Process form-based scan, returns JSON with student info.</li>
+        <li><code>HandleCardScanWS(c *websocket.Conn)</code>: WebSocket endpoint for real-time scans (wrap with
+          <code>websocket.New</code>).
+        </li>
+      </ul>
+
+      <h3>SSEHandler</h3>
+      <ul>
+        <li><code>HandleSSE(c *fiber.Ctx)</code>: Opens an SSE connection, pushes events via <code>broadcaster</code> on
+          <code>/stream</code>.
+        </li>
+      </ul>
+
+      <h3>ErrorPageHandler</h3>
+      <ul>
+        <li><code>HandleError(c *fiber.Ctx)</code>: Renders generic error template.</li>
+      </ul>
+
+      <h3>DocsHandler</h3>
+      <ul>
+        <li><code>HandleDocs(c *fiber.Ctx)</code>: Renders the API documentation page.</li>
+      </ul>
+
+      <h3>LogHandler</h3>
+      <ul>
+        <li><code>HandleLog(c *fiber.Ctx)</code>: Renders the scan logs monitor page with full log list and stats cards.
+        </li>
+        <li><code>HandleLogPartial(c *fiber.Ctx)</code>: Returns the log list partial (<code>partials/log_list</code>)
+          for HTMX polling.</li>
+        <li><code>HandleStatsPartial(c *fiber.Ctx)</code>: Returns the stats cards partial (<code>partials/stats</code>)
+          for HTMX polling.</li>
+      </ul>
+
+      <h2 id="deprecated">Deprecated Components</h2>
+      <p>The following components have been identified as potentially unused in the current application flow and may be
+        considered deprecated:</p>
+      <ul>
+        <li><code>GetStudentsForAssessmentTerm</code> function in
+          <code>internal/repositories/admin_operations_repo.go</code>: This repository function is not currently called
+          by any of the main handlers.
+        </li>
+        <li><code>SSELogger</code> in <code>internal/handlers/sse_logger.go</code>: This logger implementation is not
+          actively used to broadcast log messages to the SSE stream in the current configuration.</li>
+      </ul>
+
+      <h2 id="frontend">Frontend (HTMX) Documentation</h2>
+      <p>The frontend of the RFID System is built using HTML templates rendered by the Go backend, with dynamic
+        interactions powered by HTMX and Server-Sent Events (SSE).</p>
+
+      <h3>Key Technologies</h3>
+      <ul>
+        <li><strong>HTML Templates:</strong> Go's <code>html/template</code> package is used to render dynamic HTML
+          pages and partials.</li>
+        <li><strong>HTMX:</strong> Provides AJAX, CSS Transitions, WebSockets, and Server-Sent Events directly in HTML,
+          allowing for dynamic updates without writing extensive JavaScript.</li>
+        <li><strong>Server-Sent Events (SSE):</strong> Used for real-time updates from the server to the client, such as
+          pushing student information after an RFID scan.</li>
+        <li><strong>JavaScript:</strong> Minimal vanilla JavaScript is used for client-side logic like the theme toggle,
+          idle timeout, and wallpaper rotation on the home page.</li>
+      </ul>
+
+      <h3>Main Pages</h3>
+      <ul>
+        <li><code>ui/html/pages/home.html</code>: The main landing page. It includes the RFID scan area, displays time
+          and weather, and serves as the target for HTMX swaps when student information, grades, or bills are loaded. It
+          utilizes SSE to receive updates triggered by RFID scans.</li>
+        <li><code>ui/html/pages/log.html</code>: Displays the scan log monitoring interface. It uses HTMX to
+          periodically fetch and update the log list and statistics without full page reloads.</li>
+        <li><code>ui/html/pages/docs.html</code>: This documentation page.</li>
+        <li><code>ui/html/partials/error_page.html</code>: A partial rendered when a student is not found or an error
+          occurs.</li>
+      </ul>
+
+      <h3>Partials</h3>
+      <p>Reusable HTML snippets loaded dynamically by HTMX:</p>
+      <ul>
+        <li><code>ui/html/partials/student_info.html</code>: Displays detailed student personal and academic
+          information, including a summary of grades and bills.</li>
+        <li><code>ui/html/partials/grades.html</code>: Displays detailed student grades for a selected semester,
+          including a table and GWA.</li>
+        <li><code>ui/html/partials/grades-table.html</code>: The table portion of the grades display, updated
+          dynamically when switching semesters.</li>
+        <li><code>ui/html/partials/bills.html</code>: Displays the student's billing assessment, fee breakdown,
+          discounts, and payment history.</li>
+        <li><code>ui/html/partials/controls.html</code>: Contains controls for filtering, clearing, and exporting logs
+          on the log monitoring page.</li>
+        <li><code>ui/html/partials/log_list.html</code>: Displays the list of scan log entries, updated periodically via
+          HTMX.</li>
+        <li><code>ui/html/partials/stats.html</code>: Displays summary statistics for the scan logs, updated
+          periodically via HTMX.</li>
+        <li><code>ui/html/partials/header.html</code>: The header used on the log monitoring page.</li>
+        <li><code>ui/html/partials/settings_modal.html</code>: A modal for configuring log monitoring settings.</li>
+      </ul>
+
+      <h3>HTMX and SSE Usage</h3>
+      <p>Key HTMX attributes and patterns used:</p>
+      <ul>
+        <li><code>hx-post="/card-scan"</code>: Submits the RFID form data to the backend.</li>
+        <li><code>hx-target="#main"</code>: Specifies that the response from the backend should replace the content of
+          the element with the ID "main".</li>
+        <li><code>hx-swap="innerHTML"</code>: Indicates that the inner HTML of the target element should be replaced.
+        </li>
+        <li><code>hx-trigger="load"</code>: Triggers an HTMX request when the element is loaded (used for initial
+          partial loading).</li>
+        <li><code>hx-get="/grades/semester/:studentId"</code>: Fetches semester-specific grades when a semester button
+          is clicked.</li>
+        <li><code>hx-ext="sse" sse-connect="/stream"</code>: Configures an element to connect to an SSE stream at the
+          "/stream" endpoint.</li>
+        <li><code>sse-swap="studentcallback"</code>: Swaps the content of the element when an SSE event with the name
+          "studentcallback" is received.</li>
+        <li>Periodic polling for logs and stats using `hx-trigger="every 5s"`.</li>
+      </ul>
+
+      <h2 id="middleware">Middleware & Utilities</h2>
+      <ul>
+        <li><code>cors.New</code>: Configure cross-origin support</li>
+        <li><code>logger.New</code>: Request logging</li>
+        <li><code>LRUCache</code>: In-memory caching utility (<code>cache.go</code>)</li>
+        <li><code>broadcaster</code>: SSE broadcast manager (<code>broadcaster.go</code>)</li>
+        <li><code>WebSocket</code>: Real-time bi-directional scans (<code>websocket/v2</code>)</li>
+      </ul>
+
+      <h2 id="shutdown">Graceful Shutdown</h2>
+      <p><code>handleShutdown</code> listens for <code>os.Interrupt</code>, closes the database client, and exits
+        cleanly.</p>
+
+      <footer>
+        <p>Written by Neil on 2025-04-27</p>
+      </footer>
+    </main>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,114 @@
+{{define "partials/controls"}}
+<div class="bg-slate-800 rounded-lg p-4 mb-6 shadow-lg">
+    <div class="flex flex-wrap items-center gap-4">
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-sm font-medium mb-1">Search logs</label>
+            <div class="relative">
+                <input type="text" id="search-input" placeholder="Filter logs..."
+                    class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <i class="fas fa-search absolute right-3 top-3 text-slate-400"></i>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1">Log level</label>
+            <div class="flex space-x-2">
+                <button data-level="all" class="log-level-btn active px-3 py-1 rounded-md bg-emerald-600 text-white">All</button>
+                <button data-level="error" class="log-level-btn px-3 py-1 rounded-md bg-red-500 text-white">Error</button>
+                <button data-level="warn" class="log-level-btn px-3 py-1 rounded-md bg-yellow-500 text-white">Warn</button>
+                <button data-level="info" class="log-level-btn px-3 py-1 rounded-md bg-blue-500 text-white">Info</button>
+                <button data-level="debug" class="log-level-btn px-3 py-1 rounded-md bg-slate-500 text-white">Debug</button>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1">Actions</label>
+            <div class="flex space-x-2">
+                <button id="clear-logs" class="px-3 py-1 rounded-md bg-slate-700 hover:bg-slate-600 transition">
+                    <i class="fas fa-archive mr-1"></i> Archive all logs
+                </button>
+                <button id="pause-logs" class="px-3 py-1 rounded-md bg-slate-700 hover:bg-slate-600 transition">
+                    <i class="fas fa-pause mr-1"></i> Pause
+                </button>
+                <button id="export-logs" class="px-3 py-1 rounded-md bg-slate-700 hover:bg-slate-600 transition">
+                    <i class="fas fa-download mr-1"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+  var isPollingPaused = false;
+  var searchTimeout;
+  var searchInput = document.getElementById('search-input');
+  var levelBtns = Array.from(document.querySelectorAll('.log-level-btn'));
+  var currentLevel = 'all';
+
+  function fetchStats() {
+    if (!isPollingPaused) {
+      htmx.ajax('GET', '/stats/partial', {target: '#stats-container', swap: 'outerHTML'});
+    }
+  }
+
+  function fetchLogs() {
+    if (!isPollingPaused) {
+      var search = searchInput ? searchInput.value.trim() : '';
+      var level = currentLevel;
+      var url = '/log/partial?search=' + encodeURIComponent(search) + '&level=' + encodeURIComponent(level);
+      htmx.ajax('GET', url, {target: '#log-container', swap: 'outerHTML'});
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search filter
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(fetchLogs, 300);
+      });
+    }
+    // Level filter
+    levelBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        levelBtns.forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        currentLevel = this.dataset.level;
+        fetchLogs();
+      });
+    });
+    // Clear logs
+    var clearBtn = document.getElementById('clear-logs');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        if (!confirm('Are you sure you want to clear all logs?')) return;
+        fetch('/log/clear', {method: 'POST'}).then(function(res) {
+          if (res.ok) { fetchLogs(); fetchStats(); }
+        });
+      });
+    }
+    // Export logs
+    var exportBtn = document.getElementById('export-logs');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', function() {
+        window.location = '/log/export';
+      });
+    }
+    // Pause/resume polling
+    fetchLogs();
+    fetchStats();
+    setInterval(fetchLogs, 5000);
+    setInterval(fetchStats, 5000);
+    var pauseBtn = document.getElementById('pause-logs');
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', function() {
+        isPollingPaused = !isPollingPaused;
+        this.innerHTML = isPollingPaused
+          ? '<i class="fas fa-play mr-1"></i> Resume'
+          : '<i class="fas fa-pause mr-1"></i> Pause';
+      });
+    }
+  });
+})();
+</script>
+{{end}}

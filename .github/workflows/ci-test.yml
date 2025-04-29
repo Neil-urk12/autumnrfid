@@ -16,16 +16,14 @@ jobs:
         with:
           go-version: '1.24'
           cache: true
-      
-      - name: Install dependencies
-        run: go mod download
-      
-      - name: Run tests
-        run: go test ./... -v
-      
-      - name: Build application
-        run: go build -v ./...
-      
+
+      - name: Build and Test Application
+        run: |
+          cd RfidSystem
+          go mod download
+          go test -v ./...
+          go build -v ./...
+            
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +35,11 @@ jobs:
         with:
           go-version: '1.24'
           cache: true
+
+      - name: Install mods
+        run: |
+          cd RfidSystem
+          go mod download
       
       - name: Golangci-lint
         uses: golangci/golangci-lint-action@v6.5.1

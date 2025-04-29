@@ -1,5 +1,11 @@
 package model
 
+import (
+	"encoding/json"
+	"strings"
+	"time"
+)
+
 type StudentInfo struct {
 	Student *Student
 }
@@ -54,21 +60,41 @@ type DiscountType struct {
 }
 
 type Student struct {
-	StudentID     string  `json:"student_id" db:"student_ID"`
-	DepartmentID  *int64  `json:"department_id,omitempty" db:"department_ID"`
-	FirstName     *string `json:"first_name,omitempty" db:"first_Name"`
-	LastName      *string `json:"last_name,omitempty" db:"last_Name"`
-	MiddleName    *string `json:"middle_name,omitempty" db:"middle_Name"`
-	Birthday      *string `json:"birthday,omitempty" db:"birthday"`
-	ContactNumber *string `json:"contact_number,omitempty" db:"contact_number"`
-	Email         *string `json:"email,omitempty" db:"email"`
-	YearLevel     *int    `json:"year_level,omitempty" db:"year_Level"`
-	Program       *string `json:"program,omitempty" db:"program"`
-	BlockSection  *string `json:"block_section,omitempty" db:"block_section"`
-	// FirstAccessTimestamp *time.Time `json:"first_access_timestamp,omitempty" db:"first_access_timestamp"`
-	// LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
-	FirstAccessTimestamp string `json:"first_access_timestamp" db:"first_access_timestamp"`
-	LastAccessTimestamp  string `json:"last_access_timestamp" db:"last_access_timestamp"`
+	StudentID            string     `json:"student_id" db:"student_ID"`
+	DepartmentID         *int64     `json:"department_id,omitempty" db:"department_ID"`
+	FirstName            *string    `json:"first_name,omitempty" db:"first_Name"`
+	LastName             *string    `json:"last_name,omitempty" db:"last_Name"`
+	MiddleName           *string    `json:"middle_name,omitempty" db:"middle_Name"`
+	Birthday             *string    `json:"birthday,omitempty" db:"birthday"`
+	ContactNumber        *string    `json:"contact_number,omitempty" db:"contact_number"`
+	Email                *string    `json:"email,omitempty" db:"email"`
+	YearLevel            *int       `json:"year_level,omitempty" db:"year_Level"`
+	Program              *string    `json:"program,omitempty" db:"program"`
+	BlockSection         *string    `json:"block_section,omitempty" db:"block_section"`
+	FirstAccessTimestamp *time.Time `json:"first_access_timestamp,omitempty" db:"first_access_timestamp"`
+	LastAccessTimestamp  *time.Time `json:"last_access_timestamp,omitempty" db:"last_access_timestamp"`
+	// FirstAccessTimestamp string  `json:"first_access_timestamp" db:"first_access_timestamp"`
+	// LastAccessTimestamp  string  `json:"last_access_timestamp" db:"last_access_timestamp"`
+	Status *string `json:"status,omitempty" db:"status"`
+}
+
+// MarshalJSON customizes Student JSON to format timestamps as "YYYY-MM-DD hh:mm am/pm" without seconds
+func (s *Student) MarshalJSON() ([]byte, error) {
+	type Alias Student
+	aux := &struct {
+		*Alias
+		FirstAccessTimestamp string `json:"first_access_timestamp,omitempty"`
+		LastAccessTimestamp  string `json:"last_access_timestamp,omitempty"`
+	}{
+		Alias: (*Alias)(s),
+	}
+	if s.FirstAccessTimestamp != nil {
+		aux.FirstAccessTimestamp = strings.ToLower(s.FirstAccessTimestamp.Format("2006-01-02 03:04 PM"))
+	}
+	if s.LastAccessTimestamp != nil {
+		aux.LastAccessTimestamp = strings.ToLower(s.LastAccessTimestamp.Format("2006-01-02 03:04 PM"))
+	}
+	return json.Marshal(aux)
 }
 
 type Assessment struct {
@@ -137,10 +163,10 @@ type Payment struct {
 	ID               int64 `json:"payment_id" db:"payment_id"`
 	AssessmentNumber int64 `json:"assessment_number" db:"assessment_number"`
 	// PaymentDate      time.Time `json:"payment_date" db:"payment_date"`
-	PaymentDate     string  `json:"payment_data" db:"payment_data"`
-	Amount          float64 `json:"amount" db:"amount"`
-	Description     *string `json:"description,omitempty" db:"description"`
-	Status          string  `json:"status" db:"status"`
+	PaymentDate string  `json:"payment_data" db:"payment_data"`
+	Amount      float64 `json:"amount" db:"amount"`
+	Description *string `json:"description,omitempty" db:"description"`
+	// Status          string  `json:"status" db:"status"`
 	PaymentMethod   *string `json:"payment_method,omitempty" db:"payment_method"`
 	ReferenceNumber *string `json:"reference_number,omitempty" db:"reference_number"`
 }
@@ -156,13 +182,13 @@ type PaymentSchedule struct {
 }
 
 type PaymentScheduleViewModel struct {
-    ID               int64
-    AssessmentNumber int64
-    TermDescription  string
-    DueDate          string
-    ExpectedAmount   float64
-    ExpectedAmountFormatted string
-    SortOrder       int
+	ID                      int64
+	AssessmentNumber        int64
+	TermDescription         string
+	DueDate                 string
+	ExpectedAmount          float64
+	ExpectedAmountFormatted string
+	SortOrder               int
 }
 
 // -------------------------
@@ -175,10 +201,10 @@ type FeeBreakdown struct {
 
 type PaymentRecord struct {
 	// Date            time.Time
-	PaymentDate     string
-	Description     *string
-	Amount          float64
-	Status          string
+	PaymentDate string
+	Description *string
+	Amount      float64
+	// Status          string
 	PaymentMethod   *string
 	ReferenceNumber *string
 }
@@ -212,4 +238,27 @@ type Grades struct {
 	Student     *Student
 	CurrentTerm *AcademicTerm
 	Grades      []GradesRecord
+}
+
+// StudentAssessmentSummary represents the summary of students for a specific assessment term.
+type StudentAssessmentSummary struct {
+	StudentID string  `json:"student_id" db:"StudentID"`
+	Name      *string `json:"name,omitempty" db:"Name"`
+	Course    *string `json:"course,omitempty" db:"Course"`
+	YearLevel *string `json:"year_level,omitempty" db:"YearLevel"`
+	Status    *string `json:"status,omitempty" db:"status"`
+}
+
+// PaginationMetadata holds information about the pagination state.
+type PaginationMetadata struct {
+	CurrentPage int `json:"currentPage"`
+	PageSize    int `json:"pageSize"`
+	TotalItems  int `json:"totalItems"`
+	TotalPages  int `json:"totalPages"`
+}
+
+// PaginatedStudentAssessmentResponse structures the paginated response for student assessments.
+type PaginatedStudentAssessmentResponse struct {
+	Data       []*StudentAssessmentSummary `json:"data"`
+	Pagination PaginationMetadata          `json:"pagination"`
 }

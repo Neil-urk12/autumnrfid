@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Broadcaster manages Server-Sent Events (SSE) clients and broadcasts messages to them.
 type Broadcaster struct {
 	// clients tracks all connected SSE clients with a bool indicating active status
 	clients map[*Client]bool
@@ -21,11 +22,13 @@ type Broadcaster struct {
 	done chan struct{}
 }
 
+// Message represents a Server-Sent Events (SSE) message with an event type and data.
 type Message struct {
 	Event string
 	Data  string
 }
 
+// Client represents a single connected Server-Sent Events (SSE) client.
 type Client struct {
 	// messages is a buffered channel that receives SSE messages for this specific client
 	// Buffer size of 20 allows for message queuing before potential backpressure
@@ -40,6 +43,8 @@ var (
 	once        sync.Once
 )
 
+// GetBroadcaster returns the singleton instance of the Broadcaster.
+// It initializes the Broadcaster the first time it is called.
 func GetBroadcaster() *Broadcaster {
 	once.Do(func() {
 		broadcaster = &Broadcaster{
@@ -54,6 +59,7 @@ func GetBroadcaster() *Broadcaster {
 	return broadcaster
 }
 
+// Close closes the Broadcaster, shutting down all connected client connections.
 func (b *Broadcaster) Close() {
 	close(b.done)
 }
@@ -113,6 +119,8 @@ func (b *Broadcaster) run() {
 	}
 }
 
+// Broadcast sends a message with the given event type and data to all connected SSE clients.
+// If the event type is empty, it defaults to "message".
 func (b *Broadcaster) Broadcast(event string, data string) {
 	if event == "" {
 		event = "message"
