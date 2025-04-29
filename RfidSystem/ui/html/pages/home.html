@@ -151,7 +151,6 @@
             </div>
 
     </main>
-    <!-- <p hx-ext="sse" sse-connect="/stream" sse-swap="ping" style="display: none;">Ping</p> -->
 
     <!-- Idle Timeout Modal -->
     <div id="idle-timeout-modal" class="idle-modal-overlay" style="display: none;">
@@ -372,10 +371,6 @@
             }, 20);
         }
 
-        // document.addEventListener('DOMContentLoaded', function () {
-
-        // });
-
         document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-item')
             let currentIndex = 0
@@ -383,9 +378,9 @@
             let idleTimeoutId = null;
             let modalCountdownIntervalId = null;
             let modalCountdownValue = 10; // seconds for modal countdown
-            let isUserInfoActive = false; // Track if student/bills/grades view is active
-            const idleTimeoutDuration = 300000; // 3 seconds idle time
-            
+            let isUserInfoActive = false; // Track if student/bills/grades view isactive
+            const idleTimeoutDuration = 30000; // 30 seconds idle time
+
             // Theme-related elements
             const themeToggle = document.getElementById('theme-toggle');
             const themeModal = document.getElementById('themeModal');
