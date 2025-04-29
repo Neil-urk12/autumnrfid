@@ -23,6 +23,8 @@ import (
 )
 
 // main initializes and runs the RFID web server.
+// It sets up the database, view engine, Fiber app, handlers, and routes,
+// and starts the server. It also handles graceful shutdown.
 func main() {
 	// Load db config
 	dbClient, err := initDatabase()
@@ -49,7 +51,9 @@ func main() {
 	log.Fatal(app.Listen(":8080"))
 }
 
-// initDatabase loads configuration, connects to the database, and verifies connectivity.
+// initDatabase loads the database configuration, connects to the database,
+// and verifies connectivity by pinging the database and running a test query.
+// It returns a DatabaseClient pointer and an error if initialization fails.
 func initDatabase() (*repositories.DatabaseClient, error) {
 	dbConfig, err := config.LoadDatabaseConfig()
 	if err != nil {
@@ -69,7 +73,9 @@ func initDatabase() (*repositories.DatabaseClient, error) {
 	return dbClient, nil
 }
 
-// initViewEngine sets up the HTML template engine with development options and custom functions.
+// initViewEngine sets up the HTML template engine using the html/v2 engine.
+// It configures the engine to load templates from "./ui/html" with the ".html" extension,
+// enables reload and debug modes, and adds custom template functions.
 func initViewEngine() *html.Engine {
 	engine := html.New("./ui/html", ".html")
 	engine.Reload(true)
@@ -95,7 +101,9 @@ func initViewEngine() *html.Engine {
 	return engine
 }
 
-// configureApp creates a Fiber app, applies middleware, and ensures static assets are served.
+// configureApp creates a new Fiber application instance.
+// It configures the app with the provided view engine, applies necessary middleware
+// such as CORS and logger, and sets up static file serving.
 func configureApp(engine *html.Engine) *fiber.App {
 	app := fiber.New(fiber.Config{
 		Views:                 engine,
@@ -139,7 +147,8 @@ func configureApp(engine *html.Engine) *fiber.App {
 	return app
 }
 
-// registerRoutes maps URL paths to their handler functions.
+// registerRoutes maps URL paths to their corresponding handler functions
+// on the provided Fiber application instance.
 func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Get("/", h.HandleGetIndex)
 	app.Get("/docs", h.HandleDocs)
@@ -169,7 +178,8 @@ func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Post("/bills", h.HandleBills)
 }
 
-// handleShutdown listens for interrupt signals to gracefully close resources.
+// handleShutdown listens for interrupt signals (like Ctrl+C) to gracefully shut down the application.
+// It closes the database connection and exits the program.
 func handleShutdown(dbClient *repositories.DatabaseClient) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -179,7 +189,8 @@ func handleShutdown(dbClient *repositories.DatabaseClient) {
 	os.Exit(0)
 }
 
-// testDBConnection pings the database and runs a simple query to verify connectivity.
+// testDBConnection pings the database and runs a simple query
+// to verify that the database connection is working correctly.
 func testDBConnection(db *sql.DB) error {
 	if err := db.Ping(); err != nil {
 		return fmt.Errorf("ping failed: %v", err)
