@@ -23,7 +23,7 @@
     --night-text: #cbcbd1;
     --night-border: #1c2b50;
     --night-display: #5a8bae;
-    --night-text2: #88afca; 
+    --night-text2: #88afca;
 
     /*  --night-darkest: #050d22;
     --night-dark: #081029;
@@ -290,6 +290,7 @@ body {
     padding: 0;
     width: 60px;
     height: 60px;
+    right: 0;
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -388,7 +389,7 @@ body {
 /*START OF HOME PAGE STYLES*/
 .container-home {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1.1fr 2fr;
     gap: 20px;
     padding: 20px 0;
     width: calc(100% - 40px);
@@ -409,11 +410,9 @@ body {
 .dark-mode .profile {
     background-color: var(--night-dark);
     border: 1px solid var(--night-light);
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
 }
 
 .profile-header {
-    margin-bottom: 15px;
     padding: 15px;
     background: var(--light-aqua);
     border-radius: 4px;
@@ -449,7 +448,7 @@ body {
 .profile-info h3 {
     margin: 0;
     color: var(--darkest-blue);
-    font-size: 1.3em;
+    font-size: 1.4em;
     transition: all 0.3s ease;
 }
 
@@ -458,7 +457,7 @@ body {
 }
 
 .profile-info h5 {
-    margin: 5px 0 0 0;
+    margin-top: 5px;
     color: var(--dark-blue);
     font-size: 0.9em;
     font-weight: normal;
@@ -471,13 +470,14 @@ body {
 
 .info-table {
     width: 100%;
+    margin-top: 15px;
     border-collapse: collapse;
     font-size: 15px;
 }
 
 .info-table th,
 .info-table td {
-    padding: 8px;
+    padding: 7px 10px;
     border: 1px solid var(--medium-blue);
     transition: all 0.3s ease;
 }
@@ -532,7 +532,7 @@ body {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
-    gap: 23px;
+    gap: 20px;
     height: 100%;
 }
 
@@ -558,7 +558,6 @@ body {
 .dark-mode .summary {
     background-color: var(--night-dark);
     border: 1px solid var(--night-light);
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
 }
 
 .summary-header {
@@ -579,7 +578,7 @@ body {
 }
 
 .summary-content {
-    padding: 17px;
+    padding: 20px;
     flex: 1;
     overflow: hidden;
     height: calc(100% - 45px);
@@ -630,8 +629,6 @@ th {
 
 .bill-total {
     border-bottom: 2px solid var(--medium-blue);
-    padding-bottom: 10px;
-    margin-bottom: 10px;
 }
 
 .dark-mode .bill-total {
@@ -692,7 +689,7 @@ th {
 .payment-schedule {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    gap: 10px;
 }
 
 .payment-item {
@@ -934,129 +931,6 @@ th {
     }
 }
 
-@media (max-width: 1440px) {
-    .profile-info h3 {
-        font-size: 1.4rem;
-    }
-
-    .profile-info h5 {
-        font-size: 0.9rem;
-    }
-
-    .grades-table-home th,
-    .grades-table-home td {
-        padding: 7px 8px;
-        font-size: 15px;
-    }
-
-    .info-table th,
-    .info-table td {
-        padding: 7px 6px;
-        font-size: 15px;
-    }
-
-    .bill-amount {
-        font-size: 1.6em;
-    }
-
-    .status-amount {
-        font-size: 1.1rem;
-    }
-
-    .bill-total {
-        margin: 0;
-        padding-bottom: 5px;
-    }
-
-    .payment-title {
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 1024px) {
-    .container-home {
-        grid-template-columns: 1fr 1.4fr;
-        gap: 20px;
-    }
-
-    .summary-content {
-        padding: 15px;
-    }
-
-    .profile img {
-        width: 65px;
-        height: 65px;
-    }
-
-    .grades-table-home th,
-    .grades-table-home td {
-        padding: 7px 8px;
-        font-size: 13.2px;
-    }
-
-    .info-table th,
-    .info-table td {
-        padding: 7px 6px;
-        font-size: 13.2px;
-    }
-
-    .profile-header {
-        padding: 10px;
-    }
-
-    .profile-info h3 {
-        font-size: 1.3rem;
-    }
-
-    .profile-info h5 {
-        font-size: 0.8rem;
-    }
-
-    .bill-summary {
-        gap: 10px;
-    }
-
-    .bill-total {
-        padding-bottom: 5px;
-    }
-
-    .bill-label {
-        font-size: 0.8rem;
-    }
-
-    .bill-amount {
-        font-size: 1.4rem;
-    }
-
-    .payment-title {
-        font-size: 0.7rem;
-    }
-
-    .payment-amount {
-        font-size: 0.9rem;
-    }
-
-    .status-amount {
-        font-size: 1rem;
-    }
-
-    .welcome-content {
-        padding: 2rem;
-        max-width: 90%;
-    }
-
-    #welcome-section h1 {
-        font-size: 2rem;
-    }
-
-    #welcome-section p {
-        font-size: 1rem;
-    }
-
-    .scan-icon {
-        font-size: 4rem;
-    }
-}
 
 /*END OF HOME PAGE STYLES*/
 
@@ -1066,7 +940,7 @@ th {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
     height: calc(100vh - 70 - 40);
 }
 
@@ -1093,9 +967,9 @@ th {
 
 .semester-info {
     background: var(--white);
-    width: 400px;
+    width: auto;
     text-align: center;
-    padding: 10px 0;
+    padding: 10px 25pxpx;
     border-radius: 4px;
     font-size: 15px;
     border: 1px solid var(--medium-blue);
@@ -1110,7 +984,6 @@ th {
 
 .semester-info span:first-child {
     color: var(--darkest-blue);
-    font-size: 1.1em;
     margin-right: 15px;
     padding-right: 15px;
     border-right: 2px solid var(--medium-blue);
@@ -1144,41 +1017,13 @@ th {
 }
 
 .grades-content {
-    padding: 20px 17px;
+    padding: 20px;
     flex: 1;
+    border-radius: 4px;
 }
 
 .dark-mode .grades-content {
     background: var(--night-darkest);
-}
-
-.sidebar-btn {
-    background: linear-gradient(to bottom,
-            var(--medium-blue),
-            var(--dark-blue));
-    color: var(--white);
-    border: none;
-    border-radius: 4px;
-    width: 42px;
-    height: 42px;
-    font-size: 1.1em;
-    box-shadow: 0 2px 4px rgba(30, 84, 112, 0.1);
-    transition: all 0.3s ease;
-}
-
-.dark-mode .sidebar-btn {
-    background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.sidebar-btn:hover {
-    background: linear-gradient(to bottom,
-            var(--dark-blue),
-            var(--darkest-blue));
-}
-
-.dark-mode .sidebar-btn:hover {
-    background: linear-gradient(to bottom, var(--night-light), var(--night-medium));
 }
 
 .semester-btn {
@@ -1214,7 +1059,6 @@ th {
 .grades-table-grades {
     width: 100%;
     border-collapse: collapse;
-    border-radius: 4px;
     overflow: hidden;
     border: none;
     transition: all 0.3s ease;
@@ -1222,7 +1066,7 @@ th {
 
 .grades-table-grades th,
 .grades-table-grades td {
-    padding: 11px 8px;
+    padding: 8px 10px;
     text-align: left;
     border: 1px solid var(--medium-blue);
     font-size: 15px;
@@ -1472,7 +1316,7 @@ th {
     color: var(--night-highlight);
 }
 
-@media screen and (max-width: 1440px) {
+@media (min-width: 1367px) and (max-width: 1440px) {
     .sidebar {
         height: 506px;
     }
@@ -1522,10 +1366,10 @@ th {
 
 /*START OF BILLS PAGE STYLES*/
 .container-bills {
-    height: calc(100vh - 70);
+    min-height: calc(100vh - 70px);
     padding: 20px;
     display: grid;
-    grid-template-columns: 0.8fr 0.8fr 2fr;
+    grid-template-columns: 1fr 1fr 2fr;
     gap: 20px;
     overflow: hidden;
 }
@@ -1533,7 +1377,7 @@ th {
 .left-section {
     grid-column: 1 / 3;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr auto;
     gap: 20px;
 }
 
@@ -1550,9 +1394,8 @@ th {
 .dark-mode .balance-section,
 .dark-mode .history-section,
 .dark-mode .right-section {
-    background: var(--night-dark);
+    background: var(--night-darkest);
     border: 1px solid var(--night-light);
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
 }
 
 .section-header {
@@ -1573,14 +1416,11 @@ th {
 }
 
 .section-content {
-    padding: 17px;
-    height: calc(100% - 50px);
-    overflow: hidden;
+    padding: 20px;
     transition: all 0.3s ease;
 }
 
 .dark-mode .section-content {
-    background: var(--night-darkest);
     color: var(--night-text);
 }
 
@@ -1597,7 +1437,7 @@ th {
 }
 
 .balance-details h4 {
-    margin: 15px;
+    padding: 15px;
     color: var(--dark-blue);
     transition: all 0.3s ease;
 }
@@ -1619,7 +1459,7 @@ th {
 
 .balance-amount {
     font-size: 1.6rem;
-    margin: 6px 0;
+    margin-top: 6px;
     font-weight: bold;
     color: var(--dark-blue);
     transition: all 0.3s ease;
@@ -1705,7 +1545,7 @@ th {
 }
 
 .fee-table-container {
-    margin-bottom: 17px;
+    margin-bottom: 20px;
 }
 
 .fee-details {
@@ -1719,7 +1559,7 @@ th {
 
 .fee-details th,
 .fee-details td {
-    padding: 8px;
+    padding: 8px 10px;
     border: 1px solid var(--medium-blue);
     transition: all 0.3s ease;
 }
@@ -1769,6 +1609,10 @@ th {
     font-weight: 600 !important;
 }
 
+.fee-details tr:first-child th {
+    padding: 8.7px 10px;
+}
+
 .total-row th,
 .total-row td {
     background: var(--light-blue) !important;
@@ -1784,14 +1628,10 @@ th {
     font-weight: bold;
 }
 
-@media (max-width: 1440px) {
+
+@media (min-width: 1367px) and (max-width: 1440px) {
     .container-bills {
         grid-template-columns: 0.9fr 0.9fr 1.8fr;
-    }
-
-    .section-content {
-        padding: 17px;
-        height: calc(100% - 70px);
     }
 
     .fee-details th,
@@ -1821,7 +1661,6 @@ th {
 
     .section-content {
         padding: 15px;
-        height: calc(100% - 75px);
     }
 
     .balance-amount {
@@ -2851,3 +2690,538 @@ input:checked+.slider:before {
 }
 
 /* END */
+
+@media (min-width: 1537px) and (max-width: 1920px) and (max-height: 1080px) {
+    .container-home {
+        min-height: calc(100vh - 130px);
+        grid-template-columns: 1.3fr 2fr;
+        gap: 25px;
+        width: calc(100% - 50px);
+        padding: 25px 0;
+        font-size: 23px;
+    }
+
+    .navbar button {
+        height: 120px;
+        font-size: 2rem;
+    }
+
+    .summary-header {
+        padding: 15px 20px;
+    }
+
+    .summary-content {
+        padding: 25px;
+    }
+
+    .profile-header {
+        padding: 19px;
+    }
+
+    .profile img {
+        height: 110px;
+        width: 110px;
+    }
+
+    .info-table {
+        margin-top: 25px;
+    }
+
+    .info-table th, .info-table td {
+        padding: 10px 15px;
+        font-size: 23px;
+    }
+
+    .summary-grades {
+        min-height: 350px;
+    }
+
+    .grades-table-home th, .grades-table-home td {
+        padding: 10px 15px;
+        font-size: 23px;
+    }
+
+    .bill-summary {
+        gap: 20px;
+    }
+    .bill-amount {
+        margin: 15px 0;
+        font-size: 1.9em;
+    }
+
+    .status-amount {
+        margin-top: 12px;
+    }
+
+    .payment-item {
+        padding: 15px 10px;
+    }
+
+    .payment-title {
+        margin-bottom: 10px;
+    }
+
+    .payment-date {
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+
+    /*GRADES (max subs 12)*/
+    .container-grades {
+        min-height: calc(100vh - 130px);
+        padding: 25px;
+        gap: 25px;
+        font-size: 23px;
+    }
+
+    .button-section {
+        padding-bottom: 25px;
+    }
+    .grades-content {
+        padding: 25px;
+    }
+
+    .semester-btn {
+        height: 51px;
+    }
+
+    .semester-info {
+        padding: 15px 25px;
+        font-size: 24.1px;
+    }
+
+    .grades-table-grades th, .grades-table-grades td {
+        padding: 12px 15px;
+        font-size: 23px;
+    }
+
+   /* BILLS */ 
+   .container-bills {
+    min-height: calc(100vh - 130px);
+    padding: 25px;
+    font-size: 23px;
+   }
+
+   .section-header {
+    padding: 15px 20px;
+   }
+
+   .section-content {
+    padding: 25px;
+   }
+
+   .left-section {
+    gap: 25px;
+   }
+.balance-card {
+    padding: 20px;
+}
+   .balance-title {
+    font-size: 1.5rem;
+   }
+   .balance-details h4 {
+    padding: 25px;  
+    font-size: 25px;
+}
+   .balance-amount {
+    font-size: 3rem;
+    margin-top: 14px;
+   }
+
+   .history-section {
+    min-height: 400px;
+   }
+   .history-table th, .history-table td {
+    padding: 10px 15px; 
+    font-size: 23px;
+   }
+
+   .fee-table-container {
+    margin-bottom: 25px;
+   }
+    .fee-details th, .fee-details td {
+        padding: 10.9px 15px
+    }
+
+    /* IDLE DISPLAY
+    .toggle-button {
+        height: 85px;
+        width: 85px;
+        
+    }
+
+    .toggle-button img {
+        height: 40px;
+        width: 40px;
+        right: 10px;
+    }
+
+    .close-button {
+        margin-left: 40px;
+        width: 65px;
+        height: 65px;
+        right: -70px;
+    } */
+}
+
+
+@media (min-width: 1368px) and (max-width: 1536px) and (max-height: 864px) {
+    .container-home {
+        min-height: calc(100vh - 100px);
+        grid-template-columns: 1.2fr 2fr;
+        font-size: 17.5px;
+    }
+
+    .navbar button {
+        height: 90px;
+        font-size: 1.3rem;
+    }
+
+    .summary-header {
+        padding: 11.5px 15px;
+    }
+
+    .profile-header {
+        padding: 15px;
+    }
+
+    .profile img {
+        height: 86px;
+        width: 86px;
+    }
+
+    .info-table tr:first-child th {
+        padding: 8.7px 10px;
+    }
+
+    .info-table th,
+    .info-table td {
+        padding: 8px 10px;
+        font-size: 17.5px;
+    }
+
+    .info-table {
+        margin-top: 20px;
+    }
+
+    .summary-grades {
+        min-height: 277px;
+    }
+
+    .grades-table-home th, .grades-table-home td {
+        font-size: 17.5px;
+    }
+
+    .bill-label {
+        font-size: 1rem;
+    }
+
+    .bill-amount {
+        margin: 10px 0;
+    }
+
+    .bill-status {
+        padding: 15px;
+    }
+
+    .bill-summary {
+        gap: 17px;
+    }
+
+    .payment-item {
+         padding: 15px 6px;
+    }
+
+    .payment-date {
+        padding-top: 11px;
+        margin-top: 9px;
+    }
+
+    /* GRADES (maximum 11 subs) */ 
+    .container-grades {
+        font-size: 17.5px;
+    }
+ .semester-info {
+    padding: 11.5px 0;
+ }
+
+ .grades-table-grades th, .grades-table-grades td {
+    font-size: 17.5px;
+ }
+
+ .grades-table-grades th:nth-child(n + 3), .grades-table-grades td:nth-child(n + 3) {
+    padding: 11.3px;
+ }
+
+    /* BILLS */
+    .container-bills {
+        min-height: calc(100vh - 100px);
+        font-size: 17.5px;
+    }
+
+    .section-header {
+        padding: 11.5px;
+    }
+
+    .balance-title {
+        font-size: 1rem;
+    }
+
+    .balance-card {
+        padding: 20px;
+    }
+
+    .balance-amount {
+        font-size: 2.3rem;
+        margin-top: 15px;
+    }
+
+    .balance-details h4 {
+        padding: 17px 20px;
+        font-size: 21px;
+    }
+
+    .fee-details th, .fee-details td {
+        padding: 8.9px 10px;
+    }
+
+    .history-section {
+        min-height: 325px;
+    }
+    .history-table th, .history-table td {
+        font-size: 17.5px;
+    }
+
+
+
+}
+
+@media (min-width: 1367px) and (max-width: 1440px) {
+    .profile-info h3 {
+        font-size: 1.4rem;
+    }
+
+    .profile-info h5 {
+        font-size: 0.9rem;
+    }
+
+    .grades-table-home th,
+    .grades-table-home td {
+        padding: 7px 8px;
+        font-size: 15px;
+    }
+
+    .info-table th,
+    .info-table td {
+        font-size: 15px;
+    }
+
+    .bill-amount {
+        font-size: 1.6em;
+    }
+
+    .status-amount {
+        font-size: 1.1rem;
+    }
+
+    .bill-total {
+        margin: 0;
+        padding-bottom: 5px;
+    }
+
+    .payment-title {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 1366px) and (max-height: 768px) {
+    .container-home {
+        min-height: calc(100vh - 90px);
+        grid-template-columns: 1.1fr 2fr;
+    }
+
+    .navbar button {
+        height: 80px;
+        font-size: 1.1rem;
+    }
+
+    .profile-header {
+        padding: 13px;
+    }
+
+    .profile-info h5 {
+        margin-top: 10px;
+    }
+
+    .info-table th,
+    .info-table td {
+        padding: 7.1px 10px;
+    }
+
+    .info-table {
+        margin-top: 20px;
+    }
+
+    .summary-grades {
+        min-height: 250px;
+    }
+
+    .bill-amount {
+        font-size: 1.7em;
+        margin: 5px 0;
+        padding-bottom: 2px;
+    }
+
+    .bill-summary {
+        gap: 15px;
+    }
+
+    .bill-total {
+        margin-bottom: 3px;
+    }
+
+    .status-amount {
+        margin-top: 5px;
+    }
+
+    .payment-date {
+        padding-top: 8px;
+    }
+
+    /* GRADES (Max 11 subs) */
+    .grades-table-grades th:nth-child(n + 3), .grades-table-grades td:nth-child(n + 3) {
+        padding: 9.9px;
+    }
+
+    /* BILLS */
+    .container-bills {
+        min-height: calc(100vh - 90px);
+    }
+
+    .balance-card {
+        padding: 15px;
+    }
+
+    .balance-amount {
+        font-size: 1.8em;
+        margin-top: 14px;
+    }
+
+    .balance-details h4 {
+        padding: 17px;
+    }
+
+    .history-section {
+        min-height: 290px;
+    }
+
+    .fee-details th, .fee-details td {
+        padding: 7.5px 10px;
+    }
+
+  
+
+}
+
+
+@media (max-width: 1366px) and (max-height: 607px) {
+   .navbar button {
+    height: 70px;
+   }
+
+   .container-home {
+    min-height: 100px;
+    grid-template-columns: 1.1fr 2fr;
+    padding: 15px 0;
+    width: calc(100% - 30px);
+    gap: 15px;
+}
+}
+
+
+
+@media (max-width: 1024px) {
+    .container-home {
+        grid-template-columns: 1fr 1.4fr;
+        gap: 20px;
+    }
+
+    .summary-content {
+        padding: 15px;
+    }
+
+    .profile img {
+        width: 65px;
+        height: 65px;
+    }
+
+    .grades-table-home th,
+    .grades-table-home td {
+        padding: 7px 8px;
+        font-size: 13.2px;
+    }
+
+    .info-table th,
+    .info-table td {
+        padding: 7px 6px;
+        font-size: 13.2px;
+    }
+
+    .profile-header {
+        padding: 10px;
+    }
+
+    .profile-info h3 {
+        font-size: 1.3rem;
+    }
+
+    .profile-info h5 {
+        font-size: 0.8rem;
+    }
+
+    .bill-summary {
+        gap: 10px;
+    }
+
+    .bill-total {
+        padding-bottom: 5px;
+    }
+
+    .bill-label {
+        font-size: 0.8rem;
+    }
+
+    .bill-amount {
+        font-size: 1.4rem;
+    }
+
+    .payment-title {
+        font-size: 0.7rem;
+    }
+
+    .payment-amount {
+        font-size: 0.9rem;
+    }
+
+    .status-amount {
+        font-size: 1rem;
+    }
+
+    .welcome-content {
+        padding: 2rem;
+        max-width: 90%;
+    }
+
+    #welcome-section h1 {
+        font-size: 2rem;
+    }
+
+    #welcome-section p {
+        font-size: 1rem;
+    }
+
+    .scan-icon {
+        font-size: 4rem;
+    }
+}
+
