@@ -65,72 +65,91 @@
             .FeeBreakdown "Miscellaneous" }} {{/* Tuition Fees */}}
             <div class="fee-table-container">
                 <table class="fee-details">
-                    <tr>
-                        <th class="fee-category" colspan="2">Tuition Fees</th>
-                    </tr>
-                    {{ range $tuitionFees }}
-                    <tr>
-                        <th>{{ .Name }}</th>
-                        <td>₱{{ .Amount }}</td>
-                    </tr>
-                    {{ end }}
+                    <tbody>
+                        <tr>
+                            <th class="fee-category" colspan="2">Tuition Fees</th>
+                        </tr>
+                        {{ range $tuitionFees }}
+                        <tr>
+                            <th>{{ .Name }}</th>
+                            <td>₱{{ .Amount }}</td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
                 </table>
             </div>
 
             {{/* Miscellaneous Fees */}}
             <div class="fee-table-container">
                 <table class="fee-details">
-                    <tr>
-                        <th class="fee-category" colspan="2">
-                            Miscellaneous Fees
-                        </th>
-                    </tr>
-                    {{ range $miscFees }}
-                    <tr>
-                        <th>{{ .Name }}</th>
-                        <td>₱{{ .Amount }}</td>
-                    </tr>
-                    {{ end }}
-                    <tr class="total-row">
-                        <th>Total Fee Amount</th>
-                        <td>₱{{.Bills.TotalFeeAmount}}</td>
-                    </tr>
-                    {{/* Display Discounts */}} {{ range .Discounts }}
-                    <tr>
-                        <th>
-                            {{ .Name }}{{ if .IsPercentage }} ({{ .Value }}%){{
-                            end }}
-                        </th>
-                        <td>-₱{{ .AppliedAmount }}</td>
-                    </tr>
-                    {{ end }}
-                    <!-- <tr class="total-row">
+                    <tbody>
+                        <tr>
+                            <th class="fee-category" colspan="2">
+                                Miscellaneous Fees
+                            </th>
+                        </tr>
+                        {{ range $miscFees }}
+                        <tr>
+                            <th>{{ .Name }}</th>
+                            <td>₱{{ .Amount }}</td>
+                        </tr>
+                        {{ end }}
+                        <tr class="total-row">
+                            <th>Total Fee Amount</th>
+                            <td>₱{{.Bills.TotalFeeAmount}}</td>
+                        </tr>
+                        {{/* Display Discounts */}} {{ range .Discounts }}
+                        <tr>
+                            <th>
+                                {{ .Name }}{{ if .IsPercentage }} ({{ .Value }}%){{
+                                end }}
+                            </th>
+                            <td>-₱{{ .AppliedAmount }}</td>
+                        </tr>
+                        {{ end }}
+                        <!-- <tr class="total-row">
                         <th>Total Amount</th>
                         <td>₱{{.Bills.NetAssessmentAmount}}</td>
-                    </tr> -->
-                    <tr>
-                        <th>Full Payment (paid before exam)</th>
-                        <td>₱{{.Bills.FullPmtIfB4Prelim}}</td>
-                    </tr>
-                    <tr>
-                        <th>Per Exam</th>
-                        <td>₱{{.Bills.PerExamFee}}</td>
-                    </tr>
+                        </tr> -->
+                        <tr>
+                            <th>Full Payment (paid before exam)</th>
+                            <td>₱{{.Bills.FullPmtIfB4Prelim}}</td>
+                        </tr>
+                        <tr>
+                            <th>Per Exam</th>
+                            <td>₱{{.Bills.PerExamFee}}</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
 
             <div class="payment-info">
                 <table class="fee-details">
-                    <tr>
-                        <th>Initial Payment</th>
-                        <td>₱{{.Bills.InitialPayment}}</td>
-                    </tr>
-                    <tr class="total-row">
-                        <th>Remaining Balance</th>
-                        <td>₱{{.Bills.RemainingBalance}}</td>
-                    </tr>
+                    <tbody>
+                        <tr>
+                            <th>Initial Payment</th>
+                            <td>₱{{.Bills.InitialPayment}}</td>
+                        </tr>
+                        <tr class="total-row">
+                            <th>Remaining Balance</th>
+                            <td>₱{{.Bills.RemainingBalance}}</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const historyTable = document.querySelector('.history-table tbody');
+        if (historyTable) {
+            // ADD THE FUTURE PAYMENTSROW
+            const msgRow = document.createElement('tr');
+            msgRow.className = 'future-payments-message';
+            msgRow.innerHTML = '<td colspan="3" class="future-payments-text">Future payment history will appear here</td>';
+            historyTable.appendChild(msgRow);
+        }
+    })();
+</script>

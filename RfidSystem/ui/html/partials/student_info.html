@@ -198,3 +198,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function() {
+        const gradesTable = document.querySelector('.grades-table-home tbody');
+        if (gradesTable) {
+                const msgRow = document.createElement('tr');
+                // ADD THE FUTURE GRADES ROW
+                msgRow.className = 'future-grades-message';
+                msgRow.innerHTML = '<td colspan="3" class="future-grades-text">Future grades will appear here</td>';
+                gradesTable.appendChild(msgRow);
+        }
+    })();
+</script>

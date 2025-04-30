@@ -33,10 +33,11 @@
     --night-light: #1a6bab;
     --night-accent: #0c3958;
     --night-highlight: #3d8cbe;
-    --night-text: #e0f0ff;
+    --night-text: #b4c0cc;
     --night-border: #154d79;
     --night-display: #5aa2de;
-    --night-text2: #a6d5ff;
+    --night-text2: #88afca;
+    ;
 
 
     /* PALETTE 5 */
@@ -138,7 +139,6 @@ body {
     font-size: 1.1em;
     line-height: 70px;
     height: 70px;
-    transition: all 0.3s ease;
 }
 
 .dark-mode .navbar button {
@@ -683,25 +683,44 @@ th {
     justify-content: center;
     height: 100%;
     padding: 3rem;
+    height: 100vh;
+}
+
+.dark-mode .error-container {
+    background-color: var(--night-accent);
 }
 
 .error-code {
     font-size: 8rem;
     font-weight: bold;
-    color: #d32f2f;
+    color: var(--darkest-blue);
     margin-bottom: 1rem;
+}
+
+.dark-mode .error-code {
+    color: var(--night-highlight);
 }
 
 .error-message {
     font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--dark-blue);
     text-align: center;
     margin-bottom: 2rem;
+}
+
+.dark-mode .error-message {
+    color: var(--night-display);
 }
 
 .error-details {
     font-size: 1rem;
     color: #666;
     text-align: center;
+}
+
+.dark-mode .error-details {
+    color: var(--night-text);
 }
 
 /* Welcome section styling */
@@ -741,12 +760,6 @@ th {
     font-size: 1.2rem;
     margin-bottom: 2rem;
     line-height: 1.6;
-}
-
-.scan-icon {
-    font-size: 5rem;
-    color: var(--aqua);
-    margin-bottom: 1rem;
 }
 
 /* Message styles */
@@ -855,7 +868,7 @@ th {
     background: var(--white);
     width: auto;
     text-align: center;
-    padding: 10px 25pxpx;
+    padding: 10px 25px;
     border-radius: 4px;
     font-size: 15px;
     border: 1px solid var(--medium-blue);
@@ -923,6 +936,11 @@ th {
     font-size: 1.05em;
     letter-spacing: 0.3px;
     transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.semester-btn:hover:not(.active) {
+    background: var(--light-blue);
 }
 
 .dark-mode .semester-btn {
@@ -931,15 +949,21 @@ th {
     border: 1px solid var(--night-border);
 }
 
+.dark-mode .semester-btn:hover:not(.active) {
+    background: var(--night-medium);
+}
+
 .semester-btn.active {
     background: linear-gradient(to bottom, var(--medium-blue), var(--dark-blue));
     color: var(--white);
     border: none;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dark-mode .semester-btn.active {
     background: linear-gradient(to bottom, var(--night-medium), var(--night-dark));
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .grades-table-grades {
@@ -952,7 +976,7 @@ th {
 
 .grades-table-grades th,
 .grades-table-grades td {
-    padding: 8px 10px;
+    padding: 8px 15px;
     text-align: left;
     border: 1px solid var(--medium-blue);
     font-size: 15px;
@@ -1023,7 +1047,7 @@ th {
     background: var(--light-blue) !important;
     color: var(--darkest-blue) !important;
     font-weight: bold !important;
-    padding: 15px !important;
+    padding: 15px;
     transition: all 0.3s ease;
 }
 
@@ -1357,7 +1381,7 @@ th {
 
 .history-table {
     width: 100%;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
     font-size: 15px;
     transition: all 0.3s ease;
@@ -1370,7 +1394,7 @@ th {
 .history-table th,
 .history-table td {
     padding: 8px 12px;
-    border: 1px solid var(--light-blue);
+    border: 1px solid var(--medium-blue);
     height: 18px;
     transition: all 0.3s ease;
 }
@@ -1434,7 +1458,8 @@ th {
     margin-bottom: 20px;
 }
 
-.fee-details {
+.fee-details,
+.payment-details {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -1444,18 +1469,23 @@ th {
 }
 
 .fee-details th,
-.fee-details td {
+.fee-details td,
+.payment-details th,
+.payment-details td {
     padding: 8px 10px;
     border: 1px solid var(--medium-blue);
     transition: all 0.3s ease;
 }
 
 .dark-mode .fee-details th,
-.dark-mode .fee-details td {
+.dark-mode .fee-details td,
+.dark-mde .payment-details th,
+.dark-mode .payment-details td {
     border: 1px solid var(--night-border);
 }
 
-.fee-details th {
+.fee-details th,
+.payment-details th {
     background: var(--light-aqua);
     color: var(--darkest-blue);
     font-weight: 600;
@@ -1464,20 +1494,23 @@ th {
     transition: all 0.3s ease;
 }
 
-.dark-mode .fee-details th {
+.dark-mode .fee-details th,
+.dark-mde .payment-details th {
     background: var(--night-medium);
     color: var(--night-highlight);
     font-weight: bold;
 }
 
-.fee-details td {
+.fee-details td,
+.payment-details td {
     text-align: right;
     font-weight: 500;
     background: var(--white);
     transition: all 0.3s ease;
 }
 
-.dark-mode .fee-details td {
+.dark-mode .fee-details td,
+.dark-mde .payment-details td {
     background: var(--night-darkest);
     color: var(--night-text);
 }
@@ -1495,7 +1528,8 @@ th {
     font-weight: 600 !important;
 }
 
-.fee-details tr:first-child th {
+.fee-details tr:first-child th,
+.payment-details tr:first-child th {
     padding: 8.7px 10px;
 }
 
@@ -1521,7 +1555,9 @@ th {
     }
 
     .fee-details th,
-    .fee-details td {
+    .fee-details td,
+    .payment-details th,
+    .payment-details td {
         padding: 9.2px 10px;
         font-size: 15px;
     }
@@ -1554,7 +1590,9 @@ th {
     }
 
     .fee-details th,
-    .fee-details td {
+    .fee-details td,
+    .payment-details th,
+    .payment-details td {
         padding: 8.5px 8px;
         font-size: 13.2px;
     }
@@ -1661,6 +1699,30 @@ th {
     padding: 20px;
     color: #666;
     font-style: italic;
+}
+
+.future-grades-text {
+    text-align: center;
+    padding: 15px;
+    color: var(--night-text);
+    font-style: italic;
+    border-top: 1px dashed #ccc;
+    font-size: 0.9em;
+}
+
+.future-payments-text {
+    text-align: center;
+    padding: 15px;
+    color: #999;
+    font-style: italic;
+    border-top: 1px dashed #ccc;
+    font-size: 0.9em;
+}
+
+.dark-mode .future-grades-text,
+.dark-mode .future-payments-text {
+    color: #777;
+    border-top: 1px dashed #444;
 }
 
 /* Idle Timeout Modal Styles */
@@ -2217,7 +2279,6 @@ input:checked+.slider:before {
     display: flex;
     justify-content: space-around;
     gap: 16px;
-    margin-bottom: 32px;
 }
 
 .theme-option {
@@ -2577,9 +2638,17 @@ input:checked+.slider:before {
 
 /* END */
 
+/* .grades-section {
+    counter-reset: grades-rows;
+}
+
+.grades-table-grades tbody tr:not(.gwa-row) {
+    counter-increment: grades-rows;
+} */
+
 @media (min-width: 1537px) and (max-width: 1920px) and (max-height: 1080px) {
     .container-home {
-        min-height: calc(100vh - 130px);
+        min-height: calc(100vh - 110px);
         grid-template-columns: 1.3fr 2fr;
         gap: 25px;
         width: calc(100% - 50px);
@@ -2588,8 +2657,20 @@ input:checked+.slider:before {
     }
 
     .navbar button {
-        height: 120px;
-        font-size: 2rem;
+        height: 100px;
+        font-size: 1.5rem;
+    }
+
+    .error-code {
+        font-size: 9.5rem;
+    }
+
+    .error-message {
+        font-size: 2.5rem;
+    }
+
+    .error-details {
+        font-size: 1.5rem;
     }
 
     .summary-header {
@@ -2613,7 +2694,8 @@ input:checked+.slider:before {
         margin-top: 25px;
     }
 
-    .info-table th, .info-table td {
+    .info-table th,
+    .info-table td {
         padding: 10px 15px;
         font-size: 23px;
     }
@@ -2622,14 +2704,17 @@ input:checked+.slider:before {
         min-height: 350px;
     }
 
-    .grades-table-home th, .grades-table-home td {
+    .grades-table-home th,
+    .grades-table-home td {
         padding: 10px 15px;
         font-size: 23px;
     }
 
+
     .bill-summary {
         gap: 20px;
     }
+
     .bill-amount {
         margin: 15px 0;
         font-size: 1.9em;
@@ -2663,9 +2748,27 @@ input:checked+.slider:before {
     .button-section {
         padding-bottom: 25px;
     }
+
     .grades-content {
         padding: 25px;
     }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(2):last-child) .future-grades-message td {
+        padding: 58px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(3):last-child) .future-grades-message td {
+        padding: 34px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(4):last-child) .future-grades-message td {
+        padding: 10px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(5):last-child) .future-grades-message td {
+        display: none;
+    }
+
 
     .semester-btn {
         height: 51px;
@@ -2676,78 +2779,213 @@ input:checked+.slider:before {
         font-size: 24.1px;
     }
 
-    .grades-table-grades th, .grades-table-grades td {
+    .grades-table-grades th,
+    .grades-table-grades td {
+        font-size: 23px;
+    }
+
+    .grades-table-grades th {
+        padding: 21px;
+    }
+
+    .gwa-row td {
+        padding: 21px;
+    }
+
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(7):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 37.2px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(8):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 29.9px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(9):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 24.4px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(10):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 20.2px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(11):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 16.7px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(12):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 13.9px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(13):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 11.6px;
+    }
+
+    /* BILLS */
+    .container-bills {
+        min-height: calc(100vh - 110px);
+        padding: 25px;
+        font-size: 23px;
+    }
+
+    .section-header {
+        padding: 15px 20px;
+    }
+
+    .section-content {
+        padding: 25px;
+    }
+
+    .left-section {
+        gap: 25px;
+    }
+
+    .balance-card {
+        padding: 20px;
+    }
+
+    .balance-title {
+        font-size: 1.5rem;
+    }
+
+    .balance-details h4 {
+        padding: 25px;
+        font-size: 25px;
+    }
+
+    .balance-amount {
+        font-size: 3rem;
+        margin-top: 14px;
+    }
+
+    .fee-table-container {
+        margin-bottom: 25px;
+    }
+
+    .fee-details th,
+    .fee-details td,
+    .payment-details th,
+    .payment-details td {
+        padding: 10.9px 15px
+    }
+
+    .history-table th,
+    .history-table td {
         padding: 12px 15px;
         font-size: 23px;
     }
 
-   /* BILLS */ 
-   .container-bills {
-    min-height: calc(100vh - 130px);
-    padding: 25px;
-    font-size: 23px;
-   }
-
-   .section-header {
-    padding: 15px 20px;
-   }
-
-   .section-content {
-    padding: 25px;
-   }
-
-   .left-section {
-    gap: 25px;
-   }
-.balance-card {
-    padding: 20px;
-}
-   .balance-title {
-    font-size: 1.5rem;
-   }
-   .balance-details h4 {
-    padding: 25px;  
-    font-size: 25px;
-}
-   .balance-amount {
-    font-size: 3rem;
-    margin-top: 14px;
-   }
-
-   .history-section {
-    min-height: 400px;
-   }
-   .history-table th, .history-table td {
-    padding: 10px 15px; 
-    font-size: 23px;
-   }
-
-   .fee-table-container {
-    margin-bottom: 25px;
-   }
-    .fee-details th, .fee-details td {
-        padding: 10.9px 15px
+    .history-section {
+        min-height: 422px;
     }
 
-    /* IDLE DISPLAY
-    .toggle-button {
-        height: 85px;
-        width: 85px;
-        
+    .history-section:has(.history-table tbody tr:nth-child(2):last-child) .future-payments-message td {
+        padding: 90px;
     }
 
-    .toggle-button img {
-        height: 40px;
-        width: 40px;
-        right: 10px;
+    .history-section:has(.history-table tbody tr:nth-child(3):last-child) .future-payments-message td {
+        padding: 64px;
     }
 
-    .close-button {
-        margin-left: 40px;
-        width: 65px;
-        height: 65px;
-        right: -70px;
-    } */
+    .history-section:has(.history-table tbody tr:nth-child(4):last-child) .future-payments-message td {
+        padding: 38px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(5):last-child) .future-payments-message td {
+        padding: 11px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(6):last-child) .future-payments-message {
+        display: none;
+    }
+
+
+
+
+
+
+
+    .right-section:has(.fee-details tbody tr:nth-child(10):last-child) .fee-details td {
+        padding: 90px;
+    }
+
+
+
+
+
+    /* IDLE DISPLAY*/
+    .theme-toggle {
+        padding: 8px;
+    }
+
+    .toggle-switch {
+        width: 100px;
+        height: 50px;
+
+    }
+
+    .slider:before {
+        height: 42px;
+        width: 42px;
+    }
+
+    .sun-icon,
+    .moon-icon {
+        font-size: 25px;
+    }
+
+    .qr-code-container {
+        padding: 55px;
+    }
+
+    .scan-icon {
+        font-size: 250px;
+    }
+
+    .qr-text {
+        font-size: 2.3rem;
+
+    }
+
+    .qr-subtext {
+        font-size: 1.3rem;
+        max-width: 330px;
+    }
+
+    .logo-container img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .time {
+        font-size: 7.5rem;
+    }
+
+    .date {
+        font-size: 2.3rem;
+    }
+
+    .weather-container {
+        padding: 30px 35px;
+    }
+
+    .temperature {
+        font-size: 2.9rem;
+    }
+
+    .weather-icon {
+        font-size: 3.5rem;
+    }
+
+    .weather-condition {
+        font-size: 1.6rem;
+    }
+
+    .location {
+        font-size: 1.5rem;
+    }
+
+
 }
 
 
@@ -2762,6 +3000,20 @@ input:checked+.slider:before {
         height: 90px;
         font-size: 1.3rem;
     }
+
+    .error-code {
+        font-size: 8.5rem;
+    }
+
+    .error-message {
+        font-size: 2rem;
+    }
+
+    .error-details {
+        font-size: 1.3rem;
+    }
+
+
 
     .summary-header {
         padding: 11.5px 15px;
@@ -2794,9 +3046,28 @@ input:checked+.slider:before {
         min-height: 277px;
     }
 
-    .grades-table-home th, .grades-table-home td {
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(2):last-child) .future-grades-message td {
+        padding: 45px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(3):last-child) .future-grades-message td {
+        padding: 27px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(4):last-child) .future-grades-message td {
+        padding: 8px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(5):last-child) .future-grades-message td {
+        display: none;
+    }
+
+    .grades-table-home th,
+    .grades-table-home td {
         font-size: 17.5px;
     }
+
+
 
     .bill-label {
         font-size: 1rem;
@@ -2815,7 +3086,7 @@ input:checked+.slider:before {
     }
 
     .payment-item {
-         padding: 15px 6px;
+        padding: 15px 6px;
     }
 
     .payment-date {
@@ -2823,21 +3094,52 @@ input:checked+.slider:before {
         margin-top: 9px;
     }
 
-    /* GRADES (maximum 11 subs) */ 
+    /* GRADES (maximum 11 subs) */
     .container-grades {
         font-size: 17.5px;
     }
- .semester-info {
-    padding: 11.5px 0;
- }
 
- .grades-table-grades th, .grades-table-grades td {
-    font-size: 17.5px;
- }
+    .semester-info {
+        padding: 11.5px 25px;
+    }
 
- .grades-table-grades th:nth-child(n + 3), .grades-table-grades td:nth-child(n + 3) {
-    padding: 11.3px;
- }
+    .grades-table-grades th,
+    .grades-table-grades td {
+        font-size: 17.5px;
+    }
+
+    .grades-table-grades th:nth-child(n + 3),
+    .grades-table-grades td:nth-child(n + 3) {
+        padding: 11.3px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(7):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 30.1px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(8):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 24.2px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(9):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 19.9px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(10):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 16.5px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(11):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 13.6px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(12):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 11.4px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(13):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 9.6px;
+    }
 
     /* BILLS */
     .container-bills {
@@ -2867,16 +3169,113 @@ input:checked+.slider:before {
         font-size: 21px;
     }
 
-    .fee-details th, .fee-details td {
+    .fee-details th,
+    .fee-details td,
+    .payment-details th,
+    .payment-details td {
         padding: 8.9px 10px;
+    }
+
+    .history-table th,
+    .history-table td {
+        font-size: 17.5px;
+        padding: 8.5px 12px;
     }
 
     .history-section {
         min-height: 325px;
     }
-    .history-table th, .history-table td {
-        font-size: 17.5px;
+
+    .history-section:has(.history-table tbody tr:nth-child(2):last-child) .future-payments-message td {
+        padding: 70px;
     }
+
+    .history-section:has(.history-table tbody tr:nth-child(3):last-child) .future-payments-message td {
+        padding: 51px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(4):last-child) .future-payments-message td {
+        padding: 32px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(5):last-child) .future-payments-message td {
+        padding: 13px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(6):last-child) .future-payments-message {
+        display: none;
+    }
+
+
+
+    /* IDLE DISPLAY*/
+    .theme-toggle {
+        padding: 8px;
+    }
+
+    .toggle-switch {
+        width: 80px;
+        height: 40px;
+
+    }
+
+    .slider:before {
+        height: 32px;
+        width: 32px;
+    }
+
+    .sun-icon,
+    .moon-icon {
+        font-size: 20px;
+    }
+
+    .qr-code-container {
+        padding: 40px;
+    }
+
+    .scan-icon {
+        font-size: 190px;
+    }
+
+    .qr-text {
+        font-size: 1.8rem;
+    }
+
+    .qr-subtext {
+        font-size: 1rem;
+        max-width: 290px;
+        margin-top: 15px;
+    }
+
+    .logo-container img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .time {
+        font-size: 5.8rem;
+    }
+
+    .date {
+        font-size: 1.8rem;
+    }
+
+    .weather-icon {
+        font-size: 2.7rem;
+    }
+
+    .temperature {
+        font-size: 2.3rem;
+    }
+
+    .weather-condition {
+        font-size: 1.3rem;
+    }
+
+    .location {
+        font-size: 1.2rem;
+    }
+
 
 
 
@@ -2952,6 +3351,23 @@ input:checked+.slider:before {
         min-height: 250px;
     }
 
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(2):last-child) .future-grades-message td {
+        padding: 42px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(3):last-child) .future-grades-message td {
+        padding: 24px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(4):last-child) .future-grades-message td {
+        padding: 8px;
+    }
+
+    .summary-grades:has(.grades-table-home tbody tr:nth-child(5):last-child) .future-grades-message td {
+        display: none;
+    }
+
+
     .bill-amount {
         font-size: 1.7em;
         margin: 5px 0;
@@ -2975,8 +3391,46 @@ input:checked+.slider:before {
     }
 
     /* GRADES (Max 11 subs) */
-    .grades-table-grades th:nth-child(n + 3), .grades-table-grades td:nth-child(n + 3) {
+    .container-grades {
+        min-height: calc(100vh - 90px);
+        gap: 21px;
+    }
+
+    .grades-table-grades th:nth-child(n + 3),
+    .grades-table-grades td:nth-child(n + 3) {
         padding: 9.9px;
+    }
+
+    .button-section {
+        padding-bottom: 21px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(7):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 25.5px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(8):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 20.6px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(9):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 16.7px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(10):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 14px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(11):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 11.7px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(12):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 9.8px;
+    }
+
+    .grades-section:has(.grades-table-grades tbody tr:nth-child(13):last-child) .grades-table-grades td:nth-child(n + 3) {
+        padding: 8.2px;
     }
 
     /* BILLS */
@@ -2997,31 +3451,73 @@ input:checked+.slider:before {
         padding: 17px;
     }
 
+    .fee-details th,
+    .fee-details td,
+    .payment-details th,
+    .payment-details td {
+        padding: 7.5px 10px;
+    }
+
+
+
+
+    .history-table th,
+    .history-table td {
+        padding: 8.4px 12px;
+    }
+
     .history-section {
         min-height: 290px;
     }
 
-    .fee-details th, .fee-details td {
-        padding: 7.5px 10px;
+    .history-section:has(.history-table tbody tr:nth-child(2):last-child) .future-payments-message td {
+        padding: 62px;
     }
 
-  
+    .history-section:has(.history-table tbody tr:nth-child(3):last-child) .future-payments-message td {
+        padding: 44px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(4):last-child) .future-payments-message td {
+        padding: 28px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(5):last-child) .future-payments-message td {
+        padding: 11px;
+    }
+
+    .history-section:has(.history-table tbody tr:nth-child(6):last-child) .future-payments-message {
+        display: none;
+    }
+
+
+    .right-section:has(.fee-details:nth-of-type(1) tbody tr:nth-child(3)):has(.fee-details:nth-of-type(2) tbody tr:nth-child(9)):has(.fee-details:nth-of-type(3) tbody tr:nth-child(2)) .fee-details td,
+    .right-section:has(.fee-details:nth-of-type(1) tbody tr:nth-child(2)):has(.fee-details:nth-of-type(2) tbody tr:nth-child(9)):has(.fee-details:nth-of-type(3) tbody tr:nth-child(2)) .fee-details td,
+    .right-section:has(.fee-details:nth-of-type(1) tbody tr:nth-child(2)):has(.fee-details:nth-of-type(2) tbody tr:nth-child(8)):has(.fee-details:nth-of-type(3) tbody tr:nth-child(2)) .fee-details td,
+    .right-section:has(.fee-details:nth-of-type(1) tbody tr:nth-child(3)):has(.fee-details:nth-of-type(2) tbody tr:nth-child(8)):has(.fee-details:nth-of-type(3) tbody tr:nth-child(2)) .fee-details td,
+    .right-section:has(.fee-details:nth-of-type(1) tbody tr:nth-child(1)):has(.fee-details:nth-of-type(2) tbody tr:nth-child(8)):has(.fee-details:nth-of-type(3) tbody tr:nth-child(2)) .fee-details td,
+    .right-section:has(.fee-details:nth-of-type(1) tbody tr:nth-child(1)):has(.fee-details:nth-of-type(2) tbody tr:nth-child(8)):has(.fee-details:nth-of-type(3) tbody tr:nth-child(2)) .fee-details td {
+        padding: 20px;
+    }
+
 
 }
 
 
 @media (max-width: 1366px) and (max-height: 607px) {
-   .navbar button {
-    height: 70px;
-   }
+    .navbar button {
+        height: 70px;
+    }
 
-   .container-home {
-    min-height: 100px;
-    grid-template-columns: 1.1fr 2fr;
-    padding: 15px 0;
-    width: calc(100% - 30px);
-    gap: 15px;
-}
+    .container-home {
+        min-height: 100px;
+        grid-template-columns: 1.1fr 2fr;
+        padding: 15px 0;
+        width: calc(100% - 30px);
+        gap: 15px;
+    }
+
+
 }
 
 

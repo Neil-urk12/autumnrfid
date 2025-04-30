@@ -24,3 +24,26 @@
         </div>
     </div>
 </div>
+
+<script>
+// SEMESTER ACTIVE BTN
+document.addEventListener('DOMContentLoaded', function() {
+    const setupSemesterButtons = function() {
+        const semesterButtons = document.querySelectorAll('.semester-btn');
+        
+        semesterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                semesterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+    };
+    
+    setupSemesterButtons();
+    document.body.addEventListener('htmx:afterSwap', function() {
+        setupSemesterButtons();
+    });
+}); 
+</script>
