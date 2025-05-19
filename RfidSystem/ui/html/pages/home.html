@@ -684,6 +684,7 @@
             let currentStudentId = '';
 
             document.body.addEventListener('htmx:afterSwap', function (event) {
+                setupSemesterButtons();
                 console.log('htmx:afterSwap Event:', event);
                 console.log('htmx:afterSwap Event Detail:', event.detail);
                 if (!event || !event.detail) {
@@ -954,6 +955,23 @@
                 hasDragged = false;
                 toggleBtn.classList.remove('dragging');
             });
+
+            // SEMESTER ACTIVE BTN
+            const setupSemesterButtons = function () {
+                const semesterButtons = document.querySelectorAll('.semester-btn');
+
+                semesterButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        semesterButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    });
+                });
+            };
+
+            setupSemesterButtons();
         })
+
     </script>
     {{end}}
