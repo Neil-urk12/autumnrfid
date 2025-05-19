@@ -52,7 +52,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 		student, ok := cached.(*model.StudentInfoViewModel)
 		if ok && student != nil {
 			// Log cache hit event
-			_ = h.db.LogScanEvent(rfid, &student.Student.StudentID, "scan_cache_hit", fmt.Sprintf("Cache hit for student %s", student.Student.StudentID), "", "info")
+			_ = h.db.LogScanEvent(rfid, &student.Student.StudentID, "scan_cache_hit", fmt.Sprintf("Cache hit for student %s", *student.Student.FirstName+" "+*student.Student.LastName), "", "info")
 			htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 			GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
 			return ctx.SendString("Processing (cache)")
@@ -80,7 +80,7 @@ func (h *AppHandler) HandleCardScan(ctx *fiber.Ctx) error {
 	htmxInstruction := fmt.Sprintf(`<div hx-post="/student-partial" hx-vals='{"rfid":"%s"}' hx-trigger="load" hx-swap="innerHTML" hx-target="#main"></div>`, rfid)
 
 	GetBroadcaster().Broadcast("studentcallback", htmxInstruction)
-	_ = h.db.LogScanEvent(rfid, &student.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed info for student ID %s", student.Student.StudentID), "", "success")
+	_ = h.db.LogScanEvent(rfid, &student.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed info for student : %s", *student.Student.FirstName+" "+*student.Student.LastName), "", "success")
 	return ctx.SendString("Processing")
 }
 

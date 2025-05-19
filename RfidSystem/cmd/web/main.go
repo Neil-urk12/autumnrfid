@@ -176,6 +176,11 @@ func registerRoutes(app *fiber.App, h *handlers.AppHandler) {
 	app.Post("/student-partial", h.HandleStudentInfo)
 	app.Post("/grades", h.HandleGrades)
 	app.Post("/bills", h.HandleBills)
+
+	// Authentication routes
+	app.Get("/login", h.LoginPageHandler())
+	app.Post("/login", h.LoginPageHandler())
+	app.Post("/logout", h.LogoutHandler())
 }
 
 // handleShutdown listens for interrupt signals (like Ctrl+C) to gracefully shut down the application.

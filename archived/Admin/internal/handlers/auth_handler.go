@@ -9,8 +9,8 @@ import (
 )
 
 var users = map[string]string{
-	"admin@example.com": "admin123",
-	"user@example.com":  "user123",
+	"admin@gmail.com": "admin123",
+	"user@gmail.com":  "user123",
 }
 
 func (h *AppHandler) LoginPageHandler(templates *template.Template) http.HandlerFunc {

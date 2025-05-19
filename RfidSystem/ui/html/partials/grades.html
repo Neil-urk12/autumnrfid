@@ -1,12 +1,12 @@
 <div class="container-grades tar">
     <div class="button-section">
         <div class="button-left">
-            <button id="sem1-btn" class="semester-btn {{if eq .SelectedSemester "First Semester"}}active{{end}}"
+            <button id="sem1-btn" class="semester-btn {{if eq .SelectedSemester " First Semester"}}active{{end}}"
                 hx-get="/grades/semester/{{.Student.StudentID}}?semester=First%20Semester"
                 hx-target="#grades-table-container" hx-swap="outerHTML">
                 First Semester
             </button>
-            <button id="sem2-btn" class="semester-btn {{if eq .SelectedSemester "Second Semester"}}active{{end}}"
+            <button id="sem2-btn" class="semester-btn {{if eq .SelectedSemester " Second Semester"}}active{{end}}"
                 hx-get="/grades/semester/{{.Student.StudentID}}?semester=Second%20Semester"
                 hx-target="#grades-table-container" hx-swap="outerHTML" {{if not
                 .IsSecondSemesterAvailable}}disabled{{end}}>
@@ -14,7 +14,7 @@
             </button>
         </div>
         <div class="semester-info">
-            <span>{{if .Student}}{{.Student.FirstName}} {{.Student.LastName}} - {{.Student.Program}}{{end}}</span>
+            <span>{{if .Student}}{{.SelectedSemester}}{{end}}</span>
             <span>{{if .Term}}SY {{.Term.AcademicYear}}{{end}}</span>
         </div>
     </div>

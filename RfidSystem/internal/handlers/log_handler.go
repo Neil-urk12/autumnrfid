@@ -73,12 +73,14 @@ func (h *AppHandler) HandleLog(c *fiber.Ctx) error {
 			rate = float64(total) / duration
 		}
 	}
+	userEmail, _ := GetSessionUserEmailFiber(c)
 	if err := c.Render("pages/log", fiber.Map{
 		"Logs":      logs,
 		"TotalLogs": total,
 		"ErrorLogs": errorCount,
 		"WarnLogs":  warnCount,
 		"LogRate":   rate,
+		"UserEmail": userEmail,
 	}); err != nil {
 		log.Printf("HandleLog Render error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).
@@ -88,21 +90,55 @@ func (h *AppHandler) HandleLog(c *fiber.Ctx) error {
 }
 
 // HandleLogPartial handles HTMX requests to render the log list partial.
-// It supports filtering logs by search query and status level.
+// It supports filtering logs by search query, status level, and date range.
 func (h *AppHandler) HandleLogPartial(c *fiber.Ctx) error {
-	// Fetch with search and level filter
+	// Fetch with search, level, and date filters
 	search := strings.TrimSpace(c.Query("search", ""))
-	level  := c.Query("level", "all")
-	query := `SELECT id, timestamp, card_id, student_ID, event_type, message, details, status
-       FROM scan_logs
-       WHERE (? = '' OR message LIKE ? OR event_type LIKE ?)
-         AND (? = 'all' OR status = ?)
-       ORDER BY timestamp DESC`
-	rows, err := h.db.DB.Query(query,
-		search, "%"+search+"%", "%"+search+"%",
-		level, level)
+	level := c.Query("level", "all")
+	startDateStr := strings.TrimSpace(c.Query("startDate", ""))
+	endDateStr := strings.TrimSpace(c.Query("endDate", ""))
+
+	baseQuery := `SELECT id, timestamp, card_id, student_ID, event_type, message, details, status FROM scan_logs`
+	conditions := []string{"1 = 1"} // Start with a tautology to simplify appending AND clauses
+	args := []interface{}{}
+
+	if search != "" {
+		conditions = append(conditions, "(message LIKE ? OR event_type LIKE ? OR card_id LIKE ?)")
+		likeSearch := "%" + search + "%"
+		args = append(args, likeSearch, likeSearch, likeSearch)
+	}
+
+	if level != "all" {
+		conditions = append(conditions, "status = ?")
+		args = append(args, level)
+	}
+
+	if startDateStr != "" {
+		// Assuming YYYY-MM-DD format from date input
+		// To be safe, parse and reformat, or ensure DB handles it correctly.
+		// For simplicity, using as is, but ensure your DB/driver supports this date comparison.
+		// For simplicity, using as is, but ensure your DB/driver supports this date comparison.
+		conditions = append(conditions, "DATE(timestamp) >= ?")
+		args = append(args, startDateStr)
+	}
+
+	if endDateStr != "" {
+		// Similar to startDateStr, ensure format compatibility or parse.
+		// To include the entire end day, it's often better to use `< (endDate + 1 day)`
+		// or ensure timestamp is `YYYY-MM-DD 23:59:59`. Here, using DATE() for simplicity.
+		conditions = append(conditions, "DATE(timestamp) <= ?")
+		args = append(args, endDateStr)
+	}
+
+	finalQuery := baseQuery
+	if len(conditions) > 0 {
+		finalQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+	finalQuery += " ORDER BY timestamp DESC"
+
+	rows, err := h.db.DB.Query(finalQuery, args...)
 	if err != nil {
-		log.Printf("HandleLogPartial Query error: %v", err)
+		log.Printf("HandleLogPartial Query error: %v, Query: %s, Args: %v", err, finalQuery, args)
 		return c.Status(fiber.StatusInternalServerError).
 			SendString(fmt.Sprintf("Failed to query logs: %v", err))
 	}
@@ -242,7 +278,7 @@ func (h *AppHandler) HandleExportLogs(c *fiber.Ctx) error {
 	writer := csv.NewWriter(c)
 	defer writer.Flush()
 	// header
-	writer.Write([]string{"ID","Timestamp","CardID","StudentID","EventType","Message","Details","Status"})
+	writer.Write([]string{"ID", "Timestamp", "CardID", "StudentID", "EventType", "Message", "Details", "Status"})
 	for rows.Next() {
 		var id int
 		var ts time.Time

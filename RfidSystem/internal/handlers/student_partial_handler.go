@@ -67,7 +67,7 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 					SortOrder:               schedule.SortOrder,
 				})
 			}
-			_ = h.db.LogScanEvent(studentId, &studentInfo.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed cached info for student ID %s", studentId), "", "success")
+			_ = h.db.LogScanEvent(studentId, &studentInfo.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed cached info for student : %s", *studentInfo.Student.FirstName+" "+*studentInfo.Student.LastName), "", "success")
 			return ctx.Render("partials/student_info", fiber.Map{
 				"Student":          studentInfo.Student,
 				"YearLevel":        studentInfo.YearLevel,
@@ -92,7 +92,7 @@ func (h *AppHandler) HandleStudentInfo(ctx *fiber.Ctx) error {
 	log.Printf("Student info retrieved successfully")
 	// Store in cache
 	studentInfoCache.Set(studentId, studentInfo)
-	_ = h.db.LogScanEvent(studentId, &studentInfo.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed info for student ID %s", studentId), "", "success")
+	_ = h.db.LogScanEvent(studentId, &studentInfo.Student.StudentID, "info_displayed", fmt.Sprintf("Displayed info for student : %s", *studentInfo.Student.FirstName+" "+*studentInfo.Student.LastName), "", "success")
 
 	// Log grades summary for debugging
 	if studentInfo.GradesSummary != nil {

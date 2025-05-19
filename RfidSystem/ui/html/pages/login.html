@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <style>
+        .input-group .fa-fw {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-sky-100 to-indigo-200 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 sm:p-10 rounded-xl shadow-2xl w-full max-w-md">
+        <div class="text-center mb-6 sm:mb-8">
+            <i class="fas fa-user-circle text-5xl sm:text-6xl text-indigo-600"></i>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-1 text-center">Welcome Back</h2>
+        <p class="text-gray-500 mb-6 sm:mb-8 text-sm text-center">Please login to your account</p>
+
+        {{if .Error}}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 text-sm rounded-md" role="alert">
+            <p>{{.Error}}</p>
+        </div>
+        {{end}}
+
+        <form hx-post="/login" hx-target="body" class="space-y-5">
+            {{if .RedirectURL}}
+            <input type="hidden" name="redirect_url" value="{{.RedirectURL}}" />
+            {{else}}
+            <input type="hidden" name="redirect_url" value="/logs" />
+            {{end}}
+            <div class="relative">
+                <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 fa-fw"></i>
+                <input type="email" id="email" name="email" placeholder="Email Address" required
+                    class="w-full py-2.5 px-4 pl-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-colors text-sm" />
+            </div>
+
+            <div class="relative">
+                <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 fa-fw"></i>
+                <input type="password" id="password" name="password" placeholder="Password" required
+                    class="w-full py-2.5 px-4 pl-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-colors text-sm" />
+                <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-indigo-600 cursor-pointer toggle-password fa-fw"
+                    onclick="togglePassword()"></i>
+            </div>
+
+            <div class="flex items-center justify-between text-xs sm:text-sm">
+                <label class="flex items-center text-gray-600 cursor-pointer">
+                    <input type="checkbox" name="remember"
+                        class="mr-2 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                    Remember me
+                </label>
+                <a href="#" class="text-indigo-600 hover:text-indigo-800 hover:underline font-medium">Forgot
+                    password?</a>
+            </div>
+
+            <button type="submit"
+                class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md text-sm transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Login</button>
+
+            <!-- <div class="mt-8 text-xs text-gray-600 text-center">
+                    Don't have an account? <a href="#" class="text-indigo-600 hover:text-indigo-800 font-semibold hover:underline">Register here</a>
+                </div> -->
+        </form>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const password = document.getElementById("password");
+            const icon = document.querySelector(".toggle-password");
+
+            if (password.type === "password") {
+                password.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                password.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+</body>
+
+</html>
